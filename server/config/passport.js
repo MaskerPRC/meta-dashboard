@@ -15,11 +15,19 @@ passport.deserializeUser((id, done) => {
   });
 });
 
+// 获取OAuth回调URL基础路径
+const getCallbackBaseURL = () => {
+  return process.env.OAUTH_CALLBACK_BASE_URL || 
+    (process.env.NODE_ENV === 'production' 
+      ? 'https://shareapi.agitao.net' 
+      : `http://localhost:${process.env.PORT || 3015}`)
+}
+
 // GitHub OAuth策略
 passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_CLIENT_ID || 'your-github-client-id',
   clientSecret: process.env.GITHUB_CLIENT_SECRET || 'your-github-client-secret',
-  callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:3015/api/auth/github/callback'
+  callbackURL: process.env.GITHUB_CALLBACK_URL || `${getCallbackBaseURL()}/api/auth/github/callback`
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     // 检查用户是否已存在
@@ -83,7 +91,7 @@ passport.use(new GitHubStrategy({
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID || 'your-google-client-id',
   clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'your-google-client-secret',
-  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3015/api/auth/google/callback'
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || `${getCallbackBaseURL()}/api/auth/google/callback`
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     // 检查用户是否已存在

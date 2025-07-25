@@ -22,11 +22,22 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS配置
+const getAllowedOrigins = () => {
+  if (process.env.NODE_ENV === 'production') {
+    // 生产环境：从环境变量获取允许的域名，支持多个域名用逗号分隔
+    const origins = process.env.ALLOWED_ORIGINS || 'https://share.agitao.net'
+    return origins.split(',').map(origin => origin.trim())
+  } else {
+    // 开发环境
+    return ['http://localhost:5173', 'http://127.0.0.1:5173']
+  }
+}
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? 'https://your-domain.com'
-    : 'http://localhost:5173',
-  credentials: true
+  origin: getAllowedOrigins(),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With']
 }));
 
 // 解析JSON请求体
@@ -41,7 +52,11 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24小时
+    maxAge: 24 * 60 * 60 * 1000, // 24小时
+    domain: process.env.NODE_ENV === 'production' 
+      ? process.env.COOKIE_DOMAIN || '.agitao.net'
+      : undefined, // 开发环境不设置domain
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
