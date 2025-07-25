@@ -6,7 +6,7 @@
         <div class="hero-content">
           <div class="hero-text">
             <h1 class="hero-title">
-              <span class="gradient-text">一年100个AI产品挑战</span>
+              <span class="hero-title-text">一年100个AI产品挑战</span>
             </h1>
             <p class="hero-subtitle">
               记录每一个AI产品从构思到上线的完整历程，用代码书写人工智能时代的创新传奇
@@ -212,6 +212,11 @@ onMounted(() => {
         font-weight: 800;
         margin: 0 0 24px;
         line-height: 1.1;
+        
+        .hero-title-text {
+          color: white;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
         
         @media (max-width: 768px) {
           font-size: 2.5rem;

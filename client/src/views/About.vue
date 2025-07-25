@@ -42,10 +42,10 @@
             </p>
           </div>
           
-          <div class="intro-card ai-card">
-            <div class="card-icon">
-              <el-icon size="48"><TrendCharts /></el-icon>
-            </div>
+                     <div class="intro-card ai-card">
+             <div class="card-icon">
+               <el-icon size="48"><ArrowUp /></el-icon>
+             </div>
             <h3 class="card-title">个人能力突破</h3>
             <p class="card-description">
               通过持续的产品开发实践，验证AI工具的真实能力，积累从想法到产品的完整经验，
@@ -288,7 +288,7 @@
 import { ref, onMounted } from 'vue'
 import { useProjectsStore } from '../stores/projects'
 import {
-  Cpu, TrendCharts, Connection, Monitor, Platform, Upload,
+  Cpu, ArrowUp, Connection, Monitor, Platform, Upload,
   ChatDotSquare, Share, Trophy, Message, Link, View
 } from '@element-plus/icons-vue'
 

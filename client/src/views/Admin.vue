@@ -48,10 +48,10 @@
             </div>
           </div>
           
-          <div class="stat-card ai-card">
-            <div class="stat-icon progress">
-              <el-icon size="32"><TrendCharts /></el-icon>
-            </div>
+                     <div class="stat-card ai-card">
+             <div class="stat-icon progress">
+               <el-icon size="32"><ArrowUp /></el-icon>
+             </div>
             <div class="stat-info">
               <div class="stat-number">{{ stats.avgProgress }}%</div>
               <div class="stat-label">平均进度</div>
@@ -332,7 +332,7 @@ import ProjectEditDialog from '../components/admin/ProjectEditDialog.vue'
 import axios from '../utils/axios'
 import dayjs from 'dayjs'
 import {
-  Plus, Document, User, ChatDotSquare, TrendCharts,
+  Plus, Document, User, ChatDotSquare, ArrowUp,
   Search, Download, Delete
 } from '@element-plus/icons-vue'
 
