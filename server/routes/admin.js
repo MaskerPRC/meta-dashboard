@@ -87,7 +87,7 @@ router.get('/users', requireAdmin, (req, res) => {
   let sql = `
     SELECT 
       id, username, email, display_name, avatar_url, 
-      is_admin, created_at,
+      is_admin, created_at, github_id, google_id,
       (SELECT COUNT(*) FROM comments WHERE user_id = users.id) as comment_count
     FROM users
     WHERE 1=1
@@ -129,8 +129,27 @@ router.get('/users', requireAdmin, (req, res) => {
         return res.status(500).json({ message: '获取用户总数失败' });
       }
       
+      // 处理用户数据：添加provider字段，转换is_admin为布尔值
+      const processedUsers = users.map(user => {
+        let provider = 'local';
+        if (user.github_id) {
+          provider = 'github';
+        } else if (user.google_id) {
+          provider = 'google';
+        }
+        
+        return {
+          ...user,
+          provider,
+          is_admin: Boolean(user.is_admin), // 转换为布尔值
+          // 移除敏感ID字段
+          github_id: undefined,
+          google_id: undefined
+        };
+      });
+      
       res.json({
-        users,
+        users: processedUsers,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),

@@ -430,7 +430,12 @@ const fetchUsers = async () => {
     usersLoading.value = true
     isLoadingUsers.value = true // 设置加载标记
     const response = await axios.get('/api/admin/users')
-    users.value = response.data.users
+    
+    // 确保is_admin字段为布尔值（兼容性处理）
+    users.value = response.data.users.map(user => ({
+      ...user,
+      is_admin: Boolean(user.is_admin)
+    }))
   } catch (error) {
     console.error('获取用户列表失败:', error)
     ElMessage.error('获取用户列表失败')
