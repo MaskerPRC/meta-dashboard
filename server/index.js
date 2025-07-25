@@ -49,71 +49,21 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Session配置 - 修复sameSite: none必须配合secure: true
+// Session配置
 const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'ai-dashboard-secret-key-change-in-production',
-  resave: true, // 强制保存session
-  saveUninitialized: true, // 确保session被创建
-  rolling: true, // 刷新session过期时间
+  resave: true,
+  saveUninitialized: true,
+  rolling: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // 生产环境强制HTTPS
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24小时
-    // 移除domain设置，让express-session自动处理
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 };
 
-console.log('🔧 Session配置:', sessionConfig);
 app.use(session(sessionConfig));
-
-// Cookie domain修复中间件
-app.use((req, res, next) => {
-  if (req.url.includes('/api/auth/')) {
-    console.log('🛠️ Cookie修复中间件激活');
-    
-    const originalEnd = res.end;
-    
-    res.end = function(...args) {
-      console.log('🏁 拦截res.end调用，检查Cookie...');
-      
-      // 在res.end时检查和修复Cookie（express-session在这时已设置Cookie）
-      const cookies = res.getHeaders()['set-cookie'];
-      console.log('🔍 检查end时的Cookie:', cookies);
-      
-      if (cookies && Array.isArray(cookies)) {
-        const modifiedCookies = cookies.map(cookie => {
-          if (cookie.includes('connect.sid') && !cookie.includes('Domain=')) {
-            const modifiedCookie = cookie + '; Domain=.agitao.net';
-            console.log('🔧 修复Cookie添加domain:', modifiedCookie);
-            return modifiedCookie;
-          }
-          return cookie;
-        });
-        
-        res.setHeader('Set-Cookie', modifiedCookies);
-        console.log('✅ Cookie修复完成，最终Cookie:', res.getHeaders()['set-cookie']);
-      } else {
-        console.log('❌ 没有找到需要修复的Cookie');
-      }
-      
-      return originalEnd.apply(this, args);
-    };
-  }
-  
-  next();
-});
-
-// Session调试日志
-app.use((req, res, next) => {
-  if (req.url.includes('/api/auth/')) {
-    console.log(`🔍 [${req.method}] ${req.url}`);
-    console.log('📄 Session ID:', req.sessionID);
-    console.log('🔐 已认证:', req.isAuthenticated?.());
-    console.log('🍪 Cookies:', req.headers.cookie);
-  }
-  next();
-});
 
 // Passport配置
 app.use(passport.initialize());
