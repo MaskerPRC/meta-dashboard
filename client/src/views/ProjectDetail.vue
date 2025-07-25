@@ -143,11 +143,11 @@
                 <div class="comment-header">
                   <div class="user-info">
                     <img 
-                      :src="comment.user?.avatar_url || '/default-avatar.png'" 
-                      :alt="comment.user?.display_name || comment.user?.username"
+                      :src="comment.user_avatar || '/default-avatar.png'" 
+                      :alt="comment.user_name"
                       class="user-avatar"
                     >
-                    <span class="user-name">{{ comment.user?.display_name || comment.user?.username }}</span>
+                    <span class="user-name">{{ comment.user_name }}</span>
                   </div>
                   <div class="comment-meta">
                     <span class="comment-time">{{ formatDate(comment.created_at) }}</span>
@@ -251,7 +251,7 @@ const formatDate = (dateString) => {
 
 const canDeleteComment = (comment) => {
   if (authStore.isAdmin) return true
-  if (authStore.user?.id === comment.user?.id) {
+  if (authStore.user?.id === comment.user_id) {
     // 用户只能删除自己15分钟内的评论
     const commentTime = dayjs(comment.created_at)
     const now = dayjs()
@@ -287,7 +287,7 @@ const fetchComments = async () => {
   try {
     loadingComments.value = true
     const response = await axios.get(`/api/comments/${route.params.id}`)
-    comments.value = response.data.comments || []
+    comments.value = response.data
   } catch (error) {
     console.error('获取评论失败:', error)
   } finally {
