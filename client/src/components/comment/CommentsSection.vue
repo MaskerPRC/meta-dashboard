@@ -15,15 +15,88 @@
         </el-avatar>
       </div>
       <div class="form-content">
-        <el-input
-          v-model="newComment"
-          type="textarea"
-          :rows="3"
-          placeholder="分享您对这个AI项目的想法、建议或疑问..."
-          maxlength="1000"
-          show-word-limit
-          resize="none"
-        />
+        <!-- 编辑器工具栏 -->
+        <div class="editor-toolbar">
+          <div class="toolbar-left">
+            <el-button-group>
+              <el-button 
+                :type="editMode === 'write' ? 'primary' : ''" 
+                size="small"
+                @click="editMode = 'write'"
+              >
+                <el-icon><Edit /></el-icon>
+                编写
+              </el-button>
+              <el-button 
+                :type="editMode === 'preview' ? 'primary' : ''" 
+                size="small"
+                @click="editMode = 'preview'"
+                :disabled="!newComment.trim()"
+              >
+                <el-icon><View /></el-icon>
+                预览
+              </el-button>
+            </el-button-group>
+          </div>
+          <div class="toolbar-right">
+            <el-dropdown trigger="click" placement="bottom-end">
+              <el-button size="small" text>
+                <el-icon><QuestionFilled /></el-icon>
+                Markdown语法
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu class="markdown-help">
+                  <div class="help-content">
+                    <div class="help-item">
+                      <code>**粗体**</code> → <strong>粗体</strong>
+                    </div>
+                    <div class="help-item">
+                      <code>*斜体*</code> → <em>斜体</em>
+                    </div>
+                    <div class="help-item">
+                      <code>`代码`</code> → <code>代码</code>
+                    </div>
+                    <div class="help-item">
+                      <code>```代码块```</code>
+                    </div>
+                    <div class="help-item">
+                      <code>[链接](URL)</code>
+                    </div>
+                    <div class="help-item">
+                      <code>- 列表项</code>
+                    </div>
+                    <div class="help-item">
+                      <code>&gt; 引用</code>
+                    </div>
+                  </div>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </div>
+
+        <!-- 编辑区域 -->
+        <div class="editor-container">
+          <el-input
+            v-show="editMode === 'write'"
+            v-model="newComment"
+            type="textarea"
+            :rows="5"
+            placeholder="支持Markdown语法，分享您对这个AI项目的想法、建议或疑问..."
+            maxlength="1000"
+            show-word-limit
+            resize="none"
+            class="markdown-input"
+          />
+          
+          <!-- 预览区域 -->
+          <div 
+            v-show="editMode === 'preview'" 
+            class="markdown-preview"
+            v-html="previewContent"
+          ></div>
+        </div>
+
         <div class="form-actions">
           <el-button 
             type="primary" 
@@ -115,19 +188,53 @@
             
             <!-- 评论正文 -->
             <div v-if="editingComment !== comment.id" class="comment-text">
-              {{ comment.content }}
+              <div class="markdown-content" v-html="renderMarkdown(comment.content)"></div>
             </div>
             
             <!-- 编辑状态 -->
             <div v-else class="comment-edit">
-              <el-input
-                v-model="editContent"
-                type="textarea"
-                :rows="3"
-                maxlength="1000"
-                show-word-limit
-                resize="none"
-              />
+              <!-- 编辑工具栏 -->
+              <div class="edit-toolbar">
+                <el-button-group size="small">
+                  <el-button 
+                    :type="editEditMode === 'write' ? 'primary' : ''" 
+                    @click="editEditMode = 'write'"
+                  >
+                    <el-icon><Edit /></el-icon>
+                    编写
+                  </el-button>
+                  <el-button 
+                    :type="editEditMode === 'preview' ? 'primary' : ''" 
+                    @click="editEditMode = 'preview'"
+                    :disabled="!editContent.trim()"
+                  >
+                    <el-icon><View /></el-icon>
+                    预览
+                  </el-button>
+                </el-button-group>
+              </div>
+
+              <!-- 编辑区域 -->
+              <div class="edit-container">
+                <el-input
+                  v-show="editEditMode === 'write'"
+                  v-model="editContent"
+                  type="textarea"
+                  :rows="4"
+                  maxlength="1000"
+                  show-word-limit
+                  resize="none"
+                  placeholder="支持Markdown语法..."
+                />
+                
+                <!-- 编辑预览 -->
+                <div 
+                  v-show="editEditMode === 'preview'" 
+                  class="edit-preview"
+                  v-html="editPreviewContent"
+                ></div>
+              </div>
+
               <div class="edit-actions">
                 <el-button size="small" @click="cancelEdit">取消</el-button>
                 <el-button 
@@ -165,14 +272,31 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { marked } from 'marked'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
 import {
   ChatLineSquare, User, ChatDotSquare, MoreFilled, 
-  Edit, Delete
+  Edit, Delete, View, QuestionFilled
 } from '@element-plus/icons-vue'
 
 // 启用相对时间插件
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
+
+// 配置 marked
+marked.setOptions({
+  highlight: function(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(code, { language: lang }).value
+      } catch (__) {}
+    }
+    return hljs.highlightAuto(code).value
+  },
+  breaks: true,
+  gfm: true
+})
 
 const props = defineProps({
   projectId: {
@@ -193,6 +317,10 @@ const editingComment = ref(null)
 const editContent = ref('')
 const currentPage = ref(1)
 
+// Markdown 编辑相关状态
+const editMode = ref('write') // 'write' | 'preview'
+const editEditMode = ref('write') // 编辑评论时的模式
+
 const pagination = reactive({
   total: 0,
   limit: 20,
@@ -200,6 +328,16 @@ const pagination = reactive({
 })
 
 // 计算属性
+const previewContent = computed(() => {
+  if (!newComment.value.trim()) return '<p class="preview-empty">暂无内容</p>'
+  return renderMarkdown(newComment.value)
+})
+
+const editPreviewContent = computed(() => {
+  if (!editContent.value.trim()) return '<p class="preview-empty">暂无内容</p>'
+  return renderMarkdown(editContent.value)
+})
+
 const canManageComment = (comment) => {
   return authStore.isAuthenticated && (
     authStore.isAdmin || 
@@ -219,6 +357,24 @@ const canEditComment = (comment) => {
 }
 
 // 方法
+const renderMarkdown = (content) => {
+  if (!content) return ''
+  
+  try {
+    // 基本的安全过滤，防止XSS
+    const sanitized = content
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+      .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
+    
+    return marked(sanitized)
+  } catch (error) {
+    console.error('Markdown渲染失败:', error)
+    return content
+  }
+}
+
 const fetchComments = async () => {
   try {
     loading.value = true
@@ -256,6 +412,7 @@ const submitComment = async () => {
     // 添加新评论到列表顶部
     comments.value.unshift(response.data.comment)
     newComment.value = ''
+    editMode.value = 'write' // 重置编辑模式
     pagination.total++
     
     ElMessage.success('评论发表成功')
@@ -281,11 +438,13 @@ const handleCommentAction = (command) => {
 const startEdit = (comment) => {
   editingComment.value = comment.id
   editContent.value = comment.content
+  editEditMode.value = 'write' // 重置编辑模式
 }
 
 const cancelEdit = () => {
   editingComment.value = null
   editContent.value = ''
+  editEditMode.value = 'write'
 }
 
 const saveEdit = async (commentId) => {
@@ -400,6 +559,57 @@ onMounted(() => {
     .form-content {
       flex: 1;
       
+      .editor-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        background: var(--el-bg-color-page);
+        border: 1px solid var(--el-border-color);
+        border-radius: 6px 6px 0 0;
+        border-bottom: none;
+        
+        .toolbar-left {
+          display: flex;
+          align-items: center;
+        }
+        
+        .toolbar-right {
+          display: flex;
+          align-items: center;
+        }
+      }
+      
+      .editor-container {
+        position: relative;
+        border: 1px solid var(--el-border-color);
+        border-radius: 0 0 6px 6px;
+        overflow: hidden;
+        
+        .markdown-input {
+          :deep(.el-textarea__inner) {
+            border: none;
+            border-radius: 0;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            line-height: 1.6;
+          }
+        }
+        
+        .markdown-preview {
+          min-height: 120px;
+          padding: 12px;
+          background: white;
+          line-height: 1.6;
+          
+          .preview-empty {
+            color: var(--el-text-color-placeholder);
+            font-style: italic;
+            margin: 0;
+          }
+        }
+      }
+      
       .form-actions {
         display: flex;
         justify-content: flex-end;
@@ -473,15 +683,50 @@ onMounted(() => {
         .comment-text {
           color: var(--ai-text-primary);
           line-height: 1.6;
-          white-space: pre-wrap;
+          
+          .markdown-content {
+            line-height: 1.6;
+          }
         }
         
         .comment-edit {
+          .edit-toolbar {
+            margin-bottom: 8px;
+          }
+          
+          .edit-container {
+            border: 1px solid var(--el-border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            
+            .el-textarea {
+              :deep(.el-textarea__inner) {
+                border: none;
+                border-radius: 0;
+                font-family: 'Fira Code', 'Consolas', monospace;
+                line-height: 1.6;
+              }
+            }
+            
+            .edit-preview {
+              min-height: 100px;
+              padding: 12px;
+              background: white;
+              line-height: 1.6;
+              
+              .preview-empty {
+                color: var(--el-text-color-placeholder);
+                font-style: italic;
+                margin: 0;
+              }
+            }
+          }
+          
           .edit-actions {
             display: flex;
             justify-content: flex-end;
             gap: 8px;
-            margin-top: 12px;
           }
         }
       }
@@ -503,6 +748,152 @@ onMounted(() => {
   
   &:hover {
     background-color: var(--el-color-danger-light-9);
+  }
+}
+
+// Markdown帮助下拉菜单样式
+:deep(.markdown-help) {
+  .help-content {
+    padding: 12px;
+    max-width: 250px;
+    
+    .help-item {
+      margin-bottom: 8px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      code {
+        background: var(--el-bg-color-page);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Fira Code', monospace;
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+// Markdown内容样式
+.markdown-content {
+  :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
+    margin: 16px 0 8px 0;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  
+  :deep(h1) { font-size: 1.5em; }
+  :deep(h2) { font-size: 1.3em; }
+  :deep(h3) { font-size: 1.1em; }
+  :deep(h4) { font-size: 1em; }
+  :deep(h5) { font-size: 0.9em; }
+  :deep(h6) { font-size: 0.8em; }
+  
+  :deep(p) {
+    margin: 8px 0;
+    line-height: 1.6;
+  }
+  
+  :deep(ul), :deep(ol) {
+    margin: 8px 0;
+    padding-left: 20px;
+    
+    li {
+      margin: 4px 0;
+    }
+  }
+  
+  :deep(blockquote) {
+    margin: 12px 0;
+    padding: 8px 16px;
+    border-left: 4px solid var(--ai-primary);
+    background: var(--el-bg-color-page);
+    border-radius: 0 4px 4px 0;
+    
+    p {
+      margin: 0;
+      color: var(--el-text-color-regular);
+    }
+  }
+  
+  :deep(code) {
+    background: var(--el-bg-color-page);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+    color: var(--el-color-danger);
+  }
+  
+  :deep(pre) {
+    background: var(--el-bg-color-page);
+    padding: 12px;
+    border-radius: 6px;
+    margin: 12px 0;
+    overflow-x: auto;
+    border: 1px solid var(--el-border-color-lighter);
+    
+    code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+  }
+  
+  :deep(a) {
+    color: var(--ai-primary);
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  :deep(strong) {
+    font-weight: 600;
+  }
+  
+  :deep(em) {
+    font-style: italic;
+  }
+  
+  :deep(table) {
+    border-collapse: collapse;
+    margin: 12px 0;
+    width: 100%;
+    
+    th, td {
+      border: 1px solid var(--el-border-color);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    
+    th {
+      background: var(--el-bg-color-page);
+      font-weight: 600;
+    }
+  }
+  
+  :deep(hr) {
+    border: none;
+    border-top: 1px solid var(--el-border-color);
+    margin: 16px 0;
+  }
+  
+  // 第一个和最后一个元素的边距调整
+  :deep(*:first-child) {
+    margin-top: 0;
+  }
+  
+  :deep(*:last-child) {
+    margin-bottom: 0;
   }
 }
 </style> 

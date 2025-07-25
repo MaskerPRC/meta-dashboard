@@ -95,84 +95,7 @@
         </div>
 
         <!-- 评论区域 -->
-        <div class="comments-section ai-card">
-          <h2>项目评论</h2>
-          
-          <!-- 添加评论 -->
-          <div v-if="authStore.isAuthenticated" class="add-comment">
-            <el-input
-              v-model="newComment"
-              type="textarea"
-              :rows="3"
-              placeholder="分享您对这个AI项目的想法..."
-              :maxlength="500"
-              show-word-limit
-            />
-            <div class="comment-actions">
-              <el-button 
-                type="primary" 
-                @click="addComment"
-                :loading="submittingComment"
-                :disabled="!newComment.trim()"
-              >
-                发表评论
-              </el-button>
-            </div>
-          </div>
-
-          <!-- 未登录提示 -->
-          <div v-else class="login-prompt">
-            <p>
-              <router-link to="/login" class="login-link">登录</router-link> 
-              后即可参与讨论
-            </p>
-          </div>
-
-          <!-- 评论列表 -->
-          <div class="comments-list">
-            <div v-if="loadingComments" class="loading">
-              <el-skeleton :rows="3" animated />
-            </div>
-            
-            <div v-else-if="comments.length" class="comments">
-              <div 
-                v-for="comment in comments" 
-                :key="comment.id" 
-                class="comment-item"
-              >
-                <div class="comment-header">
-                  <div class="user-info">
-                    <img 
-                      :src="comment.user_avatar || '/default-avatar.png'" 
-                      :alt="comment.user_name"
-                      class="user-avatar"
-                    >
-                    <span class="user-name">{{ comment.user_name }}</span>
-                  </div>
-                  <div class="comment-meta">
-                    <span class="comment-time">{{ formatDate(comment.created_at) }}</span>
-                    <el-button 
-                      v-if="canDeleteComment(comment)" 
-                      type="danger" 
-                      text 
-                      size="small"
-                      @click="deleteComment(comment.id)"
-                    >
-                      删除
-                    </el-button>
-                  </div>
-                </div>
-                <div class="comment-content">
-                  {{ comment.content }}
-                </div>
-              </div>
-            </div>
-            
-            <div v-else class="empty-comments">
-              <el-empty description="暂无评论，来抢沙发吧！" />
-            </div>
-          </div>
-        </div>
+        <CommentsSection :project-id="route.params.id" />
       </div>
 
       <!-- 项目不存在 -->
@@ -202,6 +125,7 @@ import { marked } from 'marked'
 import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
 import dayjs from 'dayjs'
+import CommentsSection from '@/components/comment/CommentsSection.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -209,11 +133,7 @@ const authStore = useAuthStore()
 
 // 状态
 const project = ref(null)
-const comments = ref([])
 const loading = ref(false)
-const loadingComments = ref(false)
-const submittingComment = ref(false)
-const newComment = ref('')
 
 // 计算属性
 const renderedContent = computed(() => {
@@ -249,16 +169,7 @@ const formatDate = (dateString) => {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm')
 }
 
-const canDeleteComment = (comment) => {
-  if (authStore.isAdmin) return true
-  if (authStore.user?.id === comment.user_id) {
-    // 用户只能删除自己15分钟内的评论
-    const commentTime = dayjs(comment.created_at)
-    const now = dayjs()
-    return now.diff(commentTime, 'minute') <= 15
-  }
-  return false
-}
+
 
 // API方法
 const fetchProject = async () => {
@@ -283,51 +194,7 @@ const fetchProject = async () => {
   }
 }
 
-const fetchComments = async () => {
-  try {
-    loadingComments.value = true
-    const response = await axios.get(`/api/comments/${route.params.id}`)
-    comments.value = response.data
-  } catch (error) {
-    console.error('获取评论失败:', error)
-  } finally {
-    loadingComments.value = false
-  }
-}
 
-const addComment = async () => {
-  if (!newComment.value.trim()) return
-  
-  try {
-    submittingComment.value = true
-    await axios.post(`/api/comments/${route.params.id}`, {
-      content: newComment.value.trim()
-    })
-    newComment.value = ''
-    ElMessage.success('评论发表成功')
-    await fetchComments()
-  } catch (error) {
-    console.error('发表评论失败:', error)
-  } finally {
-    submittingComment.value = false
-  }
-}
-
-const deleteComment = async (commentId) => {
-  try {
-    await ElMessageBox.confirm('确定要删除这条评论吗？', '删除确认', {
-      type: 'warning'
-    })
-    
-    await axios.delete(`/api/comments/${commentId}`)
-    ElMessage.success('评论删除成功')
-    await fetchComments()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('删除评论失败:', error)
-    }
-  }
-}
 
 const editProject = () => {
   // TODO: 实现项目编辑功能
@@ -359,9 +226,6 @@ const deleteProject = async () => {
 // 生命周期
 onMounted(async () => {
   await fetchProject()
-  if (project.value) {
-    await fetchComments()
-  }
 })
 </script>
 
