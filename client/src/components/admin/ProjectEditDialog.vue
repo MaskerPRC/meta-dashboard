@@ -3,7 +3,7 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
     :title="project ? '编辑项目' : '创建新项目'"
-    width="800px"
+    width="1200px"
     :close-on-click-modal="false"
     @close="handleClose"
   >
@@ -11,11 +11,12 @@
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="100px"
+      label-width="120px"
       label-position="top"
     >
+      <!-- 第一行：项目基本信息 -->
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="项目名称" prop="title">
             <el-input
               v-model="formData.title"
@@ -25,7 +26,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="5">
           <el-form-item label="项目状态" prop="status">
             <el-select v-model="formData.status" placeholder="选择项目状态" style="width: 100%">
               <el-option label="构思中" value="idea" />
@@ -38,10 +39,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="5">
           <el-form-item label="优先级" prop="priority">
             <el-select v-model="formData.priority" placeholder="选择优先级" style="width: 100%">
               <el-option label="低优先级" value="low" />
@@ -51,7 +49,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="6">
           <el-form-item label="进度百分比" prop="progress">
             <el-slider
               v-model="formData.progress"
@@ -66,19 +64,25 @@
         </el-col>
       </el-row>
 
-      <el-form-item label="项目描述" prop="description">
-        <el-input
-          v-model="formData.description"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入项目简短描述"
-          maxlength="500"
-          show-word-limit
-        />
-      </el-form-item>
-
+            <!-- 第二行：项目描述 -->
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="24">
+          <el-form-item label="项目描述" prop="description">
+            <el-input
+              v-model="formData.description"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入项目简短描述"
+              maxlength="500"
+              show-word-limit
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 第三行：链接和时间 -->
+      <el-row :gutter="20">
+        <el-col :span="6">
           <el-form-item label="GitHub仓库">
             <el-input
               v-model="formData.github_repo"
@@ -86,7 +90,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="6">
           <el-form-item label="演示链接">
             <el-input
               v-model="formData.demo_url"
@@ -94,10 +98,7 @@
             />
           </el-form-item>
         </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="6">
           <el-form-item label="开始时间">
             <el-date-picker
               v-model="formData.start_date"
@@ -109,7 +110,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="6">
           <el-form-item label="预期完成时间">
             <el-date-picker
               v-model="formData.due_date"
@@ -123,125 +124,136 @@
         </el-col>
       </el-row>
 
-      <el-form-item label="技术栈">
-        <div class="tag-input-container">
-          <el-tag
-            v-for="(tech, index) in formData.tech_stack"
-            :key="tech"
-            closable
-            @close="removeTech(index)"
-            class="tech-tag"
-          >
-            {{ tech }}
-          </el-tag>
-          <el-input
-            v-if="showTechInput"
-            ref="techInputRef"
-            v-model="newTech"
-            size="small"
-            @keyup.enter="addTech"
-            @blur="addTech"
-            placeholder="添加技术栈"
-            style="width: 100px"
-          />
-          <el-button
-            v-else
-            size="small"
-            @click="showTechInput = true"
-          >
-            + 添加技术栈
-          </el-button>
-        </div>
-      </el-form-item>
-
-      <el-form-item label="项目标签">
-        <div class="tag-input-container">
-          <el-tag
-            v-for="(tag, index) in formData.tags"
-            :key="tag"
-            closable
-            @close="removeTag(index)"
-            class="project-tag"
-          >
-            {{ tag }}
-          </el-tag>
-          <el-input
-            v-if="showTagInput"
-            ref="tagInputRef"
-            v-model="newTag"
-            size="small"
-            @keyup.enter="addTag"
-            @blur="addTag"
-            placeholder="添加标签"
-            style="width: 80px"
-          />
-          <el-button
-            v-else
-            size="small"
-            @click="showTagInput = true"
-          >
-            + 添加标签
-          </el-button>
-        </div>
-      </el-form-item>
-
-      <el-form-item label="项目详细内容">
-        <div class="content-editor">
-          <!-- 编辑器工具栏 -->
-          <div class="editor-toolbar">
-            <el-button-group>
-              <el-button
-                :type="editorMode === 'edit' ? 'primary' : 'default'"
-                size="small"
-                @click="editorMode = 'edit'"
+      <!-- 第四行：技术栈和标签 -->
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="技术栈">
+            <div class="tag-input-container">
+              <el-tag
+                v-for="(tech, index) in formData.tech_stack"
+                :key="tech"
+                closable
+                @close="removeTech(index)"
+                class="tech-tag"
               >
-                <el-icon><Edit /></el-icon>
-                编辑
-              </el-button>
-              <el-button
-                :type="editorMode === 'preview' ? 'primary' : 'default'"
-                size="small"
-                @click="editorMode = 'preview'"
-              >
-                <el-icon><View /></el-icon>
-                预览
-              </el-button>
-              <el-button
-                :type="editorMode === 'split' ? 'primary' : 'default'"
-                size="small"
-                @click="editorMode = 'split'"
-              >
-                <el-icon><Operation /></el-icon>
-                分屏
-              </el-button>
-            </el-button-group>
-            
-            <el-button size="small" @click="insertTemplate">
-              <el-icon><Document /></el-icon>
-              插入模板
-            </el-button>
-          </div>
-
-          <!-- 编辑器内容 -->
-          <div class="editor-content" :class="editorMode">
-            <!-- 编辑模式 -->
-            <div v-if="editorMode === 'edit' || editorMode === 'split'" class="editor-panel">
+                {{ tech }}
+              </el-tag>
               <el-input
-                v-model="formData.content"
-                type="textarea"
-                :rows="20"
-                placeholder="请输入项目详细内容，支持Markdown格式..."
-                resize="none"
+                v-if="showTechInput"
+                ref="techInputRef"
+                v-model="newTech"
+                size="small"
+                @keyup.enter="addTech"
+                @blur="addTech"
+                placeholder="添加技术栈"
+                style="width: 100px"
               />
+              <el-button
+                v-else
+                size="small"
+                @click="showTechInput = true"
+              >
+                + 添加技术栈
+              </el-button>
             </div>
-            
-            <!-- 预览模式 -->
-            <div v-if="editorMode === 'preview' || editorMode === 'split'" class="preview-panel">
-              <div class="markdown-preview" v-html="renderedContent"></div>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="项目标签">
+            <div class="tag-input-container">
+              <el-tag
+                v-for="(tag, index) in formData.tags"
+                :key="tag"
+                closable
+                @close="removeTag(index)"
+                class="project-tag"
+              >
+                {{ tag }}
+              </el-tag>
+              <el-input
+                v-if="showTagInput"
+                ref="tagInputRef"
+                v-model="newTag"
+                size="small"
+                @keyup.enter="addTag"
+                @blur="addTag"
+                placeholder="添加标签"
+                style="width: 80px"
+              />
+              <el-button
+                v-else
+                size="small"
+                @click="showTagInput = true"
+              >
+                + 添加标签
+              </el-button>
             </div>
-          </div>
-        </div>
-      </el-form-item>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 第五行：项目详细内容（全宽度） -->
+      <el-row :gutter="20">
+        <el-col :span="24">
+          <el-form-item label="项目详细内容" class="full-width-editor">
+            <div class="content-editor">
+              <!-- 编辑器工具栏 -->
+              <div class="editor-toolbar">
+                <el-button-group>
+                  <el-button
+                    :type="editorMode === 'edit' ? 'primary' : 'default'"
+                    size="small"
+                    @click="editorMode = 'edit'"
+                  >
+                    <el-icon><Edit /></el-icon>
+                    编辑
+                  </el-button>
+                  <el-button
+                    :type="editorMode === 'preview' ? 'primary' : 'default'"
+                    size="small"
+                    @click="editorMode = 'preview'"
+                  >
+                    <el-icon><View /></el-icon>
+                    预览
+                  </el-button>
+                  <el-button
+                    :type="editorMode === 'split' ? 'primary' : 'default'"
+                    size="small"
+                    @click="editorMode = 'split'"
+                  >
+                    <el-icon><Operation /></el-icon>
+                    分屏
+                  </el-button>
+                </el-button-group>
+
+                <el-button size="small" @click="insertTemplate">
+                  <el-icon><Document /></el-icon>
+                  插入模板
+                </el-button>
+              </div>
+
+              <!-- 编辑器内容 -->
+              <div class="editor-content" :class="editorMode">
+                <!-- 编辑模式 -->
+                <div v-if="editorMode === 'edit' || editorMode === 'split'" class="editor-panel">
+                  <el-input
+                    v-model="formData.content"
+                    type="textarea"
+                    :rows="18"
+                    placeholder="请输入项目详细内容，支持Markdown格式..."
+                    resize="none"
+                  />
+                </div>
+
+                <!-- 预览模式 -->
+                <div v-if="editorMode === 'preview' || editorMode === 'split'" class="preview-panel">
+                  <div class="markdown-preview" v-html="renderedContent"></div>
+                </div>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <template #footer>
@@ -325,7 +337,7 @@ const formRules = {
 // 计算属性
 const renderedContent = computed(() => {
   if (!formData.content) return '<p class="empty-preview">暂无内容</p>'
-  
+
   // 配置marked
   marked.setOptions({
     highlight: function(code, lang) {
@@ -339,7 +351,7 @@ const renderedContent = computed(() => {
     breaks: true,
     gfm: true
   })
-  
+
   return marked(formData.content)
 })
 
@@ -359,7 +371,7 @@ const resetForm = () => {
     tech_stack: [],
     tags: []
   })
-  
+
   if (formRef.value) {
     formRef.value.clearValidate()
   }
@@ -469,11 +481,11 @@ const insertTemplate = () => {
 const handleSave = async () => {
   try {
     await formRef.value.validate()
-    
+
     saving.value = true
-    
+
     const data = { ...formData }
-    
+
     let response
     if (props.project) {
       // 更新项目
@@ -482,7 +494,7 @@ const handleSave = async () => {
       // 创建项目
       response = await axios.post('/api/projects', data)
     }
-    
+
     ElMessage.success(props.project ? '项目更新成功' : '项目创建成功')
     emit('saved', response.data.project)
   } catch (error) {
@@ -528,7 +540,7 @@ watch(showTagInput, (newVal) => {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  
+
   .tech-tag, .project-tag {
     margin: 0;
   }
@@ -538,7 +550,8 @@ watch(showTagInput, (newVal) => {
   border: 1px solid var(--ai-border);
   border-radius: 8px;
   overflow: hidden;
-  
+  width: 100%;
+
   .editor-toolbar {
     display: flex;
     justify-content: space-between;
@@ -547,33 +560,33 @@ watch(showTagInput, (newVal) => {
     background: var(--ai-bg-secondary);
     border-bottom: 1px solid var(--ai-border);
   }
-  
+
   .editor-content {
     &.edit {
       .editor-panel {
         width: 100%;
       }
     }
-    
+
     &.preview {
       .preview-panel {
         width: 100%;
       }
     }
-    
+
     &.split {
       display: flex;
-      
+
       .editor-panel,
       .preview-panel {
         width: 50%;
       }
-      
+
       .editor-panel {
         border-right: 1px solid var(--ai-border);
       }
     }
-    
+
     .editor-panel {
       :deep(.el-textarea__inner) {
         border: none;
@@ -584,44 +597,44 @@ watch(showTagInput, (newVal) => {
         line-height: 1.6;
       }
     }
-    
+
     .preview-panel {
       padding: 16px;
       background: var(--ai-bg-primary);
-      max-height: 500px;
+      max-height: 450px;
       overflow-y: auto;
-      
+
       .markdown-preview {
         line-height: 1.8;
         color: var(--ai-text-primary);
-        
+
         .empty-preview {
           color: var(--ai-text-secondary);
           font-style: italic;
           text-align: center;
           padding: 40px 20px;
         }
-        
+
         h1, h2, h3, h4, h5, h6 {
           margin: 1.5em 0 0.5em;
           font-weight: 600;
           line-height: 1.3;
           color: var(--ai-text-primary);
         }
-        
+
         h1 { font-size: 2em; }
         h2 { font-size: 1.5em; }
         h3 { font-size: 1.17em; }
-        
+
         p {
           margin: 1em 0;
         }
-        
+
         ul, ol {
           margin: 1em 0;
           padding-left: 2em;
         }
-        
+
         blockquote {
           margin: 1em 0;
           padding: 0.5em 1em;
@@ -629,7 +642,7 @@ watch(showTagInput, (newVal) => {
           background: var(--ai-bg-secondary);
           border-radius: 0 4px 4px 0;
         }
-        
+
         code {
           background: var(--ai-bg-secondary);
           padding: 0.2em 0.4em;
@@ -637,31 +650,31 @@ watch(showTagInput, (newVal) => {
           font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
           font-size: 0.875em;
         }
-        
+
         pre {
           background: var(--ai-bg-secondary);
           padding: 1em;
           border-radius: 8px;
           overflow-x: auto;
           margin: 1em 0;
-          
+
           code {
             background: none;
             padding: 0;
           }
         }
-        
+
         table {
           width: 100%;
           border-collapse: collapse;
           margin: 1em 0;
-          
+
           th, td {
             border: 1px solid var(--ai-border);
             padding: 8px 12px;
             text-align: left;
           }
-          
+
           th {
             background: var(--ai-bg-secondary);
             font-weight: 600;
@@ -672,9 +685,20 @@ watch(showTagInput, (newVal) => {
   }
 }
 
+
+.full-width-editor {
+  .content-editor {
+    min-width: 100%;
+  }
+
+  .editor-content {
+    min-height: 450px;
+  }
+}
+
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 }
-</style> 
+</style>
