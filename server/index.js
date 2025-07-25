@@ -11,6 +11,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3015;
 
+// 信任代理设置（用于部署在反向代理后面）
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // 信任第一级代理
+}
+
 // 安全中间件
 app.use(helmet());
 
