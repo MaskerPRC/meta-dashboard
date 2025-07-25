@@ -1,0 +1,20 @@
+{
+  "name": "ai-projects-dashboard",
+  "version": "1.0.0",
+  "description": "看板工具，展示100个AI项目进展 - 配合一年100个AI产品挑战计划",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": ["ai", "dashboard", "kanban", "vue", "nodejs", "projects"],
+  "author": "AI产品挑战者",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
