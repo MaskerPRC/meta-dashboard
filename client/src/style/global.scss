@@ -1,0 +1,231 @@
+// 全局重置和基础样式
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  line-height: 1.6;
+  color: var(--ai-text-primary);
+  background-color: var(--ai-bg-primary);
+}
+
+// 滚动条样式
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ai-bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ai-primary);
+  border-radius: 4px;
+  
+  &:hover {
+    background: var(--el-color-primary-light-3);
+  }
+}
+
+// AI主题卡片样式
+.ai-card {
+  background: var(--ai-bg-primary);
+  border: 1px solid var(--ai-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
+}
+
+// 渐变背景
+.gradient-bg {
+  background: linear-gradient(135deg, var(--ai-primary) 0%, var(--ai-secondary) 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--ai-primary) 0%, var(--ai-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// 状态标签样式
+.status-tag {
+  &.idea { 
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+  }
+  &.planning { 
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: white;
+  }
+  &.development { 
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    color: white;
+  }
+  &.testing { 
+    background: linear-gradient(135deg, #fb7185, #e11d48);
+    color: white;
+  }
+  &.deployed { 
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: white;
+  }
+  &.completed { 
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: white;
+  }
+  &.paused { 
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    color: white;
+  }
+}
+
+// 优先级样式
+.priority-tag {
+  &.low {
+    background: linear-gradient(135deg, #86efac, #4ade80);
+    color: white;
+  }
+  &.medium {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+  }
+  &.high {
+    background: linear-gradient(135deg, #fb7185, #e11d48);
+    color: white;
+  }
+  &.critical {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    color: white;
+  }
+}
+
+// 响应式布局
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  
+  @media (max-width: 768px) {
+    padding: 0 16px;
+  }
+}
+
+// 加载动画
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--ai-border);
+  border-radius: 50%;
+  border-top-color: var(--ai-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// AI风格按钮
+.ai-button {
+  background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &.secondary {
+    background: transparent;
+    border: 2px solid var(--ai-primary);
+    color: var(--ai-primary);
+    
+    &:hover {
+      background: var(--ai-primary);
+      color: white;
+    }
+  }
+}
+
+// 工具提示样式
+.tooltip {
+  .el-popper.is-dark {
+    background: var(--ai-bg-secondary);
+    border: 1px solid var(--ai-border);
+    color: var(--ai-text-primary);
+  }
+}
+
+// Markdown内容样式
+.markdown-content {
+  line-height: 1.8;
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin: 1.5em 0 0.5em;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.5em; }
+  h3 { font-size: 1.17em; }
+  
+  p {
+    margin: 1em 0;
+  }
+  
+  ul, ol {
+    margin: 1em 0;
+    padding-left: 2em;
+  }
+  
+  blockquote {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    border-left: 4px solid var(--ai-primary);
+    background: var(--ai-bg-secondary);
+    border-radius: 0 4px 4px 0;
+  }
+  
+  code {
+    background: var(--ai-bg-secondary);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  }
+  
+  pre {
+    background: var(--ai-bg-secondary);
+    padding: 1em;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1em 0;
+    
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+} 
