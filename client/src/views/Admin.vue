@@ -477,8 +477,20 @@ const handleProjectSelectionChange = (selection) => {
   selectedProjects.value = selection
 }
 
-const editProject = (project = null) => {
-  editingProject.value = project
+const editProject = async (project = null) => {
+  if (project) {
+    try {
+      // 获取完整的项目数据（包含详细内容）
+      const response = await axios.get(`/api/projects/${project.id}`)
+      editingProject.value = response.data
+    } catch (error) {
+      console.error('获取项目详情失败:', error)
+      ElMessage.error('获取项目详情失败，请重试')
+      return
+    }
+  } else {
+    editingProject.value = null
+  }
   showCreateProject.value = true
 }
 
@@ -678,17 +690,6 @@ const formatDateTime = (date) => {
 
 // 生命周期
 onMounted(async () => {
-  // 检查是否有编辑项目的查询参数
-  if (route.query.edit) {
-    const projectId = parseInt(route.query.edit)
-    await nextTick()
-    await fetchProjects()
-    const project = projects.value.find(p => p.id === projectId)
-    if (project) {
-      editProject(project)
-    }
-  }
-  
   // 获取数据
   await Promise.all([
     fetchStats(),
@@ -696,6 +697,16 @@ onMounted(async () => {
     fetchUsers(),
     fetchComments()
   ])
+  
+  // 检查是否有编辑项目的查询参数
+  if (route.query.edit) {
+    const projectId = parseInt(route.query.edit)
+    await nextTick()
+    const project = projects.value.find(p => p.id === projectId)
+    if (project) {
+      await editProject(project)
+    }
+  }
 })
 </script>
 

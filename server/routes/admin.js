@@ -13,18 +13,16 @@ const requireAdmin = (req, res, next) => {
 // 获取系统统计信息
 router.get('/stats', requireAdmin, (req, res) => {
   const statsQueries = [
-    // 项目统计
+    // 项目总数和平均进度
     new Promise((resolve, reject) => {
-      db.all(`
+      db.get(`
         SELECT 
-          status,
-          COUNT(*) as count,
-          AVG(progress) as avg_progress
-        FROM projects 
-        GROUP BY status
+          COUNT(*) as totalProjects,
+          ROUND(AVG(progress), 0) as avgProgress
+        FROM projects
       `, (err, projectStats) => {
         if (err) reject(err);
-        else resolve({ projectStats });
+        else resolve(projectStats || { totalProjects: 0, avgProgress: 0 });
       });
     }),
     
@@ -32,13 +30,13 @@ router.get('/stats', requireAdmin, (req, res) => {
     new Promise((resolve, reject) => {
       db.get(`
         SELECT 
-          COUNT(*) as total_users,
+          COUNT(*) as totalUsers,
           SUM(is_admin) as admin_count,
           COUNT(*) - SUM(is_admin) as regular_users
         FROM users
       `, (err, userStats) => {
         if (err) reject(err);
-        else resolve({ userStats });
+        else resolve({ totalUsers: userStats?.totalUsers || 0 });
       });
     }),
     
@@ -46,25 +44,12 @@ router.get('/stats', requireAdmin, (req, res) => {
     new Promise((resolve, reject) => {
       db.get(`
         SELECT 
-          COUNT(*) as total_comments,
+          COUNT(*) as totalComments,
           COUNT(DISTINCT user_id) as active_commenters
         FROM comments
       `, (err, commentStats) => {
         if (err) reject(err);
-        else resolve({ commentStats });
-      });
-    }),
-    
-    // 最近活动
-    new Promise((resolve, reject) => {
-      db.all(`
-        SELECT 
-          COUNT(*) as recent_projects
-        FROM projects 
-        WHERE created_at >= datetime('now', '-7 days')
-      `, (err, recentActivity) => {
-        if (err) reject(err);
-        else resolve({ recentActivity });
+        else resolve({ totalComments: commentStats?.totalComments || 0 });
       });
     })
   ];
