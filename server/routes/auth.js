@@ -3,35 +3,73 @@ const passport = require('passport');
 const router = express.Router();
 
 // GitHub登录
-router.get('/github', passport.authenticate('github', {
-  scope: ['user:email']
-}));
+router.get('/github', (req, res, next) => {
+  // 保存重定向参数
+  if (req.query.redirect) {
+    req.session.redirectTo = req.query.redirect;
+  }
+  passport.authenticate('github', {
+    scope: ['user:email']
+  })(req, res, next);
+});
 
 // GitHub回调
 router.get('/github/callback', 
-  passport.authenticate('github', { failureRedirect: '/login?error=github' }),
+  passport.authenticate('github', { 
+    failureRedirect: process.env.FRONTEND_URL ? 
+      `${process.env.FRONTEND_URL}/login?error=github` : 
+      (process.env.NODE_ENV === 'production' ? 
+        'https://your-frontend-domain.com/login?error=github' : 
+        'http://localhost:5173/login?error=github')
+  }),
   (req, res) => {
     // 登录成功，重定向到前端
-    const redirectUrl = process.env.NODE_ENV === 'production' 
-      ? '/' 
-      : 'http://localhost:5173/';
+    const frontendUrl = process.env.FRONTEND_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'https://your-frontend-domain.com' 
+        : 'http://localhost:5173');
+    
+    // 检查是否有重定向参数
+    const redirectTo = req.session.redirectTo || '/';
+    delete req.session.redirectTo; // 清除重定向参数
+    
+    const redirectUrl = `${frontendUrl}${redirectTo}`;
     res.redirect(redirectUrl);
   }
 );
 
 // Google登录
-router.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email']
-}));
+router.get('/google', (req, res, next) => {
+  // 保存重定向参数
+  if (req.query.redirect) {
+    req.session.redirectTo = req.query.redirect;
+  }
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })(req, res, next);
+});
 
 // Google回调
 router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login?error=google' }),
+  passport.authenticate('google', { 
+    failureRedirect: process.env.FRONTEND_URL ? 
+      `${process.env.FRONTEND_URL}/login?error=google` : 
+      (process.env.NODE_ENV === 'production' ? 
+        'https://your-frontend-domain.com/login?error=google' : 
+        'http://localhost:5173/login?error=google')
+  }),
   (req, res) => {
     // 登录成功，重定向到前端
-    const redirectUrl = process.env.NODE_ENV === 'production' 
-      ? '/' 
-      : 'http://localhost:5173/';
+    const frontendUrl = process.env.FRONTEND_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'https://your-frontend-domain.com' 
+        : 'http://localhost:5173');
+    
+    // 检查是否有重定向参数
+    const redirectTo = req.session.redirectTo || '/';
+    delete req.session.redirectTo; // 清除重定向参数
+    
+    const redirectUrl = `${frontendUrl}${redirectTo}`;
     res.redirect(redirectUrl);
   }
 );

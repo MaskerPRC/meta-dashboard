@@ -37,6 +37,49 @@ npm run build
 npm start
 \`\`\`
 
+## OAuth 登录配置
+
+### 环境变量配置
+
+为了确保 GitHub 和 Google 登录回调能正确重定向到前端应用，需要配置以下环境变量：
+
+#### 服务端环境变量 (.env)
+
+```bash
+# 前端应用的完整URL（重要！）
+FRONTEND_URL=https://your-frontend-domain.com
+
+# OAuth 应用配置
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# 可选：自定义OAuth回调URL基础路径
+OAUTH_CALLBACK_BASE_URL=https://your-api-domain.com
+```
+
+#### 客户端环境变量 (.env)
+
+```bash
+# API服务器的完整URL
+VITE_API_BASE_URL=https://your-api-domain.com
+```
+
+### 部署注意事项
+
+1. **FRONTEND_URL** 是最关键的配置，它告诉API服务器登录成功后应该重定向到哪个前端应用URL
+2. 如果不配置 `FRONTEND_URL`，生产环境默认重定向到 `https://your-frontend-domain.com`（需要手动修改）
+3. 开发环境默认重定向到 `http://localhost:5173`
+
+### 登录流程
+
+1. 用户点击登录按钮
+2. 自动保存当前页面路径
+3. 跳转到 OAuth 提供商授权
+4. 授权成功后回调到服务端
+5. 服务端重定向到前端应用的原始页面
+
 ## 📱 使用说明
 
 1. **管理员功能**（只有您）：

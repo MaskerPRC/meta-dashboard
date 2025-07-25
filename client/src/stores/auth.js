@@ -61,13 +61,23 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // GitHub登录
-  const loginWithGitHub = () => {
-    window.location.href = (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/github';
+  const loginWithGitHub = (redirectTo = null) => {
+    const baseUrl = (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/github';
+    const currentPath = redirectTo || window.location.pathname + window.location.search;
+    const loginUrl = currentPath !== '/login' ? 
+      `${baseUrl}?redirect=${encodeURIComponent(currentPath)}` : 
+      baseUrl;
+    window.location.href = loginUrl;
   }
 
   // Google登录
-  const loginWithGoogle = () => {
-    window.location.href =  (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/google'
+  const loginWithGoogle = (redirectTo = null) => {
+    const baseUrl = (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/google';
+    const currentPath = redirectTo || window.location.pathname + window.location.search;
+    const loginUrl = currentPath !== '/login' ? 
+      `${baseUrl}?redirect=${encodeURIComponent(currentPath)}` : 
+      baseUrl;
+    window.location.href = loginUrl;
   }
 
   return {
