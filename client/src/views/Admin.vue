@@ -364,6 +364,7 @@ const selectedProjects = ref([])
 const users = ref([])
 const usersLoading = ref(false)
 const userSearch = ref('')
+const isLoadingUsers = ref(false) // 标记是否正在加载用户数据
 
 // 评论管理
 const comments = ref([])
@@ -427,6 +428,7 @@ const fetchProjects = async () => {
 const fetchUsers = async () => {
   try {
     usersLoading.value = true
+    isLoadingUsers.value = true // 设置加载标记
     const response = await axios.get('/api/admin/users')
     users.value = response.data.users
   } catch (error) {
@@ -434,6 +436,10 @@ const fetchUsers = async () => {
     ElMessage.error('获取用户列表失败')
   } finally {
     usersLoading.value = false
+    // 延迟重置标记，确保数据已完全加载并渲染
+    setTimeout(() => {
+      isLoadingUsers.value = false
+    }, 100)
   }
 }
 
@@ -525,7 +531,9 @@ const handleBatchDelete = async () => {
     )
     
     const projectIds = selectedProjects.value.map(p => p.id)
-    await axios.post('/api/admin/projects/batch-delete', { projectIds })
+    await axios.delete('/api/admin/projects/batch', { 
+      data: { ids: projectIds }
+    })
     
     // 从列表中移除已删除的项目
     projects.value = projects.value.filter(p => !projectIds.includes(p.id))
@@ -543,7 +551,7 @@ const handleBatchDelete = async () => {
 
 const exportProjects = async () => {
   try {
-    const response = await axios.get('/api/admin/export', {
+    const response = await axios.get('/api/admin/export/projects', {
       responseType: 'blob'
     })
     
@@ -565,8 +573,13 @@ const exportProjects = async () => {
 }
 
 const updateUserAdmin = async (user) => {
+  // 如果正在加载用户数据，不执行更新操作
+  if (isLoadingUsers.value) {
+    return
+  }
+  
   try {
-    await axios.put(`/api/admin/users/${user.id}`, {
+    await axios.put(`/api/admin/users/${user.id}/admin`, {
       is_admin: user.is_admin
     })
     

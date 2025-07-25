@@ -197,8 +197,11 @@ const fetchProject = async () => {
 
 
 const editProject = () => {
-  // TODO: 实现项目编辑功能
-  ElMessage.info('项目编辑功能正在开发中...')
+  // 跳转到管理页面并传递编辑参数
+  router.push({
+    path: '/admin',
+    query: { edit: project.value.id }
+  })
 }
 
 const deleteProject = async () => {
