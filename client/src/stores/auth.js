@@ -7,11 +7,11 @@ export const useAuthStore = defineStore('auth', () => {
   // 状态
   const user = ref(null)
   const loading = ref(false)
-  
+
   // 计算属性
   const isAuthenticated = computed(() => !!user.value)
   const isAdmin = computed(() => user.value?.is_admin === 1)
-  
+
   // 检查登录状态
   const checkAuthStatus = async () => {
     try {
@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = false
     }
   }
-  
+
   // 获取用户信息
   const getUserInfo = async () => {
     try {
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
     return null
   }
-  
+
   // 登出
   const logout = async () => {
     try {
@@ -59,26 +59,26 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = false
     }
   }
-  
+
   // GitHub登录
   const loginWithGitHub = () => {
-    window.location.href = '/api/auth/github'
+    window.location.href = (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/github';
   }
-  
+
   // Google登录
   const loginWithGoogle = () => {
-    window.location.href = '/api/auth/google'
+    window.location.href =  (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/google'
   }
-  
+
   return {
     // 状态
     user,
     loading,
-    
+
     // 计算属性
     isAuthenticated,
     isAdmin,
-    
+
     // 方法
     checkAuthStatus,
     getUserInfo,
@@ -86,4 +86,4 @@ export const useAuthStore = defineStore('auth', () => {
     loginWithGitHub,
     loginWithGoogle
   }
-}) 
+})
