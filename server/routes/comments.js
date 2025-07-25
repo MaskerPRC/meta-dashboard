@@ -18,7 +18,7 @@ const requireAdmin = (req, res, next) => {
   res.status(403).json({ message: '需要管理员权限' });
 };
 
-// 获取项目的所有评论
+// 获取项目的所有评论 (原有路径)
 router.get('/project/:projectId', (req, res) => {
   const { projectId } = req.params;
   const { page = 1, limit = 20 } = req.query;
@@ -76,7 +76,29 @@ router.get('/project/:projectId', (req, res) => {
   });
 });
 
-// 添加评论（需要登录）
+// 获取评论统计信息
+router.get('/stats/:projectId', (req, res) => {
+  const { projectId } = req.params;
+  
+  const sql = `
+    SELECT 
+      COUNT(*) as total_comments,
+      COUNT(DISTINCT user_id) as unique_commenters
+    FROM comments 
+    WHERE project_id = ?
+  `;
+  
+  db.get(sql, [projectId], (err, stats) => {
+    if (err) {
+      console.error('获取评论统计错误:', err);
+      return res.status(500).json({ message: '获取评论统计失败' });
+    }
+    
+    res.json(stats);
+  });
+});
+
+// 添加评论（需要登录）- 原有接口
 router.post('/', requireAuth, (req, res) => {
   const { project_id, content } = req.body;
   const user_id = req.user.id;
@@ -270,25 +292,150 @@ router.put('/:id', requireAuth, (req, res) => {
   });
 });
 
-// 获取评论统计信息
-router.get('/stats/:projectId', (req, res) => {
+// 获取指定项目的所有评论 (兼容前端路径 /:projectId) - 这个路由必须放在最后
+router.get('/:projectId', (req, res) => {
   const { projectId } = req.params;
+  
+  // 如果参数不是数字，可能是其他路由，应该返回404
+  if (!/^\d+$/.test(projectId)) {
+    return res.status(404).json({ message: '接口不存在' });
+  }
+  
+  const { page = 1, limit = 20 } = req.query;
   
   const sql = `
     SELECT 
-      COUNT(*) as total_comments,
-      COUNT(DISTINCT user_id) as unique_commenters
-    FROM comments 
-    WHERE project_id = ?
+      c.id, c.content, c.created_at,
+      u.id as user_id, u.username, u.display_name, u.avatar_url
+    FROM comments c
+    JOIN users u ON c.user_id = u.id
+    WHERE c.project_id = ?
+    ORDER BY c.created_at DESC
+    LIMIT ? OFFSET ?
   `;
   
-  db.get(sql, [projectId], (err, stats) => {
+  const offset = (page - 1) * limit;
+  
+  db.all(sql, [projectId, parseInt(limit), offset], (err, comments) => {
     if (err) {
-      console.error('获取评论统计错误:', err);
-      return res.status(500).json({ message: '获取评论统计失败' });
+      console.error('获取评论列表错误:', err);
+      return res.status(500).json({ message: '获取评论列表失败' });
     }
     
-    res.json(stats);
+    // 获取评论总数
+    db.get(
+      'SELECT COUNT(*) as total FROM comments WHERE project_id = ?',
+      [projectId],
+      (countErr, countResult) => {
+        if (countErr) {
+          console.error('获取评论总数错误:', countErr);
+          return res.status(500).json({ message: '获取评论总数失败' });
+        }
+        
+        res.json({
+          comments: comments.map(comment => ({
+            id: comment.id,
+            content: comment.content,
+            created_at: comment.created_at,
+            user: {
+              id: comment.user_id,
+              username: comment.username,
+              display_name: comment.display_name,
+              avatar_url: comment.avatar_url
+            }
+          })),
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: countResult.total,
+            pages: Math.ceil(countResult.total / limit)
+          }
+        });
+      }
+    );
+  });
+});
+
+// 为指定项目添加评论（兼容前端路径 /:projectId） - 这个路由必须放在最后
+router.post('/:projectId', requireAuth, (req, res) => {
+  const { projectId } = req.params;
+  
+  // 如果参数不是数字，可能是其他路由，应该返回404
+  if (!/^\d+$/.test(projectId)) {
+    return res.status(404).json({ message: '接口不存在' });
+  }
+  
+  const { content } = req.body;
+  const user_id = req.user.id;
+  const project_id = projectId; // 从路径参数获取项目ID
+  
+  if (!project_id || !content) {
+    return res.status(400).json({ message: '项目ID和评论内容不能为空' });
+  }
+  
+  if (content.trim().length < 1) {
+    return res.status(400).json({ message: '评论内容不能为空' });
+  }
+  
+  if (content.length > 1000) {
+    return res.status(400).json({ message: '评论内容不能超过1000字符' });
+  }
+  
+  // 检查项目是否存在
+  db.get('SELECT id FROM projects WHERE id = ?', [project_id], (projectErr, project) => {
+    if (projectErr) {
+      console.error('检查项目存在性错误:', projectErr);
+      return res.status(500).json({ message: '检查项目失败' });
+    }
+    
+    if (!project) {
+      return res.status(404).json({ message: '项目不存在' });
+    }
+    
+    // 添加评论
+    const sql = `
+      INSERT INTO comments (project_id, user_id, content)
+      VALUES (?, ?, ?)
+    `;
+    
+    db.run(sql, [project_id, user_id, content.trim()], function(err) {
+      if (err) {
+        console.error('添加评论错误:', err);
+        return res.status(500).json({ message: '添加评论失败' });
+      }
+      
+      // 返回新创建的评论（带用户信息）
+      const selectSql = `
+        SELECT 
+          c.id, c.content, c.created_at,
+          u.id as user_id, u.username, u.display_name, u.avatar_url
+        FROM comments c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.id = ?
+      `;
+      
+      db.get(selectSql, [this.lastID], (selectErr, newComment) => {
+        if (selectErr) {
+          console.error('获取新评论错误:', selectErr);
+          return res.status(500).json({ message: '获取新评论失败' });
+        }
+        
+        res.status(201).json({
+          message: '评论添加成功',
+          comment: {
+            id: newComment.id,
+            content: newComment.content,
+            created_at: newComment.created_at,
+            user: {
+              id: newComment.user_id,
+              username: newComment.username,
+              display_name: newComment.display_name,
+              avatar_url: newComment.avatar_url
+            }
+          }
+        });
+      });
+    });
   });
 });
 
