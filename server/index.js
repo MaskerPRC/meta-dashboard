@@ -54,6 +54,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'ai-dashboard-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
+  rolling: true, // 刷新session过期时间
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
@@ -64,6 +65,17 @@ app.use(session({
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
+
+// Session调试日志
+app.use((req, res, next) => {
+  if (req.url.includes('/api/auth/')) {
+    console.log(`🔍 [${req.method}] ${req.url}`);
+    console.log('📄 Session ID:', req.sessionID);
+    console.log('🔐 已认证:', req.isAuthenticated?.());
+    console.log('🍪 Cookies:', req.headers.cookie);
+  }
+  next();
+});
 
 // Passport配置
 app.use(passport.initialize());
