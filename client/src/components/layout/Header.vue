@@ -17,15 +17,15 @@
         
         <!-- 导航菜单 - 桌面版 -->
         <nav class="header-nav desktop-nav">
-          <router-link to="/" class="nav-item">
+          <router-link to="/" class="nav-item" active-class="router-link-active" @click="handleNavClick('/')">
             <el-icon><House /></el-icon>
             <span>首页</span>
           </router-link>
-          <router-link to="/projects" class="nav-item">
+          <router-link to="/projects" class="nav-item" active-class="router-link-active" @click="handleNavClick('/projects')">
             <el-icon><List /></el-icon>
             <span>项目列表</span>
           </router-link>
-          <router-link to="/about" class="nav-item">
+          <router-link to="/about" class="nav-item" active-class="router-link-active" @click="handleNavClick('/about')">
             <el-icon><InfoFilled /></el-icon>
             <span>关于挑战</span>
           </router-link>
@@ -119,32 +119,32 @@
             <el-icon><Close /></el-icon>
           </el-button>
         </div>
-        <div class="mobile-menu-items">
-          <router-link 
-            to="/" 
-            class="mobile-nav-item"
-            @click="toggleMobileMenu"
-          >
-            <el-icon><House /></el-icon>
-            <span>首页</span>
-          </router-link>
-          <router-link 
-            to="/projects" 
-            class="mobile-nav-item"
-            @click="toggleMobileMenu"
-          >
-            <el-icon><List /></el-icon>
-            <span>项目列表</span>
-          </router-link>
-          <router-link 
-            to="/about" 
-            class="mobile-nav-item"
-            @click="toggleMobileMenu"
-          >
-            <el-icon><InfoFilled /></el-icon>
-            <span>关于挑战</span>
-          </router-link>
-        </div>
+                 <div class="mobile-menu-items">
+           <router-link 
+             to="/" 
+             class="mobile-nav-item"
+             @click="handleMobileNavClick('/')"
+           >
+             <el-icon><House /></el-icon>
+             <span>首页</span>
+           </router-link>
+           <router-link 
+             to="/projects" 
+             class="mobile-nav-item"
+             @click="handleMobileNavClick('/projects')"
+           >
+             <el-icon><List /></el-icon>
+             <span>项目列表</span>
+           </router-link>
+           <router-link 
+             to="/about" 
+             class="mobile-nav-item"
+             @click="handleMobileNavClick('/about')"
+           >
+             <el-icon><InfoFilled /></el-icon>
+             <span>关于挑战</span>
+           </router-link>
+         </div>
       </nav>
     </div>
   </header>
@@ -175,6 +175,19 @@ const toggleTheme = () => {
 // 移动菜单切换
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
+}
+
+// 导航点击处理
+const handleNavClick = (path) => {
+  console.log('Navigation clicked:', path)
+  router.push(path)
+}
+
+// 移动端导航点击处理
+const handleMobileNavClick = (path) => {
+  console.log('Mobile navigation clicked:', path)
+  toggleMobileMenu()
+  router.push(path)
 }
 
 // 用户菜单命令处理
@@ -213,6 +226,12 @@ onMounted(() => {
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--ai-border);
   z-index: 1000;
+  
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
   
   .header-content {
     height: 70px;
@@ -275,6 +294,9 @@ onMounted(() => {
       transition: all 0.3s ease;
       font-size: 14px;
       font-weight: 500;
+      cursor: pointer;
+      position: relative;
+      z-index: 10;
       
       &:hover, &.router-link-active {
         color: var(--ai-primary);

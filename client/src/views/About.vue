@@ -4,7 +4,7 @@
       <!-- 英雄区域 -->
       <section class="hero-section">
         <div class="hero-content">
-          <h1 class="hero-title gradient-text">一年100个AI产品挑战</h1>
+                     <h1 class="hero-title">一年100个AI产品挑战</h1>
           <p class="hero-subtitle">把梦想落在键盘上，用代码书写AI时代的个人传奇</p>
           <div class="hero-stats">
             <div class="stat-card">
@@ -158,7 +158,7 @@
           
           <div class="tech-category ai-card">
             <h3 class="category-title">
-              <el-icon><Server /></el-icon>
+              <el-icon><Platform /></el-icon>
               后端技术
             </h3>
             <div class="tech-list">
@@ -288,7 +288,7 @@
 import { ref, onMounted } from 'vue'
 import { useProjectsStore } from '../stores/projects'
 import {
-  Cpu, TrendCharts, Connection, Monitor, Server, Upload,
+  Cpu, TrendCharts, Connection, Monitor, Platform, Upload,
   ChatDotSquare, Share, Trophy, Message, Link, View
 } from '@element-plus/icons-vue'
 
@@ -361,16 +361,18 @@ onMounted(() => {
     border-radius: 20px;
     margin-bottom: 80px;
     
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin: 0 0 24px;
-      line-height: 1.1;
-      
-      @media (max-width: 768px) {
-        font-size: 2.5rem;
-      }
-    }
+         .hero-title {
+       font-size: 3.5rem;
+       font-weight: 800;
+       margin: 0 0 24px;
+       line-height: 1.1;
+       color: white;
+       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+       
+       @media (max-width: 768px) {
+         font-size: 2.5rem;
+       }
+     }
     
     .hero-subtitle {
       font-size: 1.25rem;

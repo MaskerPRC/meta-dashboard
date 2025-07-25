@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from '../utils/axios'
+import { ElMessage } from 'element-plus'
 
 export const useProjectsStore = defineStore('projects', () => {
   // 状态

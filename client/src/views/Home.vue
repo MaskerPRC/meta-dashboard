@@ -137,7 +137,7 @@ import { useAuthStore } from '../stores/auth'
 import ProjectCard from '../components/project/ProjectCard.vue'
 import {
   View, InfoFilled, ArrowRight, DocumentAdd,
-  Star, Edit, Cpu, TestTube, Upload, Check, Pause
+  Star, Edit, Cpu, Operation, Upload, Check, VideoPause
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -154,10 +154,10 @@ const getStatusIcon = (status) => {
     idea: 'Star',
     planning: 'Edit', 
     development: 'Cpu',
-    testing: 'TestTube',
+    testing: 'Operation',
     deployed: 'Upload',
     completed: 'Check',
-    paused: 'Pause'
+    paused: 'VideoPause'
   }
   return icons[status] || 'Star'
 }
