@@ -19,13 +19,13 @@ passport.deserializeUser((id, done) => {
 passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_CLIENT_ID || 'your-github-client-id',
   clientSecret: process.env.GITHUB_CLIENT_SECRET || 'your-github-client-secret',
-  callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:3000/api/auth/github/callback'
+  callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:3015/api/auth/github/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     // 检查用户是否已存在
     db.get("SELECT * FROM users WHERE github_id = ?", [profile.id], (err, existingUser) => {
       if (err) return done(err);
-      
+
       if (existingUser) {
         // 用户已存在，更新信息
         db.run(`
@@ -43,7 +43,7 @@ passport.use(new GitHubStrategy({
           profile.id
         ], function(updateErr) {
           if (updateErr) return done(updateErr);
-          
+
           // 返回更新后的用户信息
           db.get("SELECT * FROM users WHERE github_id = ?", [profile.id], (selectErr, updatedUser) => {
             return done(selectErr, updatedUser);
@@ -53,7 +53,7 @@ passport.use(new GitHubStrategy({
         // 新用户，创建账户
         // 检查是否是管理员（第一个GitHub用户或特定用户名）
         const isAdmin = profile.username === process.env.ADMIN_GITHUB_USERNAME || false;
-        
+
         db.run(`
           INSERT INTO users (github_id, username, email, avatar_url, display_name, is_admin)
           VALUES (?, ?, ?, ?, ?, ?)
@@ -66,7 +66,7 @@ passport.use(new GitHubStrategy({
           isAdmin ? 1 : 0
         ], function(insertErr) {
           if (insertErr) return done(insertErr);
-          
+
           // 返回新创建的用户
           db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (selectErr, newUser) => {
             return done(selectErr, newUser);
@@ -83,13 +83,13 @@ passport.use(new GitHubStrategy({
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID || 'your-google-client-id',
   clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'your-google-client-secret',
-  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/api/auth/google/callback'
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3015/api/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     // 检查用户是否已存在
     db.get("SELECT * FROM users WHERE google_id = ?", [profile.id], (err, existingUser) => {
       if (err) return done(err);
-      
+
       if (existingUser) {
         // 用户已存在，更新信息
         db.run(`
@@ -107,7 +107,7 @@ passport.use(new GoogleStrategy({
           profile.id
         ], function(updateErr) {
           if (updateErr) return done(updateErr);
-          
+
           // 返回更新后的用户信息
           db.get("SELECT * FROM users WHERE google_id = ?", [profile.id], (selectErr, updatedUser) => {
             return done(selectErr, updatedUser);
@@ -117,7 +117,7 @@ passport.use(new GoogleStrategy({
         // 新用户，创建账户
         // 检查是否是管理员（特定邮箱）
         const isAdmin = profile.emails?.[0]?.value === process.env.ADMIN_EMAIL || false;
-        
+
         db.run(`
           INSERT INTO users (google_id, username, email, avatar_url, display_name, is_admin)
           VALUES (?, ?, ?, ?, ?, ?)
@@ -130,7 +130,7 @@ passport.use(new GoogleStrategy({
           isAdmin ? 1 : 0
         ], function(insertErr) {
           if (insertErr) return done(insertErr);
-          
+
           // 返回新创建的用户
           db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (selectErr, newUser) => {
             return done(selectErr, newUser);
@@ -143,4 +143,4 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-module.exports = passport; 
+module.exports = passport;
