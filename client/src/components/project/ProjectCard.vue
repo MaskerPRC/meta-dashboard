@@ -2,17 +2,29 @@
   <div class="project-card ai-card" @click="$emit('click')">
     <!-- 项目状态和优先级 -->
     <div class="card-header">
+      <div class="status-tags">
+        <el-tag 
+          :class="['status-tag', project.status]" 
+          size="small"
+        >
+          {{ getStatusName(project.status) }}
+        </el-tag>
+        <el-tag 
+          :class="['priority-tag', project.priority]" 
+          size="small"
+        >
+          {{ getPriorityName(project.priority) }}
+        </el-tag>
+      </div>
+      <!-- AI生成标识 -->
       <el-tag 
-        :class="['status-tag', project.status]" 
+        v-if="isAIGenerated(project)"
+        type="success" 
         size="small"
+        class="ai-generated-tag"
       >
-        {{ getStatusName(project.status) }}
-      </el-tag>
-      <el-tag 
-        :class="['priority-tag', project.priority]" 
-        size="small"
-      >
-        {{ getPriorityName(project.priority) }}
+        <el-icon><Robot /></el-icon>
+        AI生成
       </el-tag>
     </div>
 
@@ -91,7 +103,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Calendar, Link, View } from '@element-plus/icons-vue'
+import { Calendar, Link, View, Robot } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 
 const props = defineProps({
@@ -135,6 +147,18 @@ const getProgressColor = (progress) => {
   return '#67c23a'
 }
 
+// 判断是否为AI生成项目
+const isAIGenerated = (project) => {
+  // 检查项目标签中是否包含"AI生成"
+  if (project.tags && Array.isArray(project.tags)) {
+    return project.tags.includes('AI生成')
+  }
+  if (typeof project.tags === 'string') {
+    return project.tags.includes('AI生成')
+  }
+  return false
+}
+
 // 格式化日期
 const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD')
@@ -172,6 +196,23 @@ const openDemo = () => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
+    
+    .status-tags {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .ai-generated-tag {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+      border: none;
+      
+      .el-icon {
+        font-size: 12px;
+      }
+    }
     
     .status-tag, .priority-tag {
       border: none;
