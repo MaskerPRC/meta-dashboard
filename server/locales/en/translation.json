@@ -1,0 +1,80 @@
+{
+  "errors": {
+    "auth": {
+      "required": "Authentication required",
+      "admin_required": "Administrator privileges required",
+      "forbidden": "Access denied",
+      "invalid_credentials": "Invalid username or password",
+      "token_expired": "Session expired, please login again",
+      "login_failed": "Login failed",
+      "user_not_found": "User not found",
+      "password_mismatch": "Password confirmation doesn't match",
+      "password_too_short": "Password must be at least 6 characters",
+      "current_password_wrong": "Current password is incorrect",
+      "user_exists": "User already exists",
+      "registration_failed": "Registration failed",
+      "logout_failed": "Logout failed"
+    },
+    "validation": {
+      "required_field": "Required field cannot be empty",
+      "invalid_format": "Invalid format",
+      "too_long": "Content too long",
+      "too_short": "Content too short",
+      "title_required": "Project title cannot be empty",
+      "comment_required": "Comment content cannot be empty",
+      "comment_too_long": "Comment cannot exceed 1000 characters",
+      "config_key_required": "Configuration key cannot be empty",
+      "config_value_required": "Configuration value cannot be empty"
+    },
+    "server": {
+      "internal_error": "Internal server error",
+      "not_found": "Resource not found",
+      "api_not_found": "API endpoint not found",
+      "database_error": "Database operation failed"
+    },
+    "upload": {
+      "file_too_large": "File size exceeds limit (max 50MB)",
+      "too_many_files": "Too many files uploaded (max 10 files)",
+      "unsupported_type": "Unsupported file type. Supported: jpg, png, gif, webp, mp4, webm",
+      "no_file_selected": "No file selected",
+      "upload_failed": "File upload failed"
+    },
+    "comment": {
+      "not_found": "Comment not found",
+      "no_permission_delete": "No permission to delete this comment",
+      "no_permission_edit": "Can only edit your own comments",
+      "edit_time_expired": "Comments cannot be edited 30 minutes after posting"
+    },
+    "config": {
+      "not_found": "Configuration not found",
+      "key_exists": "Configuration key already exists",
+      "format_error": "Configuration data format error",
+      "no_update_needed": "No configuration updates needed"
+    }
+  },
+  "success": {
+    "created": "Created successfully",
+    "updated": "Updated successfully", 
+    "deleted": "Deleted successfully",
+    "uploaded": "Uploaded successfully",
+    "login": "Login successful",
+    "logout": "Logout successful",
+    "registration": "Registration successful",
+    "password_set": "Password set successfully",
+    "password_changed": "Password changed successfully"
+  },
+  "project": {
+    "status": {
+      "not_started": "Not Started",
+      "in_progress": "In Progress",
+      "completed": "Completed", 
+      "on_hold": "On Hold"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High", 
+      "urgent": "Urgent"
+    }
+  }
+} 

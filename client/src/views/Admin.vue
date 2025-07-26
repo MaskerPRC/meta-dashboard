@@ -4,13 +4,13 @@
       <!-- 页面头部 -->
       <div class="page-header">
         <div class="header-content">
-          <h1 class="page-title">管理后台</h1>
-          <p class="page-subtitle">AI项目看板管理中心</p>
+          <h1 class="page-title">{{ $t('admin.title') }}</h1>
+          <p class="page-subtitle">{{ $t('admin.subtitle') }}</p>
         </div>
         <div class="header-actions">
           <el-button type="primary" @click="showCreateProject = true">
             <el-icon><Plus /></el-icon>
-            新建项目
+            {{ $t('admin.new_project') }}
           </el-button>
         </div>
       </div>
@@ -24,7 +24,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ stats.totalProjects }}</div>
-              <div class="stat-label">总项目数</div>
+              <div class="stat-label">{{ $t('admin.stats.total_projects') }}</div>
             </div>
           </div>
           
@@ -34,7 +34,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ stats.totalUsers }}</div>
-              <div class="stat-label">注册用户</div>
+              <div class="stat-label">{{ $t('admin.stats.total_users') }}</div>
             </div>
           </div>
           
@@ -44,7 +44,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ stats.totalComments }}</div>
-              <div class="stat-label">评论总数</div>
+              <div class="stat-label">{{ $t('admin.stats.total_comments') }}</div>
             </div>
           </div>
           
@@ -66,7 +66,7 @@
           <!-- 标签页 -->
           <el-tabs v-model="activeTab" class="admin-tabs">
             <!-- 项目管理 -->
-            <el-tab-pane label="项目管理" name="projects">
+            <el-tab-pane :label="$t('admin.project_management')" name="projects">
               <div class="tab-content">
                 <!-- 项目操作工具栏 -->
                 <div class="projects-toolbar">
@@ -193,7 +193,7 @@
             </el-tab-pane>
 
             <!-- 用户管理 -->
-            <el-tab-pane label="用户管理" name="users">
+            <el-tab-pane :label="$t('admin.user_management')" name="users">
               <div class="tab-content">
                 <div class="users-toolbar">
                   <el-input
@@ -297,7 +297,7 @@
             </el-tab-pane>
 
             <!-- 评论管理 -->
-            <el-tab-pane label="评论管理" name="comments">
+            <el-tab-pane :label="$t('admin.comment_management')" name="comments">
               <div class="tab-content">
                 <div class="comments-table-container">
                   <el-table
@@ -393,7 +393,7 @@
             </el-tab-pane>
 
             <!-- 站点配置 -->
-            <el-tab-pane label="站点配置" name="config">
+            <el-tab-pane :label="$t('admin.config_management')" name="config">
               <div class="tab-content">
                 <div class="config-section">
                   <h3 class="config-title">微信群二维码设置</h3>

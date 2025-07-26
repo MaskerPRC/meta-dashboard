@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const db = require('../config/database');
+const ResponseHelper = require('../utils/responseHelper');
 const router = express.Router();
 
 // 手动设置Session Cookie的公共函数
@@ -132,10 +133,7 @@ router.get('/user', (req, res) => {
       }
     });
   } else {
-    res.status(401).json({
-      success: false,
-      message: '用户未登录'
-    });
+    return ResponseHelper.authError(res, req, 'errors.auth.required');
   }
 });
 
@@ -143,30 +141,21 @@ router.get('/user', (req, res) => {
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
-      return res.status(500).json({
-        success: false,
-        message: '登录过程中发生错误'
-      });
+      return ResponseHelper.serverError(res, req, 'errors.server.internal_error');
     }
     
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: info.message || '登录失败'
-      });
+      return ResponseHelper.authError(res, req, 'errors.auth.login_failed');
     }
     
     req.logIn(user, (loginErr) => {
       if (loginErr) {
-        return res.status(500).json({
-          success: false,
-          message: '登录失败'
-        });
+        return ResponseHelper.serverError(res, req, 'errors.auth.login_failed');
       }
       
       res.json({
         success: true,
-        message: '登录成功',
+        message: req.t('success.login'),
         user: {
           id: user.id,
           username: user.username,
@@ -186,24 +175,15 @@ router.post('/register', (req, res) => {
   
   // 验证输入
   if (!username || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: '用户名、邮箱和密码不能为空'
-    });
+    return ResponseHelper.validationError(res, req, 'errors.validation.required_field');
   }
   
   if (password !== confirmPassword) {
-    return res.status(400).json({
-      success: false,
-      message: '两次输入的密码不一致'
-    });
+    return ResponseHelper.validationError(res, req, 'errors.auth.password_mismatch');
   }
   
   if (password.length < 6) {
-    return res.status(400).json({
-      success: false,
-      message: '密码长度至少6位'
-    });
+    return ResponseHelper.validationError(res, req, 'errors.auth.password_too_short');
   }
   
   // 检查用户名和邮箱是否已存在

@@ -8,6 +8,10 @@ const session = require('express-session');
 const passport = require('passport');
 const path = require('path');
 
+// 国际化支持
+const i18next = require('./config/i18n');
+const middleware = require('i18next-http-middleware');
+
 const app = express();
 const PORT = process.env.PORT || 3015;
 
@@ -48,6 +52,9 @@ app.use(cors({
 // 解析JSON请求体
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// 国际化中间件
+app.use(middleware.handle(i18next));
 
 // Session配置
 const sessionConfig = {
@@ -120,14 +127,14 @@ if (process.env.NODE_ENV === 'production') {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
-    message: '服务器内部错误',
+    message: req.t('errors.server.internal_error'),
     error: process.env.NODE_ENV === 'development' ? err.message : {}
   });
 });
 
 // 404处理
 app.use((req, res) => {
-  res.status(404).json({ message: '接口不存在' });
+  res.status(404).json({ message: req.t('errors.server.not_found') });
 });
 
 app.listen(PORT, () => {

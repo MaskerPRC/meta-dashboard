@@ -1,0 +1,80 @@
+{
+  "errors": {
+    "auth": {
+      "required": "需要登录",
+      "admin_required": "需要管理员权限",
+      "forbidden": "权限不足",
+      "invalid_credentials": "用户名或密码错误",
+      "token_expired": "登录已过期，请重新登录",
+      "login_failed": "登录失败",
+      "user_not_found": "用户不存在",
+      "password_mismatch": "两次输入的密码不一致",
+      "password_too_short": "密码长度至少6位",
+      "current_password_wrong": "当前密码错误",
+      "user_exists": "用户已存在",
+      "registration_failed": "注册失败",
+      "logout_failed": "登出失败"
+    },
+    "validation": {
+      "required_field": "必填字段不能为空",
+      "invalid_format": "格式不正确",
+      "too_long": "内容过长",
+      "too_short": "内容过短",
+      "title_required": "项目标题不能为空",
+      "comment_required": "评论内容不能为空",
+      "comment_too_long": "评论内容不能超过1000字符",
+      "config_key_required": "配置键不能为空",
+      "config_value_required": "配置值不能为空"
+    },
+    "server": {
+      "internal_error": "服务器内部错误",
+      "not_found": "资源不存在",
+      "api_not_found": "接口不存在",
+      "database_error": "数据库操作失败"
+    },
+    "upload": {
+      "file_too_large": "文件大小超过限制（最大50MB）",
+      "too_many_files": "上传文件数量超过限制（最多10个）",
+      "unsupported_type": "不支持的文件类型，支持：jpg, png, gif, webp, mp4, webm",
+      "no_file_selected": "没有选择文件",
+      "upload_failed": "文件上传失败"
+    },
+    "comment": {
+      "not_found": "评论不存在",
+      "no_permission_delete": "没有权限删除此评论",
+      "no_permission_edit": "只能编辑自己的评论",
+      "edit_time_expired": "评论发布30分钟后无法编辑"
+    },
+    "config": {
+      "not_found": "配置不存在",
+      "key_exists": "配置键已存在",
+      "format_error": "配置数据格式错误",
+      "no_update_needed": "没有配置需要更新"
+    }
+  },
+  "success": {
+    "created": "创建成功",
+    "updated": "更新成功",
+    "deleted": "删除成功",
+    "uploaded": "上传成功",
+    "login": "登录成功",
+    "logout": "登出成功",
+    "registration": "注册成功",
+    "password_set": "密码设置成功",
+    "password_changed": "密码修改成功"
+  },
+  "project": {
+    "status": {
+      "not_started": "未开始",
+      "in_progress": "进行中", 
+      "completed": "已完成",
+      "on_hold": "暂停"
+    },
+    "priority": {
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "urgent": "紧急"
+    }
+  }
+} 

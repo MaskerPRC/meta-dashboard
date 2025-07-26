@@ -9,8 +9,8 @@
               <img src="/logo.png" alt="AI项目看板" class="logo-image" />
             </div>
             <div class="logo-text">
-              <h1 class="title">AI项目看板</h1>
-              <p class="subtitle">一年100个AI产品挑战</p>
+              <h1 class="title">{{ $t('home.title') }}</h1>
+              <p class="subtitle">{{ $t('home.subtitle') }}</p>
             </div>
           </router-link>
         </div>
@@ -19,15 +19,15 @@
         <nav class="header-nav desktop-nav">
           <router-link to="/" class="nav-item" active-class="router-link-active" @click="handleNavClick('/')">
             <el-icon><House /></el-icon>
-            <span>首页</span>
+            <span>{{ $t('nav.home') }}</span>
           </router-link>
           <router-link to="/projects" class="nav-item" active-class="router-link-active" @click="handleNavClick('/projects')">
             <el-icon><List /></el-icon>
-            <span>项目列表</span>
+            <span>{{ $t('nav.projects') }}</span>
           </router-link>
           <router-link to="/about" class="nav-item" active-class="router-link-active" @click="handleNavClick('/about')">
             <el-icon><InfoFilled /></el-icon>
-            <span>关于挑战</span>
+            <span>{{ $t('nav.about') }}</span>
           </router-link>
         </nav>
         
@@ -154,6 +154,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import LanguageSwitcher from '../common/LanguageSwitcher.vue'
 import { 
   House, List, InfoFilled, User, ArrowDown, 
   Setting, SwitchButton, Moon, Sunny, Menu, Close
