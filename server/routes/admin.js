@@ -157,7 +157,7 @@ router.get('/comments', requireAdmin, (req, res) => {
   
   let sql = `
     SELECT 
-      c.id, c.content, c.created_at,
+      c.id, c.content, c.attachments, c.created_at,
       c.project_id, p.title as project_title,
       u.id as user_id, u.username, u.display_name, u.avatar_url
     FROM comments c
@@ -211,21 +211,34 @@ router.get('/comments', requireAdmin, (req, res) => {
       }
       
       res.json({
-        comments: comments.map(comment => ({
-          id: comment.id,
-          content: comment.content,
-          created_at: comment.created_at,
-          project: {
-            id: comment.project_id,
-            title: comment.project_title
-          },
-          user: {
-            id: comment.user_id,
-            username: comment.username,
-            display_name: comment.display_name,
-            avatar_url: comment.avatar_url
+        comments: comments.map(comment => {
+          // 解析附件数据
+          let parsedAttachments = { images: [], videos: [] };
+          try {
+            if (comment.attachments) {
+              parsedAttachments = JSON.parse(comment.attachments);
+            }
+          } catch (e) {
+            console.warn('解析附件数据失败:', e);
           }
-        })),
+
+          return {
+            id: comment.id,
+            content: comment.content,
+            attachments: parsedAttachments,
+            created_at: comment.created_at,
+            project: {
+              id: comment.project_id,
+              title: comment.project_title
+            },
+            user: {
+              id: comment.user_id,
+              username: comment.username,
+              display_name: comment.display_name,
+              avatar_url: comment.avatar_url
+            }
+          };
+        }),
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),

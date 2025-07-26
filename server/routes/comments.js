@@ -25,7 +25,7 @@ router.get('/project/:projectId', (req, res) => {
   
   const sql = `
     SELECT 
-      c.id, c.content, c.created_at,
+      c.id, c.content, c.attachments, c.created_at,
       u.id as user_id, u.username, u.display_name, u.avatar_url
     FROM comments c
     JOIN users u ON c.user_id = u.id
@@ -53,17 +53,30 @@ router.get('/project/:projectId', (req, res) => {
         }
         
         res.json({
-          comments: comments.map(comment => ({
-            id: comment.id,
-            content: comment.content,
-            created_at: comment.created_at,
-            user: {
-              id: comment.user_id,
-              username: comment.username,
-              display_name: comment.display_name,
-              avatar_url: comment.avatar_url
+          comments: comments.map(comment => {
+            // 解析附件数据
+            let parsedAttachments = { images: [], videos: [] };
+            try {
+              if (comment.attachments) {
+                parsedAttachments = JSON.parse(comment.attachments);
+              }
+            } catch (e) {
+              console.warn('解析附件数据失败:', e);
             }
-          })),
+
+            return {
+              id: comment.id,
+              content: comment.content,
+              attachments: parsedAttachments,
+              created_at: comment.created_at,
+              user: {
+                id: comment.user_id,
+                username: comment.username,
+                display_name: comment.display_name,
+                avatar_url: comment.avatar_url
+              }
+            };
+          }),
           pagination: {
             page: parseInt(page),
             limit: parseInt(limit),
@@ -100,7 +113,7 @@ router.get('/stats/:projectId', (req, res) => {
 
 // 添加评论（需要登录）- 原有接口
 router.post('/', requireAuth, (req, res) => {
-  const { project_id, content } = req.body;
+  const { project_id, content, attachments } = req.body;
   const user_id = req.user.id;
   
   if (!project_id || !content) {
@@ -126,13 +139,23 @@ router.post('/', requireAuth, (req, res) => {
       return res.status(404).json({ message: '项目不存在' });
     }
     
+    // 处理附件数据
+    let attachmentsStr = '{"images":[],"videos":[]}';
+    if (attachments && typeof attachments === 'object') {
+      try {
+        attachmentsStr = JSON.stringify(attachments);
+      } catch (e) {
+        console.warn('附件数据格式错误:', e);
+      }
+    }
+
     // 添加评论
     const sql = `
-      INSERT INTO comments (project_id, user_id, content)
-      VALUES (?, ?, ?)
+      INSERT INTO comments (project_id, user_id, content, attachments)
+      VALUES (?, ?, ?, ?)
     `;
     
-    db.run(sql, [project_id, user_id, content.trim()], function(err) {
+    db.run(sql, [project_id, user_id, content.trim(), attachmentsStr], function(err) {
       if (err) {
         console.error('添加评论错误:', err);
         return res.status(500).json({ message: '添加评论失败' });
@@ -141,7 +164,7 @@ router.post('/', requireAuth, (req, res) => {
       // 返回新创建的评论（带用户信息）
       const selectSql = `
         SELECT 
-          c.id, c.content, c.created_at,
+          c.id, c.content, c.attachments, c.created_at,
           u.id as user_id, u.username, u.display_name, u.avatar_url
         FROM comments c
         JOIN users u ON c.user_id = u.id
@@ -154,11 +177,22 @@ router.post('/', requireAuth, (req, res) => {
           return res.status(500).json({ message: '获取新评论失败' });
         }
         
+        // 解析附件数据
+        let parsedAttachments = { images: [], videos: [] };
+        try {
+          if (newComment.attachments) {
+            parsedAttachments = JSON.parse(newComment.attachments);
+          }
+        } catch (e) {
+          console.warn('解析附件数据失败:', e);
+        }
+
         res.status(201).json({
           message: '评论添加成功',
           comment: {
             id: newComment.id,
             content: newComment.content,
+            attachments: parsedAttachments,
             created_at: newComment.created_at,
             user: {
               id: newComment.user_id,
@@ -305,7 +339,7 @@ router.get('/:projectId', (req, res) => {
   
   const sql = `
     SELECT 
-      c.id, c.content, c.created_at,
+      c.id, c.content, c.attachments, c.created_at,
       u.id as user_id, u.username, u.display_name, u.avatar_url
     FROM comments c
     JOIN users u ON c.user_id = u.id
@@ -333,17 +367,30 @@ router.get('/:projectId', (req, res) => {
         }
         
         res.json({
-          comments: comments.map(comment => ({
-            id: comment.id,
-            content: comment.content,
-            created_at: comment.created_at,
-            user: {
-              id: comment.user_id,
-              username: comment.username,
-              display_name: comment.display_name,
-              avatar_url: comment.avatar_url
+          comments: comments.map(comment => {
+            // 解析附件数据
+            let parsedAttachments = { images: [], videos: [] };
+            try {
+              if (comment.attachments) {
+                parsedAttachments = JSON.parse(comment.attachments);
+              }
+            } catch (e) {
+              console.warn('解析附件数据失败:', e);
             }
-          })),
+
+            return {
+              id: comment.id,
+              content: comment.content,
+              attachments: parsedAttachments,
+              created_at: comment.created_at,
+              user: {
+                id: comment.user_id,
+                username: comment.username,
+                display_name: comment.display_name,
+                avatar_url: comment.avatar_url
+              }
+            };
+          }),
           pagination: {
             page: parseInt(page),
             limit: parseInt(limit),
@@ -365,7 +412,7 @@ router.post('/:projectId', requireAuth, (req, res) => {
     return res.status(404).json({ message: '接口不存在' });
   }
   
-  const { content } = req.body;
+  const { content, attachments } = req.body;
   const user_id = req.user.id;
   const project_id = projectId; // 从路径参数获取项目ID
   
@@ -392,13 +439,23 @@ router.post('/:projectId', requireAuth, (req, res) => {
       return res.status(404).json({ message: '项目不存在' });
     }
     
+    // 处理附件数据
+    let attachmentsStr = '{"images":[],"videos":[]}';
+    if (attachments && typeof attachments === 'object') {
+      try {
+        attachmentsStr = JSON.stringify(attachments);
+      } catch (e) {
+        console.warn('附件数据格式错误:', e);
+      }
+    }
+
     // 添加评论
     const sql = `
-      INSERT INTO comments (project_id, user_id, content)
-      VALUES (?, ?, ?)
+      INSERT INTO comments (project_id, user_id, content, attachments)
+      VALUES (?, ?, ?, ?)
     `;
     
-    db.run(sql, [project_id, user_id, content.trim()], function(err) {
+    db.run(sql, [project_id, user_id, content.trim(), attachmentsStr], function(err) {
       if (err) {
         console.error('添加评论错误:', err);
         return res.status(500).json({ message: '添加评论失败' });
@@ -407,7 +464,7 @@ router.post('/:projectId', requireAuth, (req, res) => {
       // 返回新创建的评论（带用户信息）
       const selectSql = `
         SELECT 
-          c.id, c.content, c.created_at,
+          c.id, c.content, c.attachments, c.created_at,
           u.id as user_id, u.username, u.display_name, u.avatar_url
         FROM comments c
         JOIN users u ON c.user_id = u.id
@@ -420,11 +477,22 @@ router.post('/:projectId', requireAuth, (req, res) => {
           return res.status(500).json({ message: '获取新评论失败' });
         }
         
+        // 解析附件数据
+        let parsedAttachments = { images: [], videos: [] };
+        try {
+          if (newComment.attachments) {
+            parsedAttachments = JSON.parse(newComment.attachments);
+          }
+        } catch (e) {
+          console.warn('解析附件数据失败:', e);
+        }
+
         res.status(201).json({
           message: '评论添加成功',
           comment: {
             id: newComment.id,
             content: newComment.content,
+            attachments: parsedAttachments,
             created_at: newComment.created_at,
             user: {
               id: newComment.user_id,

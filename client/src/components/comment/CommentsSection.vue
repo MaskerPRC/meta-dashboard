@@ -37,6 +37,37 @@
                 预览
               </el-button>
             </el-button-group>
+            
+            <!-- 文件上传按钮 -->
+            <div class="upload-buttons">
+              <el-upload
+                ref="imageUploadRef"
+                :show-file-list="false"
+                :before-upload="beforeImageUpload"
+                :http-request="handleFileUpload"
+                accept="image/*"
+                multiple
+              >
+                <el-button size="small" text>
+                  <el-icon><Picture /></el-icon>
+                  图片
+                </el-button>
+              </el-upload>
+              
+              <el-upload
+                ref="videoUploadRef"
+                :show-file-list="false"
+                :before-upload="beforeVideoUpload"
+                :http-request="handleFileUpload"
+                accept="video/*"
+                multiple
+              >
+                <el-button size="small" text>
+                  <el-icon><VideoPlay /></el-icon>
+                  视频
+                </el-button>
+              </el-upload>
+            </div>
           </div>
           <div class="toolbar-right">
             <el-dropdown trigger="click" placement="bottom-end">
@@ -95,6 +126,83 @@
             class="markdown-preview"
             v-html="previewContent"
           ></div>
+        </div>
+
+        <!-- 附件预览 -->
+        <div v-if="hasAttachmentsToSubmit()" class="attachments-section">
+          <div class="attachments-header">
+            <span class="attachments-title">附件</span>
+          </div>
+          
+          <!-- 图片附件 -->
+          <div v-if="attachments.images.length > 0" class="attachment-group">
+            <div class="attachment-label">
+              <el-icon><Picture /></el-icon>
+              图片 ({{ attachments.images.length }})
+            </div>
+            <div class="images-grid">
+              <div 
+                v-for="(image, index) in attachments.images" 
+                :key="image.id"
+                class="attachment-item"
+              >
+                <el-image
+                  :src="image.url"
+                  :preview-src-list="attachments.images.map(img => img.url)"
+                  class="attachment-image"
+                  fit="cover"
+                  preview-teleported
+                />
+                <div class="attachment-info">
+                  <span class="filename">{{ image.filename }}</span>
+                  <span class="filesize">({{ formatFileSize(image.size) }})</span>
+                </div>
+                <el-button 
+                  class="remove-btn"
+                  type="danger" 
+                  size="small" 
+                  circle
+                  @click="removeAttachment('images', index)"
+                >
+                  <el-icon><Delete /></el-icon>
+                </el-button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 视频附件 -->
+          <div v-if="attachments.videos.length > 0" class="attachment-group">
+            <div class="attachment-label">
+              <el-icon><VideoPlay /></el-icon>
+              视频 ({{ attachments.videos.length }})
+            </div>
+            <div class="videos-list">
+              <div 
+                v-for="(video, index) in attachments.videos" 
+                :key="video.id"
+                class="video-item"
+              >
+                <div class="video-info">
+                  <el-icon><VideoPlay /></el-icon>
+                  <div class="video-details">
+                    <span class="filename">{{ video.filename }}</span>
+                    <span class="filesize">({{ formatFileSize(video.size) }})</span>
+                  </div>
+                </div>
+                <div class="video-actions">
+                  <el-link :href="video.url" target="_blank" type="primary">预览</el-link>
+                  <el-button 
+                    type="danger" 
+                    size="small" 
+                    text
+                    @click="removeAttachment('videos', index)"
+                  >
+                    删除
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="form-actions">
@@ -188,7 +296,49 @@
             
             <!-- 评论正文 -->
             <div v-if="editingComment !== comment.id" class="comment-text">
-              <div class="markdown-content" v-html="renderMarkdown(comment.content)"></div>
+              <div v-if="comment.content" class="markdown-content" v-html="renderMarkdown(comment.content)"></div>
+              
+              <!-- 评论附件显示 -->
+              <div v-if="hasCommentAttachments(comment)" class="comment-attachments">
+                <!-- 图片附件 -->
+                <div v-if="comment.attachments?.images?.length" class="comment-images">
+                  <div class="attachment-label">
+                    <el-icon><Picture /></el-icon>
+                    图片 ({{ comment.attachments.images.length }})
+                  </div>
+                  <div class="images-grid">
+                    <el-image
+                      v-for="image in comment.attachments.images"
+                      :key="image.id"
+                      :src="image.url"
+                      :preview-src-list="comment.attachments.images.map(img => img.url)"
+                      class="comment-image"
+                      fit="cover"
+                      preview-teleported
+                    />
+                  </div>
+                </div>
+                
+                <!-- 视频附件 -->
+                <div v-if="comment.attachments?.videos?.length" class="comment-videos">
+                  <div class="attachment-label">
+                    <el-icon><VideoPlay /></el-icon>
+                    视频 ({{ comment.attachments.videos.length }})
+                  </div>
+                  <div class="videos-list">
+                    <div v-for="video in comment.attachments.videos" :key="video.id" class="video-item">
+                      <div class="video-info">
+                        <el-icon><VideoPlay /></el-icon>
+                        <div class="video-details">
+                          <span class="filename">{{ video.filename }}</span>
+                          <span class="filesize">({{ formatFileSize(video.size) }})</span>
+                        </div>
+                      </div>
+                      <el-link :href="video.url" target="_blank" type="primary">预览</el-link>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <!-- 编辑状态 -->
@@ -277,7 +427,7 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import {
   ChatLineSquare, User, ChatDotSquare, MoreFilled, 
-  Edit, Delete, View, QuestionFilled
+  Edit, Delete, View, QuestionFilled, Picture, VideoPlay, Upload
 } from '@element-plus/icons-vue'
 
 // 启用相对时间插件
@@ -320,6 +470,13 @@ const currentPage = ref(1)
 // Markdown 编辑相关状态
 const editMode = ref('write') // 'write' | 'preview'
 const editEditMode = ref('write') // 编辑评论时的模式
+
+// 文件上传相关状态
+const uploading = ref(false)
+const attachments = ref({ images: [], videos: [] })
+const imageUploadRef = ref()
+const videoUploadRef = ref()
+const uploadConfig = ref({})
 
 const pagination = reactive({
   total: 0,
@@ -397,7 +554,7 @@ const fetchComments = async () => {
 }
 
 const submitComment = async () => {
-  if (!newComment.value.trim()) {
+  if (!newComment.value.trim() && !hasAttachmentsToSubmit()) {
     ElMessage.warning('评论内容不能为空')
     return
   }
@@ -406,12 +563,14 @@ const submitComment = async () => {
     submitting.value = true
     const response = await axios.post('/api/comments', {
       project_id: props.projectId,
-      content: newComment.value.trim()
+      content: newComment.value.trim(),
+      attachments: attachments.value
     })
     
     // 添加新评论到列表顶部
     comments.value.unshift(response.data.comment)
     newComment.value = ''
+    attachments.value = { images: [], videos: [] } // 清空附件
     editMode.value = 'write' // 重置编辑模式
     pagination.total++
     
@@ -523,9 +682,120 @@ const formatCommentTime = (time) => {
   }
 }
 
+// 文件上传相关方法
+const loadUploadConfig = async () => {
+  try {
+    const response = await axios.get('/api/upload/config')
+    uploadConfig.value = response.data
+  } catch (error) {
+    console.error('获取上传配置失败:', error)
+  }
+}
+
+const hasAttachmentsToSubmit = () => {
+  return attachments.value.images.length > 0 || attachments.value.videos.length > 0
+}
+
+const beforeImageUpload = (file) => {
+  const isValidType = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)
+  if (!isValidType) {
+    ElMessage.error('只支持 JPG、PNG、GIF、WebP 格式的图片')
+    return false
+  }
+  
+  const isLt5M = file.size / 1024 / 1024 < 5
+  if (!isLt5M) {
+    ElMessage.error('图片大小不能超过 5MB')
+    return false
+  }
+  
+  return true
+}
+
+const beforeVideoUpload = (file) => {
+  const isValidType = ['video/mp4', 'video/webm'].includes(file.type)
+  if (!isValidType) {
+    ElMessage.error('只支持 MP4、WebM 格式的视频')
+    return false
+  }
+  
+  const isLt50M = file.size / 1024 / 1024 < 50
+  if (!isLt50M) {
+    ElMessage.error('视频大小不能超过 50MB')
+    return false
+  }
+  
+  return true
+}
+
+const handleFileUpload = async (options) => {
+  const { file } = options
+  
+  if (uploading.value) {
+    ElMessage.warning('文件正在上传中，请稍候...')
+    return
+  }
+  
+  try {
+    uploading.value = true
+    const formData = new FormData()
+    formData.append('files', file)
+    
+    const response = await axios.post('/api/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    
+    const { images, videos, errors } = response.data.data
+    
+    if (errors.length > 0) {
+      errors.forEach(error => {
+        ElMessage.error(`${error.filename}: ${error.error}`)
+      })
+    }
+    
+    // 添加成功上传的文件到附件列表
+    if (images.length > 0) {
+      attachments.value.images.push(...images)
+      ElMessage.success(`成功上传 ${images.length} 张图片`)
+    }
+    
+    if (videos.length > 0) {
+      attachments.value.videos.push(...videos)
+      ElMessage.success(`成功上传 ${videos.length} 个视频`)
+    }
+    
+  } catch (error) {
+    console.error('文件上传失败:', error)
+    ElMessage.error(error.response?.data?.message || '文件上传失败')
+  } finally {
+    uploading.value = false
+  }
+}
+
+const removeAttachment = (type, index) => {
+  attachments.value[type].splice(index, 1)
+}
+
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+const hasCommentAttachments = (comment) => {
+  if (!comment.attachments) return false
+  return (comment.attachments.images && comment.attachments.images.length > 0) ||
+         (comment.attachments.videos && comment.attachments.videos.length > 0)
+}
+
 // 生命周期
 onMounted(() => {
   fetchComments()
+  loadUploadConfig()
 })
 </script>
 
@@ -573,6 +843,13 @@ onMounted(() => {
         .toolbar-left {
           display: flex;
           align-items: center;
+          gap: 12px;
+          
+          .upload-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+          }
         }
         
         .toolbar-right {
@@ -614,6 +891,131 @@ onMounted(() => {
         display: flex;
         justify-content: flex-end;
         margin-top: 12px;
+      }
+      
+      .attachments-section {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid var(--el-border-color-lighter);
+        border-radius: 6px;
+        background: var(--el-bg-color-page);
+        
+        .attachments-header {
+          margin-bottom: 12px;
+          
+          .attachments-title {
+            font-weight: 600;
+            color: var(--ai-text-primary);
+          }
+        }
+        
+        .attachment-group {
+          margin-bottom: 16px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          .attachment-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--ai-text-secondary);
+            margin-bottom: 8px;
+          }
+          
+          .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            
+            .attachment-item {
+              position: relative;
+              
+              .attachment-image {
+                width: 100px;
+                height: 100px;
+                border-radius: 6px;
+                border: 1px solid var(--el-border-color-lighter);
+              }
+              
+              .attachment-info {
+                margin-top: 4px;
+                text-align: center;
+                
+                .filename {
+                  display: block;
+                  font-size: 12px;
+                  color: var(--ai-text-primary);
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-width: 100px;
+                }
+                
+                .filesize {
+                  font-size: 11px;
+                  color: var(--ai-text-secondary);
+                }
+              }
+              
+              .remove-btn {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+              }
+            }
+          }
+          
+          .videos-list {
+            .video-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 8px 12px;
+              border: 1px solid var(--el-border-color-lighter);
+              border-radius: 6px;
+              margin-bottom: 8px;
+              background: white;
+              
+              &:last-child {
+                margin-bottom: 0;
+              }
+              
+              .video-info {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex: 1;
+                
+                .video-details {
+                  .filename {
+                    display: block;
+                    font-size: 14px;
+                    color: var(--ai-text-primary);
+                    margin-bottom: 2px;
+                  }
+                  
+                  .filesize {
+                    font-size: 12px;
+                    color: var(--ai-text-secondary);
+                  }
+                }
+              }
+              
+              .video-actions {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -686,6 +1088,83 @@ onMounted(() => {
           
           .markdown-content {
             line-height: 1.6;
+            margin-bottom: 12px;
+          }
+          
+          .comment-attachments {
+            .attachment-label {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              font-size: 13px;
+              font-weight: 500;
+              color: var(--ai-text-secondary);
+              margin-bottom: 8px;
+              margin-top: 12px;
+            }
+            
+            .comment-images {
+              margin-bottom: 12px;
+              
+              .images-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 8px;
+                max-width: 400px;
+                
+                .comment-image {
+                  width: 120px;
+                  height: 120px;
+                  border-radius: 6px;
+                  border: 1px solid var(--el-border-color-lighter);
+                  cursor: pointer;
+                  transition: transform 0.2s;
+                  
+                  &:hover {
+                    transform: scale(1.05);
+                  }
+                }
+              }
+            }
+            
+            .comment-videos {
+              .videos-list {
+                .video-item {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  padding: 8px 12px;
+                  border: 1px solid var(--el-border-color-lighter);
+                  border-radius: 6px;
+                  margin-bottom: 6px;
+                  background: var(--el-bg-color-page);
+                  
+                  &:last-child {
+                    margin-bottom: 0;
+                  }
+                  
+                  .video-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex: 1;
+                    
+                    .video-details {
+                      .filename {
+                        font-size: 14px;
+                        color: var(--ai-text-primary);
+                        margin-bottom: 2px;
+                      }
+                      
+                      .filesize {
+                        font-size: 12px;
+                        color: var(--ai-text-secondary);
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
         

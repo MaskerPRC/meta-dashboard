@@ -321,7 +321,51 @@
                     <el-table-column prop="content" label="评论内容" min-width="300">
                       <template #default="scope">
                         <div class="comment-content">
-                          {{ scope.row.content }}
+                          <!-- 文本内容 -->
+                          <div v-if="scope.row.content" class="text-content">
+                            {{ scope.row.content }}
+                          </div>
+                          
+                          <!-- 附件显示 -->
+                          <div v-if="hasAttachments(scope.row)" class="attachments-preview">
+                            <!-- 图片附件 -->
+                            <div v-if="scope.row.attachments?.images?.length" class="images-preview">
+                              <div class="attachment-label">
+                                <el-icon><Picture /></el-icon>
+                                图片 ({{ scope.row.attachments.images.length }})
+                              </div>
+                              <div class="images-grid">
+                                <el-image
+                                  v-for="image in scope.row.attachments.images.slice(0, 3)"
+                                  :key="image.id"
+                                  :src="image.url"
+                                  :preview-src-list="scope.row.attachments.images.map(img => img.url)"
+                                  class="preview-image"
+                                  fit="cover"
+                                  preview-teleported
+                                />
+                                <div v-if="scope.row.attachments.images.length > 3" class="more-images">
+                                  +{{ scope.row.attachments.images.length - 3 }}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <!-- 视频附件 -->
+                            <div v-if="scope.row.attachments?.videos?.length" class="videos-preview">
+                              <div class="attachment-label">
+                                <el-icon><VideoPlay /></el-icon>
+                                视频 ({{ scope.row.attachments.videos.length }})
+                              </div>
+                              <div class="videos-list">
+                                <div v-for="video in scope.row.attachments.videos" :key="video.id" class="video-item">
+                                  <el-link :href="video.url" target="_blank" type="primary">
+                                    {{ video.filename }}
+                                  </el-link>
+                                  <span class="file-size">({{ formatFileSize(video.size) }})</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </template>
                     </el-table-column>
@@ -431,7 +475,7 @@ import axios from '../utils/axios'
 import dayjs from 'dayjs'
 import {
   Plus, Document, User, ChatDotSquare, ArrowUp,
-  Search, Download, Delete
+  Search, Download, Delete, Picture, VideoPlay
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -790,6 +834,22 @@ const formatDateTime = (date) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
+// 检查评论是否有附件
+const hasAttachments = (comment) => {
+  if (!comment.attachments) return false
+  return (comment.attachments.images && comment.attachments.images.length > 0) ||
+         (comment.attachments.videos && comment.attachments.videos.length > 0)
+}
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
 // 用户管理相关方法
 const getProviderName = (user) => {
   if (user.password_hash) return '本地账户'
@@ -1145,11 +1205,68 @@ onMounted(async () => {
     
          .comment-content {
        max-width: 300px;
-       display: -webkit-box;
-       -webkit-line-clamp: 3;
-       -webkit-box-orient: vertical;
-       overflow: hidden;
        line-height: 1.5;
+       
+       .text-content {
+         margin-bottom: 8px;
+         display: -webkit-box;
+         -webkit-line-clamp: 3;
+         -webkit-box-orient: vertical;
+         overflow: hidden;
+       }
+       
+       .attachments-preview {
+         .attachment-label {
+           display: flex;
+           align-items: center;
+           gap: 4px;
+           font-size: 12px;
+           color: var(--el-text-color-secondary);
+           margin-bottom: 6px;
+         }
+         
+         .images-preview {
+           margin-bottom: 8px;
+           
+           .images-grid {
+             display: flex;
+             gap: 6px;
+             align-items: center;
+             
+             .preview-image {
+               width: 40px;
+               height: 40px;
+               border-radius: 4px;
+               border: 1px solid var(--el-border-color-lighter);
+             }
+             
+             .more-images {
+               font-size: 12px;
+               color: var(--el-text-color-secondary);
+               background: var(--el-bg-color-page);
+               padding: 2px 6px;
+               border-radius: 4px;
+               border: 1px solid var(--el-border-color-lighter);
+             }
+           }
+         }
+         
+         .videos-preview {
+           .videos-list {
+             .video-item {
+               display: flex;
+               align-items: center;
+               gap: 8px;
+               margin-bottom: 4px;
+               
+               .file-size {
+                 font-size: 12px;
+                 color: var(--el-text-color-secondary);
+               }
+             }
+           }
+         }
+       }
      }
    }
    
