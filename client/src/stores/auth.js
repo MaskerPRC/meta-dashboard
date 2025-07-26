@@ -93,6 +93,16 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = loginUrl;
   }
 
+  // 微信登录
+  const loginWithWechat = (redirectTo = null) => {
+    const baseUrl = (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/wechat';
+    const currentPath = redirectTo || window.location.pathname + window.location.search;
+    const loginUrl = currentPath !== '/login' ? 
+      `${baseUrl}?redirect=${encodeURIComponent(currentPath)}` : 
+      baseUrl;
+    window.location.href = loginUrl;
+  }
+
   return {
     // 状态
     user,
@@ -108,6 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
     getUserInfo,
     logout,
     loginWithGitHub,
-    loginWithGoogle
+    loginWithGoogle,
+    loginWithWechat
   }
 })

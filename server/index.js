@@ -80,6 +80,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/config', require('./routes/config'));
 
 // 静态文件服务（生产环境）
 if (process.env.NODE_ENV === 'production') {

@@ -226,15 +226,26 @@
                       </template>
                     </el-table-column>
                     
-                    <el-table-column prop="username" label="用户名" min-width="150" />
+                    <el-table-column prop="username" label="用户名" min-width="120" />
                     
-                    <el-table-column prop="display_name" label="显示名称" min-width="150" />
+                    <el-table-column prop="display_name" label="显示名称" min-width="120" />
                     
-                    <el-table-column prop="email" label="邮箱" min-width="200" />
+                    <el-table-column prop="email" label="邮箱" min-width="180" />
                     
-                    <el-table-column prop="provider" label="登录方式" width="100">
+                    <el-table-column prop="phone" label="手机号" width="120">
                       <template #default="scope">
-                        <el-tag size="small">{{ scope.row.provider }}</el-tag>
+                        {{ scope.row.phone || '-' }}
+                      </template>
+                    </el-table-column>
+                    
+                    <el-table-column prop="provider" label="认证方式" width="100">
+                      <template #default="scope">
+                        <el-tag 
+                          :type="getProviderTagType(scope.row)" 
+                          size="small"
+                        >
+                          {{ getProviderName(scope.row) }}
+                        </el-tag>
                       </template>
                     </el-table-column>
                     
@@ -248,9 +259,36 @@
                       </template>
                     </el-table-column>
                     
+                    <el-table-column prop="last_login" label="最后登录" width="120">
+                      <template #default="scope">
+                        {{ scope.row.last_login ? formatDateTime(scope.row.last_login) : '-' }}
+                      </template>
+                    </el-table-column>
+                    
                     <el-table-column prop="created_at" label="注册时间" width="120">
                       <template #default="scope">
                         {{ formatDate(scope.row.created_at) }}
+                      </template>
+                    </el-table-column>
+                    
+                    <el-table-column label="操作" width="160">
+                      <template #default="scope">
+                        <el-button 
+                          v-if="isLocalUser(scope.row)"
+                          size="small" 
+                          type="primary"
+                          @click="resetUserPassword(scope.row)"
+                        >
+                          重置密码
+                        </el-button>
+                        <el-button 
+                          size="small" 
+                          type="danger"
+                          @click="deleteUser(scope.row)"
+                          :disabled="scope.row.id === authStore.user?.id"
+                        >
+                          删除
+                        </el-button>
                       </template>
                     </el-table-column>
                   </el-table>
@@ -306,6 +344,66 @@
                       </template>
                     </el-table-column>
                   </el-table>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <!-- 站点配置 -->
+            <el-tab-pane label="站点配置" name="config">
+              <div class="tab-content">
+                <div class="config-section">
+                  <h3 class="config-title">微信群二维码设置</h3>
+                  <div class="config-form">
+                    <el-form label-width="120px">
+                      <el-form-item label="群二维码">
+                        <div class="qr-upload-container">
+                          <el-upload
+                            :show-file-list="false"
+                            :before-upload="beforeQRUpload"
+                            accept="image/*"
+                            :http-request="handleQRUpload"
+                          >
+                            <div class="qr-preview" v-if="siteConfig.wechat_group_qr?.value">
+                              <img :src="siteConfig.wechat_group_qr.value" alt="微信群二维码" />
+                              <div class="qr-mask">
+                                <el-icon><Plus /></el-icon>
+                                <span>更换二维码</span>
+                              </div>
+                            </div>
+                            <div class="qr-placeholder" v-else>
+                              <el-icon><Plus /></el-icon>
+                              <span>上传微信群二维码</span>
+                            </div>
+                          </el-upload>
+                        </div>
+                      </el-form-item>
+                      
+                      <el-form-item label="群标题">
+                        <el-input
+                          v-model="siteConfig.wechat_group_title?.value"
+                          placeholder="请输入微信群标题"
+                          style="width: 300px"
+                          @blur="updateConfig('wechat_group_title', siteConfig.wechat_group_title?.value)"
+                        />
+                      </el-form-item>
+                      
+                      <el-form-item label="群描述">
+                        <el-input
+                          type="textarea"
+                          v-model="siteConfig.wechat_group_description?.value"
+                          placeholder="请输入微信群描述"
+                          :rows="3"
+                          style="width: 400px"
+                          @blur="updateConfig('wechat_group_description', siteConfig.wechat_group_description?.value)"
+                        />
+                      </el-form-item>
+                      
+                      <el-form-item>
+                        <el-button type="primary" @click="saveAllConfigs">保存所有配置</el-button>
+                        <el-button @click="loadSiteConfig">重置</el-button>
+                      </el-form-item>
+                    </el-form>
+                  </div>
                 </div>
               </div>
             </el-tab-pane>
@@ -369,6 +467,10 @@ const isLoadingUsers = ref(false) // 标记是否正在加载用户数据
 // 评论管理
 const comments = ref([])
 const commentsLoading = ref(false)
+
+// 站点配置管理
+const siteConfig = ref({})
+const configLoading = ref(false)
 
 // 计算属性
 const filteredProjects = computed(() => {
@@ -688,6 +790,169 @@ const formatDateTime = (date) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
+// 用户管理相关方法
+const getProviderName = (user) => {
+  if (user.password_hash) return '本地账户'
+  if (user.github_id) return 'GitHub'
+  if (user.google_id) return 'Google'
+  if (user.wechat_id) return '微信'
+  return '未知'
+}
+
+const getProviderTagType = (user) => {
+  if (user.password_hash) return ''
+  if (user.github_id) return 'success'
+  if (user.google_id) return 'warning'
+  if (user.wechat_id) return 'success'
+  return 'info'
+}
+
+const isLocalUser = (user) => {
+  return Boolean(user.password_hash)
+}
+
+const resetUserPassword = async (user) => {
+  try {
+    await ElMessageBox.prompt(
+      '请输入新密码（至少6位）：',
+      `重置用户 ${user.username} 的密码`,
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputType: 'password',
+        inputValidator: (value) => {
+          if (!value || value.length < 6) {
+            return '密码长度至少6位'
+          }
+          return true
+        }
+      }
+    )
+    .then(async ({ value }) => {
+      await axios.put(`/api/admin/users/${user.id}/password`, {
+        new_password: value
+      })
+      ElMessage.success('密码重置成功')
+    })
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('重置密码失败:', error)
+      ElMessage.error(error.response?.data?.message || '重置密码失败')
+    }
+  }
+}
+
+const deleteUser = async (user) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除用户 "${user.username}" 吗？此操作不可恢复。`,
+      '删除用户',
+      {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+        confirmButtonClass: 'el-button--danger'
+      }
+    )
+    
+    await axios.delete(`/api/admin/users/${user.id}`)
+    
+    // 从列表中移除用户
+    const index = users.value.findIndex(u => u.id === user.id)
+    if (index !== -1) {
+      users.value.splice(index, 1)
+    }
+    
+    ElMessage.success('用户删除成功')
+    await fetchStats()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除用户失败:', error)
+      ElMessage.error(error.response?.data?.message || '删除用户失败')
+    }
+  }
+}
+
+// 站点配置相关方法
+const loadSiteConfig = async () => {
+  try {
+    configLoading.value = true
+    const response = await axios.get('/api/config')
+    siteConfig.value = response.data.configs
+  } catch (error) {
+    console.error('获取站点配置失败:', error)
+    ElMessage.error('获取站点配置失败')
+  } finally {
+    configLoading.value = false
+  }
+}
+
+const updateConfig = async (key, value) => {
+  try {
+    await axios.put(`/api/config/${key}`, { value })
+    ElMessage.success('配置更新成功')
+  } catch (error) {
+    console.error('更新配置失败:', error)
+    ElMessage.error('更新配置失败')
+    // 重新加载配置以恢复原值
+    loadSiteConfig()
+  }
+}
+
+const saveAllConfigs = async () => {
+  try {
+    const configs = {}
+    Object.keys(siteConfig.value).forEach(key => {
+      configs[key] = siteConfig.value[key].value
+    })
+    
+    await axios.put('/api/config', { configs })
+    ElMessage.success('所有配置保存成功')
+  } catch (error) {
+    console.error('保存配置失败:', error)
+    ElMessage.error('保存配置失败')
+  }
+}
+
+const beforeQRUpload = (file) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt5M = file.size / 1024 / 1024 < 5
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt5M) {
+    ElMessage.error('图片大小不能超过 5MB!')
+    return false
+  }
+  return true
+}
+
+const handleQRUpload = async (uploadFile) => {
+  const formData = new FormData()
+  formData.append('image', uploadFile.file)
+  
+  try {
+    // 这里应该调用图片上传API，暂时使用base64
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const base64Data = e.target.result
+      await updateConfig('wechat_group_qr', base64Data)
+      // 更新本地状态
+      if (!siteConfig.value.wechat_group_qr) {
+        siteConfig.value.wechat_group_qr = {}
+      }
+      siteConfig.value.wechat_group_qr.value = base64Data
+      ElMessage.success('二维码上传成功')
+    }
+    reader.readAsDataURL(uploadFile.file)
+  } catch (error) {
+    console.error('上传二维码失败:', error)
+    ElMessage.error('上传二维码失败')
+  }
+}
+
 // 生命周期
 onMounted(async () => {
   // 获取数据
@@ -695,7 +960,8 @@ onMounted(async () => {
     fetchStats(),
     fetchProjects(),
     fetchUsers(),
-    fetchComments()
+    fetchComments(),
+    loadSiteConfig()
   ])
   
   // 检查是否有编辑项目的查询参数
@@ -877,14 +1143,103 @@ onMounted(async () => {
       }
     }
     
-    .comment-content {
-      max-width: 300px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.5;
-    }
-  }
-}
+         .comment-content {
+       max-width: 300px;
+       display: -webkit-box;
+       -webkit-line-clamp: 3;
+       -webkit-box-orient: vertical;
+       overflow: hidden;
+       line-height: 1.5;
+     }
+   }
+   
+   // 站点配置样式
+   .config-section {
+     .config-title {
+       font-size: 1.25rem;
+       font-weight: 600;
+       color: var(--ai-text-primary);
+       margin-bottom: 24px;
+       padding-bottom: 12px;
+       border-bottom: 1px solid var(--ai-border);
+     }
+     
+     .config-form {
+       .qr-upload-container {
+         .qr-preview,
+         .qr-placeholder {
+           width: 200px;
+           height: 200px;
+           border: 2px dashed var(--ai-border);
+           border-radius: 8px;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           justify-content: center;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           position: relative;
+           overflow: hidden;
+           
+           &:hover {
+             border-color: var(--ai-primary);
+             background: var(--ai-bg-secondary);
+           }
+         }
+         
+         .qr-preview {
+           border-style: solid;
+           
+           img {
+             width: 100%;
+             height: 100%;
+             object-fit: cover;
+           }
+           
+           .qr-mask {
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             background: rgba(0, 0, 0, 0.6);
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             justify-content: center;
+             color: white;
+             opacity: 0;
+             transition: opacity 0.3s ease;
+             
+             &:hover {
+               opacity: 1;
+             }
+             
+             .el-icon {
+               font-size: 24px;
+               margin-bottom: 8px;
+             }
+             
+             span {
+               font-size: 14px;
+             }
+           }
+         }
+         
+         .qr-placeholder {
+           color: var(--ai-text-secondary);
+           
+           .el-icon {
+             font-size: 32px;
+             margin-bottom: 12px;
+           }
+           
+           span {
+             font-size: 14px;
+           }
+         }
+       }
+     }
+   }
+ }
 </style> 

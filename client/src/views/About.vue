@@ -278,6 +278,37 @@
         </div>
       </section>
 
+      <!-- 微信群二维码 -->
+      <section class="wechat-group-section" v-if="wechatGroupConfig.qr">
+        <div class="wechat-group-card ai-card">
+          <h2 class="wechat-group-title">{{ wechatGroupConfig.title }}</h2>
+          <p class="wechat-group-description">
+            {{ wechatGroupConfig.description }}
+          </p>
+          
+          <div class="qr-container">
+            <div class="qr-image-wrapper">
+              <img 
+                :src="wechatGroupConfig.qr" 
+                alt="微信群二维码" 
+                class="qr-image"
+              />
+              <div class="qr-overlay">
+                <el-icon class="qr-icon"><ChatDotSquare /></el-icon>
+                <span class="qr-hint">扫码加群</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="wechat-group-tips">
+            <p class="tip-text">
+              <el-icon><ChatDotSquare /></el-icon>
+              扫描上方二维码，或长按保存到相册后用微信扫一扫
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- 底部宣言 -->
       <section class="manifesto-section">
         <div class="manifesto-content">
@@ -296,12 +327,20 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useProjectsStore } from '../stores/projects'
+import axios from '../utils/axios'
 import {
   Cpu, ArrowUp, Connection, Monitor, Platform, Upload,
   ChatDotSquare, Share, Trophy, Message, Link, View, Phone
 } from '@element-plus/icons-vue'
 
 const projectsStore = useProjectsStore()
+
+// 微信群配置
+const wechatGroupConfig = ref({
+  qr: '',
+  title: '加入微信交流群',
+  description: '扫描二维码加入我们的微信交流群，与其他开发者一起讨论AI项目'
+})
 
 // 技术栈数据
 const aiTools = ref([
@@ -352,9 +391,32 @@ const callPhone = () => {
   ElMessage.success('正在启动拨号功能...')
 }
 
+// 加载微信群配置
+const loadWechatGroupConfig = async () => {
+  try {
+    const response = await axios.get('/api/config')
+    const configs = response.data.configs
+    
+    if (configs.wechat_group_qr?.value) {
+      wechatGroupConfig.value.qr = configs.wechat_group_qr.value
+    }
+    if (configs.wechat_group_title?.value) {
+      wechatGroupConfig.value.title = configs.wechat_group_title.value
+    }
+    if (configs.wechat_group_description?.value) {
+      wechatGroupConfig.value.description = configs.wechat_group_description.value
+    }
+  } catch (error) {
+    console.error('获取微信群配置失败:', error)
+    // 静默失败，不显示错误信息给用户
+  }
+}
+
 onMounted(() => {
   // 获取项目统计数据
   projectsStore.fetchProjects({ limit: 100 })
+  // 加载微信群配置
+  loadWechatGroupConfig()
 })
 </script>
 
@@ -670,6 +732,102 @@ onMounted(() => {
         gap: 16px;
         justify-content: center;
         flex-wrap: wrap;
+      }
+    }
+  }
+
+  .wechat-group-section {
+    .wechat-group-card {
+      padding: 40px;
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+
+      .wechat-group-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 16px;
+        color: var(--ai-text-primary);
+      }
+
+      .wechat-group-description {
+        font-size: 1rem;
+        color: var(--ai-text-secondary);
+        margin: 0 0 32px;
+        line-height: 1.6;
+      }
+
+      .qr-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+
+        .qr-image-wrapper {
+          position: relative;
+          width: 200px;
+          height: 200px;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+
+            .qr-overlay {
+              opacity: 1;
+            }
+          }
+
+          .qr-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .qr-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+
+            .qr-icon {
+              font-size: 32px;
+              margin-bottom: 8px;
+            }
+
+            .qr-hint {
+              font-size: 14px;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+
+      .wechat-group-tips {
+        .tip-text {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          color: var(--ai-text-secondary);
+          font-size: 0.875rem;
+          margin: 0;
+
+          .el-icon {
+            color: #07c160;
+          }
+        }
       }
     }
   }

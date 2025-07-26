@@ -72,7 +72,8 @@ router.get('/users', requireAdmin, (req, res) => {
   let sql = `
     SELECT 
       id, username, email, display_name, avatar_url, 
-      is_admin, created_at, github_id, google_id,
+      is_admin, created_at, last_login, phone,
+      github_id, google_id, wechat_id, password_hash,
       (SELECT COUNT(*) FROM comments WHERE user_id = users.id) as comment_count
     FROM users
     WHERE 1=1
@@ -121,15 +122,19 @@ router.get('/users', requireAdmin, (req, res) => {
           provider = 'github';
         } else if (user.google_id) {
           provider = 'google';
+        } else if (user.wechat_id) {
+          provider = 'wechat';
         }
         
         return {
           ...user,
           provider,
           is_admin: Boolean(user.is_admin), // 转换为布尔值
-          // 移除敏感ID字段
-          github_id: undefined,
-          google_id: undefined
+          // 保留ID字段用于前端判断认证方式，但不暴露敏感信息
+          github_id: user.github_id ? true : null,
+          google_id: user.google_id ? true : null,
+          wechat_id: user.wechat_id ? true : null,
+          password_hash: user.password_hash ? true : null, // 只返回是否有密码的布尔值
         };
       });
       
@@ -320,6 +325,100 @@ router.get('/export/projects', requireAdmin, (req, res) => {
         tech_stack: project.tech_stack ? project.tech_stack.split(',') : [],
         tags: project.tags ? project.tags.split(',') : []
       }))
+    });
+  });
+});
+
+// 重置用户密码
+router.put('/users/:id/password', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { new_password } = req.body;
+  
+  if (!new_password || new_password.length < 6) {
+    return res.status(400).json({ message: '密码长度至少6位' });
+  }
+  
+  // 获取用户信息确认用户存在
+  db.get('SELECT id, username FROM users WHERE id = ?', [id], (err, user) => {
+    if (err) {
+      console.error('查询用户错误:', err);
+      return res.status(500).json({ message: '查询用户失败' });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+    
+    // 生成新的盐值和密码哈希
+    const bcrypt = require('bcryptjs');
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(new_password + salt, 10);
+    
+    db.run(
+      'UPDATE users SET password_hash = ?, salt = ? WHERE id = ?',
+      [hash, salt, id],
+      function(updateErr) {
+        if (updateErr) {
+          console.error('更新密码错误:', updateErr);
+          return res.status(500).json({ message: '更新密码失败' });
+        }
+        
+        res.json({ message: `用户 ${user.username} 的密码重置成功` });
+      }
+    );
+  });
+});
+
+// 删除用户
+router.delete('/users/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  
+  // 不能删除自己
+  if (parseInt(id) === req.user.id) {
+    return res.status(400).json({ message: '不能删除自己的账户' });
+  }
+  
+  // 检查用户是否存在
+  db.get('SELECT username FROM users WHERE id = ?', [id], (err, user) => {
+    if (err) {
+      console.error('查询用户错误:', err);
+      return res.status(500).json({ message: '查询用户失败' });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+    
+    // 开始事务，删除用户及其相关数据
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      
+      // 删除用户的评论
+      db.run('DELETE FROM comments WHERE user_id = ?', [id], (commentErr) => {
+        if (commentErr) {
+          console.error('删除用户评论错误:', commentErr);
+          db.run('ROLLBACK');
+          return res.status(500).json({ message: '删除用户评论失败' });
+        }
+        
+        // 删除用户
+        db.run('DELETE FROM users WHERE id = ?', [id], function(userErr) {
+          if (userErr) {
+            console.error('删除用户错误:', userErr);
+            db.run('ROLLBACK');
+            return res.status(500).json({ message: '删除用户失败' });
+          }
+          
+          db.run('COMMIT', (commitErr) => {
+            if (commitErr) {
+              console.error('提交事务错误:', commitErr);
+              return res.status(500).json({ message: '删除操作失败' });
+            }
+            
+            res.json({ message: `用户 ${user.username} 删除成功` });
+          });
+        });
+      });
     });
   });
 });

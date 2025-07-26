@@ -11,10 +11,20 @@
     "start": "cd server && npm start",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
-  "keywords": ["ai", "dashboard", "kanban", "vue", "nodejs", "projects"],
+  "keywords": [
+    "ai",
+    "dashboard",
+    "kanban",
+    "vue",
+    "nodejs",
+    "projects"
+  ],
   "author": "AI产品挑战者",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.11.0"
   }
-} 
+}
