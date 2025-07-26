@@ -6,7 +6,7 @@
         <div class="header-left">
           <router-link to="/" class="logo-section">
             <div class="logo-icon">
-              <el-icon size="32"><Cpu /></el-icon>
+              <img src="/logo.png" alt="AI项目看板" class="logo-image" />
             </div>
             <div class="logo-text">
               <h1 class="title">AI项目看板</h1>
@@ -155,7 +155,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { 
-  Cpu, House, List, InfoFilled, User, ArrowDown, 
+  House, List, InfoFilled, User, ArrowDown, 
   Setting, SwitchButton, Moon, Sunny, Menu, Close
 } from '@element-plus/icons-vue'
 
@@ -254,9 +254,14 @@ onMounted(() => {
         justify-content: center;
         width: 48px;
         height: 48px;
-        background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
         border-radius: 12px;
-        color: white;
+        overflow: hidden;
+        
+        .logo-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
       }
       
       .logo-text {
