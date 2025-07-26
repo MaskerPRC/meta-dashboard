@@ -64,11 +64,16 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
   // 设置页面标题
   document.title = to.meta.title ? `${to.meta.title} - AI项目看板` : 'AI项目看板'
+  
+  // 如果还没有检查过身份验证状态，先检查
+  if (!authStore.hasCheckedAuth) {
+    await authStore.checkAuthStatus()
+  }
   
   // 检查是否需要登录
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

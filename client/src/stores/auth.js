@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 状态
   const user = ref(null)
   const loading = ref(false)
+  const hasCheckedAuth = ref(false) // 添加标记，记录是否已经检查过身份验证状态
 
   // 计算属性
   const isAuthenticated = computed(() => !!user.value)
@@ -14,18 +15,29 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查登录状态
   const checkAuthStatus = async () => {
+    // 如果已经检查过且有用户信息，直接返回
+    if (hasCheckedAuth.value && user.value) {
+      return user.value
+    }
+    
     try {
       loading.value = true
       const response = await axios.get('/api/auth/status')
       if (response.data.isAuthenticated) {
         user.value = response.data.user
+      } else {
+        user.value = null
       }
+      hasCheckedAuth.value = true
+      return user.value
     } catch (error) {
       console.error('检查登录状态失败:', error)
       user.value = null
+      hasCheckedAuth.value = true
     } finally {
       loading.value = false
     }
+    return user.value
   }
 
   // 获取用户信息
@@ -49,6 +61,7 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       await axios.post('/api/auth/logout')
       user.value = null
+      hasCheckedAuth.value = false // 重置检查状态，确保下次重新检查
       ElMessage.success('登出成功')
       // 刷新页面回到首页
       window.location.href = '/'
@@ -84,6 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
     // 状态
     user,
     loading,
+    hasCheckedAuth,
 
     // 计算属性
     isAuthenticated,

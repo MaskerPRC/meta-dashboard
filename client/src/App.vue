@@ -20,15 +20,7 @@
 <script setup>
 import Header from './components/layout/Header.vue'
 import Notifications from './components/common/Notifications.vue'
-import { onMounted } from 'vue'
-import { useAuthStore } from './stores/auth'
-
-const authStore = useAuthStore()
-
-onMounted(() => {
-  // 检查登录状态
-  authStore.checkAuthStatus()
-})
+// 移除不需要的导入和逻辑，因为路由守卫已经处理了身份验证检查
 </script>
 
 <style lang="scss">
