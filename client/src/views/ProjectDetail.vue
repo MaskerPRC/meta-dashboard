@@ -44,18 +44,45 @@
               <span class="meta-label">更新时间：</span>
               <span class="meta-value">{{ formatDate(project.updated_at) }}</span>
             </div>
-            <div v-if="project.github_url" class="meta-item">
-              <span class="meta-label">GitHub：</span>
-              <el-link :href="project.github_url" target="_blank" type="primary">
-                查看源码
-              </el-link>
-            </div>
-            <div v-if="project.demo_url" class="meta-item">
-              <span class="meta-label">演示地址：</span>
-              <el-link :href="project.demo_url" target="_blank" type="primary">
-                在线体验
-              </el-link>
-            </div>
+          </div>
+
+          <!-- 项目链接 -->
+          <div v-if="project.github_repo || project.demo_url" class="project-links">
+            <a 
+              v-if="project.github_repo" 
+              :href="project.github_repo" 
+              target="_blank" 
+              class="link-card github-link"
+            >
+              <div class="link-icon">
+                <el-icon><Link /></el-icon>
+              </div>
+              <div class="link-content">
+                <div class="link-title">GitHub 仓库</div>
+                <div class="link-desc">查看源代码</div>
+              </div>
+              <div class="link-arrow">
+                <el-icon><ArrowRight /></el-icon>
+              </div>
+            </a>
+
+            <a 
+              v-if="project.demo_url" 
+              :href="project.demo_url" 
+              target="_blank" 
+              class="link-card demo-link"
+            >
+              <div class="link-icon">
+                <el-icon><View /></el-icon>
+              </div>
+              <div class="link-content">
+                <div class="link-title">在线演示</div>
+                <div class="link-desc">体验项目效果</div>
+              </div>
+              <div class="link-arrow">
+                <el-icon><ArrowRight /></el-icon>
+              </div>
+            </a>
           </div>
 
           <!-- 技术栈 -->
@@ -120,7 +147,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Edit, Delete } from '@element-plus/icons-vue'
+import { ArrowLeft, Edit, Delete, Link, View, ArrowRight } from '@element-plus/icons-vue'
 import { marked } from 'marked'
 import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
@@ -303,6 +330,172 @@ onMounted(async () => {
 
         .meta-value {
           color: var(--el-text-color-primary);
+        }
+      }
+    }
+
+    .project-links {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .link-card {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 10px;
+          padding: 2px;
+          background: linear-gradient(135deg, transparent, transparent);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: exclude;
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask-composite: exclude;
+          transition: all 0.3s ease;
+        }
+
+        .link-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          margin-right: 16px;
+          font-size: 20px;
+          transition: all 0.3s ease;
+        }
+
+        .link-content {
+          flex: 1;
+
+          .link-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+          }
+
+          .link-desc {
+            font-size: 14px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+          }
+        }
+
+        .link-arrow {
+          display: flex;
+          align-items: center;
+          font-size: 16px;
+          opacity: 0.6;
+          transform: translateX(-8px);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        &.github-link {
+          background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
+          border-color: #e1e4e8;
+
+          &::before {
+            background: linear-gradient(135deg, #24292e, #6f42c1);
+          }
+
+          .link-icon {
+            background: linear-gradient(135deg, #24292e, #6f42c1);
+            color: white;
+          }
+
+          .link-title {
+            color: #24292e;
+          }
+
+          .link-desc {
+            color: #586069;
+          }
+
+          .link-arrow {
+            color: #24292e;
+          }
+
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(36, 41, 46, 0.15);
+            border-color: #24292e;
+
+            &::before {
+              background: linear-gradient(135deg, #24292e, #6f42c1);
+            }
+
+            .link-icon {
+              transform: scale(1.1);
+              box-shadow: 0 8px 24px rgba(36, 41, 46, 0.3);
+            }
+
+            .link-arrow {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+        }
+
+        &.demo-link {
+          background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+          border-color: #fed7d7;
+
+          &::before {
+            background: linear-gradient(135deg, #e53e3e, #d69e2e);
+          }
+
+          .link-icon {
+            background: linear-gradient(135deg, #e53e3e, #d69e2e);
+            color: white;
+          }
+
+          .link-title {
+            color: #c53030;
+          }
+
+          .link-desc {
+            color: #a0aec0;
+          }
+
+          .link-arrow {
+            color: #c53030;
+          }
+
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(229, 62, 62, 0.15);
+            border-color: #e53e3e;
+
+            &::before {
+              background: linear-gradient(135deg, #e53e3e, #d69e2e);
+            }
+
+            .link-icon {
+              transform: scale(1.1);
+              box-shadow: 0 8px 24px rgba(229, 62, 62, 0.3);
+            }
+
+            .link-arrow {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
         }
       }
     }
@@ -521,6 +714,29 @@ onMounted(async () => {
 
       .project-meta {
         grid-template-columns: 1fr;
+      }
+
+      .project-links {
+        flex-direction: column;
+
+        .link-card {
+          .link-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+            font-size: 18px;
+          }
+
+          .link-content {
+            .link-title {
+              font-size: 15px;
+            }
+
+            .link-desc {
+              font-size: 13px;
+            }
+          }
+        }
       }
 
       .admin-actions {
