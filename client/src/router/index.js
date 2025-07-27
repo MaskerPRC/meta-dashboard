@@ -22,6 +22,18 @@ const routes = [
     meta: { title: '项目详情' }
   },
   {
+    path: '/project/:id/history',
+    name: 'ProjectHistory',
+    component: () => import('../views/ProjectHistory.vue'),
+    meta: { title: '项目进展历史' }
+  },
+  {
+    path: '/global-history',
+    name: 'GlobalHistory',
+    component: () => import('../views/GlobalHistory.vue'),
+    meta: { title: '全局项目进展' }
+  },
+  {
     path: '/admin',
     name: 'Admin',
     component: () => import('../views/Admin.vue'),

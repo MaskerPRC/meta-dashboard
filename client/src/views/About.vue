@@ -4,20 +4,20 @@
       <!-- 英雄区域 -->
       <section class="hero-section">
         <div class="hero-content">
-                     <h1 class="hero-title">一年100个AI产品挑战</h1>
-          <p class="hero-subtitle">把梦想落在键盘上，用代码书写AI时代的个人传奇</p>
+                     <h1 class="hero-title">{{ $t('about.title') }}</h1>
+          <p class="hero-subtitle">{{ $t('about.subtitle') }}</p>
           <div class="hero-stats">
             <div class="stat-card">
               <div class="stat-number">{{ projectsStore.projects.length || 0 }}</div>
-              <div class="stat-label">已启动项目</div>
+              <div class="stat-label">{{ $t('about.stats.launched_projects') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-number">{{ projectsStore.totalProgress || 0 }}%</div>
-              <div class="stat-label">平均进度</div>
+              <div class="stat-label">{{ $t('about.stats.average_progress') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-number">{{ projectsStore.statusCounts.completed || 0 }}</div>
-              <div class="stat-label">已完成项目</div>
+              <div class="stat-label">{{ $t('about.stats.completed_projects') }}</div>
             </div>
           </div>
         </div>
@@ -26,8 +26,8 @@
       <!-- 挑战介绍 -->
       <section class="introduction-section">
         <div class="section-header">
-          <h2 class="section-title">关于这个挑战</h2>
-          <p class="section-subtitle">为什么要在2025年做100个AI产品？</p>
+          <h2 class="section-title">{{ $t('about.challenge_info.title') }}</h2>
+          <p class="section-subtitle">{{ $t('about.challenge_info.why_title') }}</p>
         </div>
 
         <div class="intro-content">
@@ -35,10 +35,9 @@
             <div class="card-icon">
               <el-icon size="48"><Cpu /></el-icon>
             </div>
-            <h3 class="card-title">技术红利时代</h3>
+            <h3 class="card-title">{{ $t('about.challenge_info.tech_dividend.title') }}</h3>
             <p class="card-description">
-              LLM的普及正在带来"软件的超级高产时代"。个人开发者甚至非技术人员都能快速产出大量软件，
-              深入各行各业，解决过去工程界久攻不下的问题。
+              {{ $t('about.challenge_info.tech_dividend.content') }}
             </p>
           </div>
 
@@ -46,10 +45,9 @@
              <div class="card-icon">
                <el-icon size="48"><ArrowUp /></el-icon>
              </div>
-            <h3 class="card-title">个人能力突破</h3>
+            <h3 class="card-title">{{ $t('about.challenge_info.personal_breakthrough.title') }}</h3>
             <p class="card-description">
-              通过持续的产品开发实践，验证AI工具的真实能力，积累从想法到产品的完整经验，
-              在AI让我们"真正只做想做的事"之前，先做一件足够挑战自己的事。
+              {{ $t('about.challenge_info.personal_breakthrough.content') }}
             </p>
           </div>
 
@@ -57,10 +55,9 @@
             <div class="card-icon">
               <el-icon size="48"><Connection /></el-icon>
             </div>
-            <h3 class="card-title">透明分享</h3>
+            <h3 class="card-title">{{ $t('about.challenge_info.transparent_sharing.title') }}</h3>
             <p class="card-description">
-              记录每一个产品的构思、开发、上线和反馈过程，分享做产品的经验、踩过的坑、复盘思考，
-              为其他AI产品开发者提供参考。
+              {{ $t('about.challenge_info.transparent_sharing.content') }}
             </p>
           </div>
         </div>
@@ -69,56 +66,56 @@
       <!-- 挑战规则 -->
       <section class="rules-section">
         <div class="section-header">
-          <h2 class="section-title">挑战规则</h2>
-          <p class="section-subtitle">明确的目标和标准，确保挑战的可执行性</p>
+          <h2 class="section-title">{{ $t('about.challenge_rules.title') }}</h2>
+          <p class="section-subtitle">{{ $t('about.challenge_rules.subtitle') }}</p>
         </div>
 
         <div class="rules-grid">
           <div class="rule-item ai-card">
             <div class="rule-number">01</div>
-            <h3 class="rule-title">目标数量</h3>
+            <h3 class="rule-title">{{ $t('about.challenge_rules.target_quantity.title') }}</h3>
             <p class="rule-description">
-              2025年发布100个可用的AI产品（平均约3.6天/个）
+              {{ $t('about.challenge_rules.target_quantity.content') }}
             </p>
           </div>
 
           <div class="rule-item ai-card">
             <div class="rule-number">02</div>
-            <h3 class="rule-title">判定标准</h3>
+            <h3 class="rule-title">{{ $t('about.challenge_rules.criteria.title') }}</h3>
             <p class="rule-description">
-              能被真实用户使用（哪怕是极小众），有清晰功能与价值
+              {{ $t('about.challenge_rules.criteria.content') }}
             </p>
           </div>
 
           <div class="rule-item ai-card">
             <div class="rule-number">03</div>
-            <h3 class="rule-title">过程透明</h3>
+            <h3 class="rule-title">{{ $t('about.challenge_rules.transparency.title') }}</h3>
             <p class="rule-description">
-              每款产品的灵感、开发记录、上线情况、数据反馈都会公开
+              {{ $t('about.challenge_rules.transparency.content') }}
             </p>
           </div>
 
           <div class="rule-item ai-card">
             <div class="rule-number">04</div>
-            <h3 class="rule-title">工具栈</h3>
+            <h3 class="rule-title">{{ $t('about.challenge_rules.toolstack.title') }}</h3>
             <p class="rule-description">
-              主力使用LLM辅助开发（Cursor、Claude等），加速从想法到上线
+              {{ $t('about.challenge_rules.toolstack.content') }}
             </p>
           </div>
 
           <div class="rule-item ai-card">
             <div class="rule-number">05</div>
-            <h3 class="rule-title">允许迭代</h3>
+            <h3 class="rule-title">{{ $t('about.challenge_rules.iteration.title') }}</h3>
             <p class="rule-description">
-              每个产品上线后可继续优化，但不影响下一个产品的推进
+              {{ $t('about.challenge_rules.iteration.content') }}
             </p>
           </div>
 
           <div class="rule-item ai-card">
             <div class="rule-number">06</div>
-            <h3 class="rule-title">复盘节奏</h3>
+            <h3 class="rule-title">{{ $t('about.challenge_rules.review_rhythm.title') }}</h3>
             <p class="rule-description">
-              每完成10个产品，做一次阶段复盘，调整方向和策略
+              {{ $t('about.challenge_rules.review_rhythm.content') }}
             </p>
           </div>
         </div>
@@ -127,18 +124,18 @@
       <!-- 技术选择 -->
       <section class="tech-section">
         <div class="section-header">
-          <h2 class="section-title">技术工具栈</h2>
-          <p class="section-subtitle">充分利用AI工具提升开发效率</p>
+          <h2 class="section-title">{{ $t('about.tech_stack.title') }}</h2>
+          <p class="section-subtitle">{{ $t('about.tech_stack.subtitle') }}</p>
         </div>
 
         <div class="tech-categories">
           <div class="tech-category ai-card">
             <h3 class="category-title">
               <el-icon><Cpu /></el-icon>
-              AI开发工具
+              {{ $t('about.tech_stack.ai_tools.title') }}
             </h3>
             <div class="tech-list">
-              <el-tag v-for="tool in aiTools" :key="tool" class="tech-tag">
+              <el-tag v-for="tool in techStack.ai_tools" :key="tool" class="tech-tag">
                 {{ tool }}
               </el-tag>
             </div>
@@ -147,10 +144,10 @@
           <div class="tech-category ai-card">
             <h3 class="category-title">
               <el-icon><Monitor /></el-icon>
-              前端技术
+              {{ $t('about.tech_stack.frontend.title') }}
             </h3>
             <div class="tech-list">
-              <el-tag v-for="tech in frontendTech" :key="tech" class="tech-tag">
+              <el-tag v-for="tech in techStack.frontend" :key="tech" class="tech-tag">
                 {{ tech }}
               </el-tag>
             </div>
@@ -159,10 +156,10 @@
           <div class="tech-category ai-card">
             <h3 class="category-title">
               <el-icon><Platform /></el-icon>
-              后端技术
+              {{ $t('about.tech_stack.backend.title') }}
             </h3>
             <div class="tech-list">
-              <el-tag v-for="tech in backendTech" :key="tech" class="tech-tag">
+              <el-tag v-for="tech in techStack.backend" :key="tech" class="tech-tag">
                 {{ tech }}
               </el-tag>
             </div>
@@ -171,10 +168,10 @@
           <div class="tech-category ai-card">
             <h3 class="category-title">
               <el-icon><Upload /></el-icon>
-              部署平台
+              {{ $t('about.tech_stack.deployment.title') }}
             </h3>
             <div class="tech-list">
-              <el-tag v-for="platform in deployPlatforms" :key="platform" class="tech-tag">
+              <el-tag v-for="platform in techStack.deployment" :key="platform" class="tech-tag">
                 {{ platform }}
               </el-tag>
             </div>
@@ -185,8 +182,8 @@
       <!-- 参与方式 -->
       <section class="participation-section">
         <div class="section-header">
-          <h2 class="section-title">如何参与</h2>
-          <p class="section-subtitle">欢迎以各种方式参与这个挑战</p>
+          <h2 class="section-title">{{ $t('about.how_to_participate.title') }}</h2>
+          <p class="section-subtitle">{{ $t('about.how_to_participate.subtitle') }}</p>
         </div>
 
         <div class="participation-grid">
@@ -194,9 +191,9 @@
             <div class="card-icon">
               <el-icon size="40"><ChatDotSquare /></el-icon>
             </div>
-            <h3 class="card-title">反馈产品</h3>
+            <h3 class="card-title">{{ $t('about.how_to_participate.feedback.title') }}</h3>
             <p class="card-description">
-              试用我的产品，告诉我你的感受和建议，帮助我改进产品质量。
+              {{ $t('about.how_to_participate.feedback.content') }}
             </p>
           </div>
 
@@ -204,9 +201,9 @@
             <div class="card-icon">
               <el-icon size="40"><Share /></el-icon>
             </div>
-            <h3 class="card-title">交流想法</h3>
+            <h3 class="card-title">{{ $t('about.how_to_participate.exchange.title') }}</h3>
             <p class="card-description">
-              如果你也在做类似的事，欢迎互相借鉴，分享经验和资源。
+              {{ $t('about.how_to_participate.exchange.content') }}
             </p>
           </div>
 
@@ -214,9 +211,9 @@
             <div class="card-icon">
               <el-icon size="40"><Connection /></el-icon>
             </div>
-            <h3 class="card-title">资源合作</h3>
+            <h3 class="card-title">{{ $t('about.how_to_participate.cooperation.title') }}</h3>
             <p class="card-description">
-              如果你有需求、数据、渠道等资源，欢迎对接探讨合作机会。
+              {{ $t('about.how_to_participate.cooperation.content') }}
             </p>
           </div>
 
@@ -224,9 +221,9 @@
             <div class="card-icon">
               <el-icon size="40"><Trophy /></el-icon>
             </div>
-            <h3 class="card-title">纯粹鼓励</h3>
+            <h3 class="card-title">{{ $t('about.how_to_participate.encouragement.title') }}</h3>
             <p class="card-description">
-              一句"加油"，也是燃料。你的关注和支持是我前进的动力。
+              {{ $t('about.how_to_participate.encouragement.content') }}
             </p>
           </div>
         </div>
@@ -235,43 +232,43 @@
       <!-- 联系方式 -->
       <section class="contact-section">
         <div class="contact-card ai-card">
-          <h2 class="contact-title">联系我</h2>
+          <h2 class="contact-title">{{ $t('about.contact.title') }}</h2>
           <p class="contact-description">
-            有任何想法、建议或合作意向，欢迎随时联系
+            {{ $t('about.contact.subtitle') }}
           </p>
 
           <div class="contact-methods">
             <div class="contact-item interactive" @click="openEmail">
               <el-icon><Message /></el-icon>
-              <span>邮箱：maskerprc@gmail.com</span>
-              <el-tag size="small" class="action-hint">点击发邮件</el-tag>
+              <span>{{ $t('about.contact.email') }}：maskerprc@gmail.com</span>
+              <el-tag size="small" class="action-hint">{{ $t('about.contact.click_email') }}</el-tag>
             </div>
             <div class="contact-item interactive" @click="openGithub">
               <el-icon><Link /></el-icon>
-              <span>GitHub：https://github.com/MaskerPRC</span>
-              <el-tag size="small" class="action-hint">点击访问</el-tag>
+              <span>{{ $t('about.contact.github') }}：https://github.com/MaskerPRC</span>
+              <el-tag size="small" class="action-hint">{{ $t('about.contact.click_visit') }}</el-tag>
             </div>
             <div class="contact-item interactive" @click="copyWechat">
               <el-icon><ChatDotSquare /></el-icon>
-              <span>微信：QQTommer</span>
-              <el-tag size="small" class="action-hint">点击复制</el-tag>
+              <span>{{ $t('about.contact.wechat') }}：QQTommer</span>
+              <el-tag size="small" class="action-hint">{{ $t('about.contact.click_copy') }}</el-tag>
             </div>
             <div class="contact-item interactive" @click="callPhone">
               <el-icon><Phone /></el-icon>
-              <span>手机：13022898959</span>
-              <el-tag size="small" class="action-hint">点击拨打</el-tag>
+              <span>{{ $t('about.contact.phone') }}：13022898959</span>
+              <el-tag size="small" class="action-hint">{{ $t('about.contact.click_call') }}</el-tag>
             </div>
           </div>
 
           <div class="contact-actions">
             <el-button type="primary" size="large">
               <el-icon><ChatDotSquare /></el-icon>
-              开始对话
+              {{ $t('comment.add_comment') }}
             </el-button>
             <router-link to="/projects">
               <el-button size="large">
                 <el-icon><View /></el-icon>
-                查看项目
+                {{ $t('home.view_projects') }}
               </el-button>
             </router-link>
           </div>
@@ -313,10 +310,9 @@
       <section class="manifesto-section">
         <div class="manifesto-content">
           <blockquote class="manifesto-quote">
-            "2025年，我会把这100个小小的软件，作为我和这个时代对话的方式。
-            它们不一定每个都完美，但每一个都是真诚的尝试。"
+            {{ $t('about.conclusion.quote') }}
           </blockquote>
-          <p class="manifesto-signature">—— 继续向前的我</p>
+          <p class="manifesto-signature">{{ $t('about.conclusion.signature') }}</p>
         </div>
       </section>
     </div>
@@ -324,7 +320,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { useProjectsStore } from '../stores/projects'
 import axios from '../utils/axios'
@@ -333,31 +330,30 @@ import {
   ChatDotSquare, Share, Trophy, Message, Link, View, Phone
 } from '@element-plus/icons-vue'
 
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
+
+// 计算技术栈数据
+const techStack = computed(() => {
+  const { locale } = useI18n()
+  
+  // 定义工具数组 - 避免i18n问题
+  const toolsData = {
+    ai_tools: ['Cursor', 'Claude', 'ChatGPT', 'GitHub Copilot', 'v0.dev', 'Bolt.new'],
+    frontend: ['Vue.js', 'React', 'Next.js', 'Nuxt.js', 'TypeScript', 'Tailwind CSS', 'Element Plus'],
+    backend: ['Node.js', 'Python', 'FastAPI', 'Express', 'NestJS', 'Supabase', 'Firebase'],
+    deployment: ['Vercel', 'Netlify', 'Railway', 'Render', 'Cloudflare', 'AWS', 'Zeabur']
+  }
+  
+  return toolsData
+})
 
 // 微信群配置
 const wechatGroupConfig = ref({
   qr: '',
-  title: '加入微信交流群',
-  description: '扫描二维码加入我们的微信交流群，与其他开发者一起讨论AI项目'
+  title: t('about.how_to_participate.title'),
+  description: t('about.how_to_participate.subtitle')
 })
-
-// 技术栈数据
-const aiTools = ref([
-  'Cursor', 'Claude', 'ChatGPT', 'GitHub Copilot', 'v0.dev', 'Bolt.new'
-])
-
-const frontendTech = ref([
-  'Vue.js', 'React', 'Next.js', 'Nuxt.js', 'TypeScript', 'Tailwind CSS', 'Element Plus'
-])
-
-const backendTech = ref([
-  'Node.js', 'Python', 'FastAPI', 'Express', 'NestJS', 'Supabase', 'Firebase'
-])
-
-const deployPlatforms = ref([
-  'Vercel', 'Netlify', 'Railway', 'Render', 'Cloudflare', 'AWS', 'Zeabur'
-])
 
 // 联系方式交互方法
 const openEmail = () => {

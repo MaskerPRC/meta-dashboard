@@ -4,8 +4,8 @@
       <!-- 页面头部 -->
       <div class="page-header">
         <div class="header-content">
-          <h1 class="page-title">AI项目看板</h1>
-          <p class="page-subtitle">探索100个AI产品挑战的完整历程</p>
+          <h1 class="page-title">{{ $t('projects.title') }}</h1>
+          <p class="page-subtitle">{{ $t('projects.subtitle') }}</p>
         </div>
         
         <!-- 管理员按钮 -->
@@ -13,7 +13,7 @@
           <router-link to="/admin">
             <el-button type="primary">
               <el-icon><Setting /></el-icon>
-              管理后台
+              {{ $t('admin.title') }}
             </el-button>
           </router-link>
         </div>
@@ -25,38 +25,38 @@
           <!-- 状态筛选 -->
           <el-select
             v-model="filters.status"
-            placeholder="按状态筛选"
+            :placeholder="$t('projects.filter_by_status')"
             clearable
             style="width: 140px"
             @change="handleFilterChange"
           >
-            <el-option label="构思中" value="idea" />
-            <el-option label="规划中" value="planning" />
-            <el-option label="开发中" value="development" />
-            <el-option label="测试中" value="testing" />
-            <el-option label="已部署" value="deployed" />
-            <el-option label="已完成" value="completed" />
-            <el-option label="暂停中" value="paused" />
+            <el-option :label="$t('project.status_options.brainstorming')" value="idea" />
+            <el-option :label="$t('project.status_options.planning')" value="planning" />
+            <el-option :label="$t('project.status_options.development')" value="development" />
+            <el-option :label="$t('project.status_options.testing')" value="testing" />
+            <el-option :label="$t('project.status_options.deployed')" value="deployed" />
+            <el-option :label="$t('project.status_options.completed')" value="completed" />
+            <el-option :label="$t('project.status_options.on_hold')" value="paused" />
           </el-select>
 
           <!-- 优先级筛选 -->
           <el-select
             v-model="filters.priority"
-            placeholder="按优先级筛选"
+            :placeholder="$t('projects.filter_by_priority')"
             clearable
             style="width: 140px"
             @change="handleFilterChange"
           >
-            <el-option label="低优先级" value="low" />
-            <el-option label="中优先级" value="medium" />
-            <el-option label="高优先级" value="high" />
-            <el-option label="紧急" value="critical" />
+            <el-option :label="$t('project.priority_options.low')" value="low" />
+            <el-option :label="$t('project.priority_options.medium')" value="medium" />
+            <el-option :label="$t('project.priority_options.high')" value="high" />
+            <el-option :label="$t('project.priority_options.urgent')" value="critical" />
           </el-select>
 
           <!-- 搜索框 -->
           <el-input
             v-model="searchText"
-            placeholder="搜索项目名称、描述或标签..."
+            :placeholder="$t('projects.search_placeholder')"
             style="width: 300px"
             clearable
             @keyup.enter="handleSearch"
@@ -68,7 +68,7 @@
           </el-input>
 
           <el-button type="primary" @click="handleSearch">
-            搜索
+            {{ $t('form.search') }}
           </el-button>
         </div>
 
@@ -92,7 +92,7 @@
           <!-- 重置筛选 -->
           <el-button @click="resetFilters">
             <el-icon><Refresh /></el-icon>
-            重置
+            {{ $t('form.reset') }}
           </el-button>
         </div>
       </div>
@@ -100,11 +100,11 @@
       <!-- 统计信息 -->
       <div class="stats-bar">
         <div class="stats-item">
-          <span class="stats-label">总项目数：</span>
+          <span class="stats-label">{{ $t('projects.total_projects') }}：</span>
           <span class="stats-value">{{ projectsStore.pagination.total }}</span>
         </div>
         <div class="stats-item">
-          <span class="stats-label">平均进度：</span>
+          <span class="stats-label">{{ $t('projects.average_progress') }}：</span>
           <span class="stats-value">{{ projectsStore.totalProgress }}%</span>
         </div>
       </div>
@@ -129,7 +129,7 @@
             @row-click="handleRowClick"
             class="projects-table"
           >
-            <el-table-column prop="title" label="项目名称" min-width="200">
+            <el-table-column prop="title" :label="$t('project.title')" min-width="200">
               <template #default="scope">
                 <div class="project-title-cell">
                   <h4>{{ scope.row.title }}</h4>
@@ -138,7 +138,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="status" label="状态" width="100">
+            <el-table-column prop="status" :label="$t('project.status')" width="100">
               <template #default="scope">
                 <el-tag :class="['status-tag', scope.row.status]" size="small">
                   {{ getStatusName(scope.row.status) }}
@@ -146,7 +146,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="priority" label="优先级" width="100">
+            <el-table-column prop="priority" :label="$t('project.priority')" width="100">
               <template #default="scope">
                 <el-tag :class="['priority-tag', scope.row.priority]" size="small">
                   {{ getPriorityName(scope.row.priority) }}
@@ -154,7 +154,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="progress" label="进度" width="120">
+            <el-table-column prop="progress" :label="$t('home.progress')" width="120">
               <template #default="scope">
                 <el-progress 
                   :percentage="scope.row.progress" 
@@ -184,7 +184,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="created_at" label="创建时间" width="120">
+            <el-table-column prop="created_at" :label="$t('project.created_at')" width="120">
               <template #default="scope">
                 {{ formatDate(scope.row.created_at) }}
               </template>
@@ -194,8 +194,8 @@
 
         <!-- 空状态 -->
         <div v-if="projectsStore.projects.length === 0" class="empty-state">
-          <el-empty description="暂无项目数据">
-            <el-button type="primary" @click="resetFilters">重置筛选</el-button>
+          <el-empty :description="$t('message.no_data')">
+            <el-button type="primary" @click="resetFilters">{{ $t('form.reset') }}</el-button>
           </el-empty>
         </div>
       </div>
@@ -224,6 +224,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '../stores/projects'
 import { useAuthStore } from '../stores/auth'
 import ProjectCard from '../components/project/ProjectCard.vue'
@@ -233,6 +234,7 @@ import {
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const authStore = useAuthStore()
 
@@ -250,7 +252,7 @@ const filters = ref({
 
 // 计算属性
 const searchPlaceholder = computed(() => {
-  return `搜索${projectsStore.pagination.total}个项目...`
+  return `${t('form.search')}${projectsStore.pagination.total}${t('projects.total_projects')}...`
 })
 
 // 方法
@@ -305,26 +307,28 @@ const handleRowClick = (row) => {
 }
 
 const getStatusName = (status) => {
-  const names = {
-    idea: '构思中',
-    planning: '规划中',
-    development: '开发中',
-    testing: '测试中',
-    deployed: '已部署',
-    completed: '已完成',
-    paused: '暂停中'
+  const statusMap = {
+    idea: 'brainstorming',
+    planning: 'planning',
+    development: 'development',
+    testing: 'testing',
+    deployed: 'deployed',
+    completed: 'completed',
+    paused: 'on_hold'
   }
-  return names[status] || '未知'
+  const translationKey = statusMap[status] || 'brainstorming'
+  return t(`project.status_options.${translationKey}`)
 }
 
 const getPriorityName = (priority) => {
-  const names = {
-    low: '低',
-    medium: '中',
-    high: '高',
-    critical: '紧急'
+  const priorityMap = {
+    low: 'low',
+    medium: 'medium',
+    high: 'high',
+    critical: 'urgent'
   }
-  return names[priority] || '中'
+  const translationKey = priorityMap[priority] || 'medium'
+  return t(`project.priority_options.${translationKey}`)
 }
 
 const formatDate = (date) => {

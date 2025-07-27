@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../config/database');
+const { recordProjectChange } = require('./project-history');
 const router = express.Router();
 
 // 中间件：检查是否登录
@@ -486,30 +487,55 @@ router.put('/:id', requireAdmin, (req, res) => {
     order_index, id
   ];
   
-  db.run(sql, params, function(err) {
-    if (err) {
-      console.error('更新项目错误:', err);
-      return res.status(500).json({ message: '更新项目失败' });
+  // 先获取更新前的数据
+  db.get('SELECT * FROM projects WHERE id = ?', [id], (getErr, oldProject) => {
+    if (getErr) {
+      console.error('获取旧项目数据错误:', getErr);
+      return res.status(500).json({ message: '获取项目数据失败' });
     }
     
-    if (this.changes === 0) {
+    if (!oldProject) {
       return res.status(404).json({ message: '项目不存在' });
     }
     
-    // 返回更新后的项目
-    db.get('SELECT * FROM projects WHERE id = ?', [id], (selectErr, updatedProject) => {
-      if (selectErr) {
-        console.error('获取更新项目错误:', selectErr);
-        return res.status(500).json({ message: '获取更新项目失败' });
+    db.run(sql, params, function(err) {
+      if (err) {
+        console.error('更新项目错误:', err);
+        return res.status(500).json({ message: '更新项目失败' });
       }
       
-      res.json({
-        message: '项目更新成功',
-        project: {
-          ...updatedProject,
-          tech_stack: updatedProject.tech_stack ? updatedProject.tech_stack.split(',') : [],
-          tags: updatedProject.tags ? updatedProject.tags.split(',') : []
+      if (this.changes === 0) {
+        return res.status(404).json({ message: '项目不存在' });
+      }
+      
+      // 返回更新后的项目
+      db.get('SELECT * FROM projects WHERE id = ?', [id], async (selectErr, updatedProject) => {
+        if (selectErr) {
+          console.error('获取更新项目错误:', selectErr);
+          return res.status(500).json({ message: '获取更新项目失败' });
         }
+        
+        // 记录项目变更历史
+        try {
+          if (oldProject.status !== updatedProject.status) {
+            await recordProjectChange(id, 'status_change', oldProject, updatedProject, req.user.id);
+          }
+          if (oldProject.progress !== updatedProject.progress) {
+            await recordProjectChange(id, 'progress_update', oldProject, updatedProject, req.user.id);
+          }
+        } catch (historyErr) {
+          console.error('记录项目变更历史失败:', historyErr);
+          // 不影响主要功能，只记录错误
+        }
+        
+        res.json({
+          message: '项目更新成功',
+          project: {
+            ...updatedProject,
+            tech_stack: updatedProject.tech_stack ? updatedProject.tech_stack.split(',') : [],
+            tags: updatedProject.tags ? updatedProject.tags.split(',') : []
+          }
+        });
       });
     });
   });

@@ -23,7 +23,7 @@
         size="small"
         class="ai-generated-tag"
       >
-        <el-icon><Robot /></el-icon>
+        <el-icon><Cpu /></el-icon>
         AI生成
       </el-tag>
     </div>
@@ -103,7 +103,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Calendar, Link, View, Robot } from '@element-plus/icons-vue'
+import { Calendar, Link, View, Cpu } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 
 const props = defineProps({

@@ -25,6 +25,10 @@
             <el-icon><List /></el-icon>
             <span>{{ $t('nav.projects') }}</span>
           </router-link>
+          <router-link to="/global-history" class="nav-item" active-class="router-link-active" @click="handleNavClick('/global-history')">
+            <el-icon><Clock /></el-icon>
+            <span>{{ $t('nav.global_history') }}</span>
+          </router-link>
           <router-link to="/about" class="nav-item" active-class="router-link-active" @click="handleNavClick('/about')">
             <el-icon><InfoFilled /></el-icon>
             <span>{{ $t('nav.about') }}</span>
@@ -40,6 +44,9 @@
         
         <!-- 用户区域 -->
         <div class="header-right">
+          <!-- 语言切换 -->
+          <LanguageSwitcher />
+          
           <!-- 主题切换 -->
           <el-button 
             circle 
@@ -68,18 +75,18 @@
                 <el-dropdown-menu>
                   <el-dropdown-item command="profile">
                     <el-icon><User /></el-icon>
-                    个人资料
+                    {{ $t('auth.profile') }}
                   </el-dropdown-item>
                   <el-dropdown-item 
                     v-if="authStore.isAdmin" 
                     command="admin"
                   >
                     <el-icon><Setting /></el-icon>
-                    管理后台
+                    {{ $t('nav.admin') }}
                   </el-dropdown-item>
                   <el-dropdown-item divided command="logout">
                     <el-icon><SwitchButton /></el-icon>
-                    退出登录
+                    {{ $t('nav.logout') }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -91,7 +98,7 @@
             <router-link to="/login">
               <el-button type="primary">
                 <el-icon><User /></el-icon>
-                登录
+                {{ $t('nav.login') }}
               </el-button>
             </router-link>
           </div>
@@ -110,7 +117,7 @@
         @click.stop
       >
         <div class="mobile-menu-header">
-          <h3>导航菜单</h3>
+          <h3>{{ $t('nav.title') }}</h3>
           <el-button 
             circle 
             text 
@@ -126,7 +133,7 @@
              @click="handleMobileNavClick('/')"
            >
              <el-icon><House /></el-icon>
-             <span>首页</span>
+             <span>{{ $t('nav.home') }}</span>
            </router-link>
            <router-link 
              to="/projects" 
@@ -134,7 +141,15 @@
              @click="handleMobileNavClick('/projects')"
            >
              <el-icon><List /></el-icon>
-             <span>项目列表</span>
+             <span>{{ $t('nav.projects') }}</span>
+           </router-link>
+           <router-link 
+             to="/global-history" 
+             class="mobile-nav-item"
+             @click="handleMobileNavClick('/global-history')"
+           >
+             <el-icon><Clock /></el-icon>
+             <span>{{ $t('nav.global_history') }}</span>
            </router-link>
            <router-link 
              to="/about" 
@@ -142,7 +157,7 @@
              @click="handleMobileNavClick('/about')"
            >
              <el-icon><InfoFilled /></el-icon>
-             <span>关于挑战</span>
+             <span>{{ $t('nav.about') }}</span>
            </router-link>
          </div>
       </nav>
@@ -153,14 +168,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
 import LanguageSwitcher from '../common/LanguageSwitcher.vue'
 import { 
   House, List, InfoFilled, User, ArrowDown, 
-  Setting, SwitchButton, Moon, Sunny, Menu, Close
+  Setting, SwitchButton, Moon, Sunny, Menu, Close, Clock
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 
 const isDark = ref(false)

@@ -47,7 +47,24 @@
           </div>
 
           <!-- 项目链接 -->
-          <div v-if="project.github_repo || project.demo_url" class="project-links">
+          <div class="project-links">
+            <!-- 进展历史链接（始终显示） -->
+            <router-link 
+              :to="`/project/${project.id}/history`"
+              class="link-card history-link"
+            >
+              <div class="link-icon">
+                <el-icon><Clock /></el-icon>
+              </div>
+              <div class="link-content">
+                <div class="link-title">进展历史</div>
+                <div class="link-desc">查看项目发展轨迹</div>
+              </div>
+              <div class="link-arrow">
+                <el-icon><ArrowRight /></el-icon>
+              </div>
+            </router-link>
+
             <a 
               v-if="project.github_repo" 
               :href="project.github_repo" 
@@ -147,7 +164,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Edit, Delete, Link, View, ArrowRight } from '@element-plus/icons-vue'
+import { ArrowLeft, Edit, Delete, Link, View, ArrowRight, Clock } from '@element-plus/icons-vue'
 import { marked } from 'marked'
 import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'

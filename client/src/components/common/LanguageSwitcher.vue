@@ -5,7 +5,7 @@
     class="language-switcher"
   >
     <el-button text class="language-btn">
-      <el-icon><Globe /></el-icon>
+      <el-icon><Setting /></el-icon>
       <span class="language-text">{{ currentLanguageName }}</span>
       <el-icon class="arrow-icon"><ArrowDown /></el-icon>
     </el-button>
@@ -33,7 +33,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Globe, ArrowDown, Check } from '@element-plus/icons-vue'
+import { Setting, ArrowDown, Check } from '@element-plus/icons-vue'
 import { switchLanguage, getCurrentLanguage, getSupportedLanguages } from '../../locales/index.js'
 
 const { t } = useI18n()

@@ -6,22 +6,22 @@
         <div class="hero-content">
           <div class="hero-text">
             <h1 class="hero-title">
-              <span class="hero-title-text">一年100个AI产品挑战</span>
+              <span class="hero-title-text">{{ $t('home.challenge_title') }}</span>
             </h1>
             <p class="hero-subtitle">
-              记录每一个AI产品从构思到上线的完整历程，用代码书写人工智能时代的创新传奇
+              {{ $t('home.description') }}
             </p>
             <div class="hero-actions">
               <router-link to="/projects">
                 <el-button type="primary" size="large" class="ai-button">
                   <el-icon><View /></el-icon>
-                  查看所有项目
+                  {{ $t('home.view_projects') }}
                 </el-button>
               </router-link>
               <router-link to="/about">
                 <el-button size="large" class="ai-button secondary">
                   <el-icon><InfoFilled /></el-icon>
-                  了解挑战
+                  {{ $t('home.learn_more') }}
                 </el-button>
               </router-link>
             </div>
@@ -30,19 +30,19 @@
             <div class="stats-grid">
               <div class="stat-card">
                 <div class="stat-number">{{ projectsStore.projects.length || 0 }}</div>
-                <div class="stat-label">AI项目</div>
+                <div class="stat-label">{{ $t('home.stats.ai_projects') }}</div>
               </div>
               <div class="stat-card">
                 <div class="stat-number">{{ projectsStore.totalProgress || 0 }}%</div>
-                <div class="stat-label">整体进度</div>
+                <div class="stat-label">{{ $t('home.stats.overall_progress') }}</div>
               </div>
               <div class="stat-card">
                 <div class="stat-number">{{ projectsStore.statusCounts.completed || 0 }}</div>
-                <div class="stat-label">已完成</div>
+                <div class="stat-label">{{ $t('home.stats.completed') }}</div>
               </div>
               <div class="stat-card">
                 <div class="stat-number">{{ projectsStore.statusCounts.development || 0 }}</div>
-                <div class="stat-label">开发中</div>
+                <div class="stat-label">{{ $t('home.stats.in_development') }}</div>
               </div>
             </div>
           </div>
@@ -53,7 +53,7 @@
     <!-- 项目状态统计 -->
     <section class="status-section">
       <div class="container">
-        <h2 class="section-title">项目状态概览</h2>
+        <h2 class="section-title">{{ $t('home.status_overview.title') }}</h2>
         <div class="status-grid">
           <div 
             v-for="(count, status) in projectsStore.statusCounts" 
@@ -79,10 +79,10 @@
     <section class="recent-projects-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title">最新项目</h2>
+          <h2 class="section-title">{{ $t('home.latest_projects') }}</h2>
           <router-link to="/projects">
             <el-button text type="primary">
-              查看全部
+              {{ $t('projects.title') }}
               <el-icon><ArrowRight /></el-icon>
             </el-button>
           </router-link>
@@ -99,13 +99,13 @@
         
         <div v-else class="empty-state">
           <el-icon size="64" color="#94a3b8"><DocumentAdd /></el-icon>
-          <p>还没有任何项目，开始您的AI产品挑战之旅吧！</p>
+          <p>{{ $t('message.no_data') }}</p>
           <el-button 
             v-if="authStore.isAdmin" 
             type="primary" 
             @click="$router.push('/admin')"
           >
-            创建第一个项目
+            {{ $t('admin.new_project') }}
           </el-button>
         </div>
       </div>
@@ -115,13 +115,12 @@
     <section class="manifesto-section">
       <div class="container">
         <div class="manifesto-card ai-card">
-          <h3 class="manifesto-title">挑战宣言</h3>
+          <h3 class="manifesto-title">{{ $t('home.challenge_manifesto.title') }}</h3>
           <blockquote class="manifesto-quote">
-            "在AI让我们真正只做想做的事之前——我们先做一件足够挑战自己的事"
+            {{ $t('home.challenge_manifesto.quote') }}
           </blockquote>
           <p class="manifesto-text">
-            2025年，用100个AI产品记录这个时代最激动人心的技术变革。
-            每一个产品都是一次勇敢的尝试，每一行代码都在书写未来。
+            {{ $t('home.challenge_manifesto.description') }}
           </p>
         </div>
       </div>
@@ -132,6 +131,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '../stores/projects'
 import { useAuthStore } from '../stores/auth'
 import ProjectCard from '../components/project/ProjectCard.vue'
@@ -141,6 +141,7 @@ import {
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const authStore = useAuthStore()
 
@@ -164,16 +165,17 @@ const getStatusIcon = (status) => {
 
 // 获取状态名称
 const getStatusName = (status) => {
-  const names = {
-    idea: '构思中',
-    planning: '规划中',
-    development: '开发中', 
-    testing: '测试中',
-    deployed: '已部署',
-    completed: '已完成',
-    paused: '暂停中'
+  const statusMap = {
+    idea: 'brainstorming',
+    planning: 'planning',
+    development: 'development', 
+    testing: 'testing',
+    deployed: 'deployed',
+    completed: 'completed',
+    paused: 'on_hold'
   }
-  return names[status] || '未知'
+  const translationKey = statusMap[status] || 'brainstorming'
+  return t(`home.status_overview.${translationKey}`)
 }
 
 // 跳转到项目详情

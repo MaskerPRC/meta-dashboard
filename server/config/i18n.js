@@ -9,7 +9,7 @@ i18next
   .init({
     lng: 'zh', // 默认语言
     fallbackLng: 'zh',
-    debug: process.env.NODE_ENV === 'development',
+    debug: false, // 关闭debug模式以减少日志输出
     
     backend: {
       loadPath: path.join(__dirname, '../locales/{{lng}}/translation.json'),
