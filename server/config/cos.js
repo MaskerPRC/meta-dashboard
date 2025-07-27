@@ -3,7 +3,7 @@ const OSS = require('ali-oss');
 
 // 阿里云OSS配置
 const ossConfig = {
-  region: process.env.ALICLOUD_OSS_REGION || 'oss-cn-hangzhou',
+  region: process.env.ALICLOUD_OSS_REGION || 'oss-cn-beijing', // 修改为北京区域
   accessKeyId: process.env.ALICLOUD_ACCESS_KEY_ID,
   accessKeySecret: process.env.ALICLOUD_ACCESS_KEY_SECRET,
   bucket: process.env.ALICLOUD_OSS_BUCKET || 'meta-dashboard',
