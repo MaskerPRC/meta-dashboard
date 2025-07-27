@@ -103,6 +103,54 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = loginUrl;
   }
 
+  // 更新用户基本信息
+  const updateProfile = async (profileData) => {
+    try {
+      loading.value = true
+      const response = await axios.put('/api/auth/profile', profileData)
+      
+      if (response.data.success) {
+        // 更新本地用户信息
+        user.value = response.data.user
+        ElMessage.success(response.data.message)
+        return { success: true, user: response.data.user }
+      } else {
+        ElMessage.error(response.data.message || '更新失败')
+        return { success: false, message: response.data.message }
+      }
+    } catch (error) {
+      console.error('更新用户信息失败:', error)
+      const errorMessage = error.response?.data?.message || '更新失败，请稍后重试'
+      ElMessage.error(errorMessage)
+      return { success: false, message: errorMessage }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 修改密码
+  const changePassword = async (passwordData) => {
+    try {
+      loading.value = true
+      const response = await axios.post('/api/auth/change-password', passwordData)
+      
+      if (response.data.success) {
+        ElMessage.success(response.data.message)
+        return { success: true }
+      } else {
+        ElMessage.error(response.data.message || '密码修改失败')
+        return { success: false, message: response.data.message }
+      }
+    } catch (error) {
+      console.error('修改密码失败:', error)
+      const errorMessage = error.response?.data?.message || '密码修改失败，请稍后重试'
+      ElMessage.error(errorMessage)
+      return { success: false, message: errorMessage }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // 状态
     user,
@@ -119,6 +167,8 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     loginWithGitHub,
     loginWithGoogle,
-    loginWithWechat
+    loginWithWechat,
+    updateProfile,
+    changePassword
   }
 })

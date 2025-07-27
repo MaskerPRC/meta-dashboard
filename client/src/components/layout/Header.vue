@@ -162,6 +162,9 @@
          </div>
       </nav>
     </div>
+    
+                <!-- 个人资料弹窗 -->
+    <ProfileDialog v-model="showProfileDialog" />
   </header>
 </template>
 
@@ -171,6 +174,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
 import LanguageSwitcher from '../common/LanguageSwitcher.vue'
+import ProfileDialog from '../common/ProfileDialog.vue'
 import { 
   House, List, InfoFilled, User, ArrowDown, 
   Setting, SwitchButton, Moon, Sunny, Menu, Close, Clock
@@ -182,6 +186,7 @@ const authStore = useAuthStore()
 
 const isDark = ref(false)
 const showMobileMenu = ref(false)
+const showProfileDialog = ref(false)
 
 // 主题切换
 const toggleTheme = () => {
@@ -212,7 +217,7 @@ const handleMobileNavClick = (path) => {
 const handleUserCommand = (command) => {
   switch (command) {
     case 'profile':
-      // 打开个人资料弹窗或页面
+      showProfileDialog.value = true
       break
     case 'admin':
       router.push('/admin')

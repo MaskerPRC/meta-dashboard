@@ -38,35 +38,12 @@
               </el-button>
             </el-button-group>
             
-            <!-- 文件上传按钮 -->
-            <div class="upload-buttons">
-              <el-upload
-                ref="imageUploadRef"
-                :show-file-list="false"
-                :before-upload="beforeImageUpload"
-                :http-request="handleFileUpload"
-                accept="image/*"
-                multiple
-              >
-                <el-button size="small" text>
-                  <el-icon><Picture /></el-icon>
-                  图片
-                </el-button>
-              </el-upload>
-              
-              <el-upload
-                ref="videoUploadRef"
-                :show-file-list="false"
-                :before-upload="beforeVideoUpload"
-                :http-request="handleFileUpload"
-                accept="video/*"
-                multiple
-              >
-                <el-button size="small" text>
-                  <el-icon><VideoPlay /></el-icon>
-                  视频
-                </el-button>
-              </el-upload>
+            <!-- 粘贴提示 -->
+            <div class="paste-hint">
+              <el-text size="small" type="info">
+                <el-icon><Upload /></el-icon>
+                支持直接粘贴图片和视频文件
+              </el-text>
             </div>
           </div>
           <div class="toolbar-right">
@@ -113,11 +90,12 @@
             v-model="newComment"
             type="textarea"
             :rows="5"
-            placeholder="支持Markdown语法，分享您对这个AI项目的想法、建议或疑问..."
+            placeholder="支持Markdown语法，可直接粘贴图片文件（Ctrl+V）..."
             maxlength="1000"
             show-word-limit
             resize="none"
             class="markdown-input"
+            @paste="handlePaste"
           />
           
           <!-- 预览区域 -->
@@ -471,12 +449,9 @@ const currentPage = ref(1)
 const editMode = ref('write') // 'write' | 'preview'
 const editEditMode = ref('write') // 编辑评论时的模式
 
-// 文件上传相关状态
+// 文件上传相关状态  
 const uploading = ref(false)
 const attachments = ref({ images: [], videos: [] })
-const imageUploadRef = ref()
-const videoUploadRef = ref()
-const uploadConfig = ref({})
 
 const pagination = reactive({
   total: 0,
@@ -682,57 +657,45 @@ const formatCommentTime = (time) => {
   }
 }
 
-// 文件上传相关方法
-const loadUploadConfig = async () => {
-  try {
-    const response = await axios.get('/api/upload/config')
-    uploadConfig.value = response.data
-  } catch (error) {
-    console.error('获取上传配置失败:', error)
-  }
-}
-
+// 文件粘贴上传相关方法
 const hasAttachmentsToSubmit = () => {
   return attachments.value.images.length > 0 || attachments.value.videos.length > 0
 }
 
-const beforeImageUpload = (file) => {
-  const isValidType = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)
-  if (!isValidType) {
-    ElMessage.error('只支持 JPG、PNG、GIF、WebP 格式的图片')
-    return false
-  }
+const handlePaste = async (event) => {
+  const items = event.clipboardData?.items
+  if (!items) return
   
-  const isLt5M = file.size / 1024 / 1024 < 5
-  if (!isLt5M) {
-    ElMessage.error('图片大小不能超过 5MB')
-    return false
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+    
+    // 处理图片
+    if (item.type.indexOf('image') !== -1) {
+      event.preventDefault()
+      const file = item.getAsFile()
+      if (file) {
+        await uploadFile(file)
+      }
+    }
+    // 处理文件（通过复制文件粘贴）
+    else if (item.kind === 'file') {
+      event.preventDefault()
+      const file = item.getAsFile()
+      if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+        await uploadFile(file)
+      }
+    }
   }
-  
-  return true
 }
 
-const beforeVideoUpload = (file) => {
-  const isValidType = ['video/mp4', 'video/webm'].includes(file.type)
-  if (!isValidType) {
-    ElMessage.error('只支持 MP4、WebM 格式的视频')
-    return false
-  }
-  
-  const isLt50M = file.size / 1024 / 1024 < 50
-  if (!isLt50M) {
-    ElMessage.error('视频大小不能超过 50MB')
-    return false
-  }
-  
-  return true
-}
-
-const handleFileUpload = async (options) => {
-  const { file } = options
-  
+const uploadFile = async (file) => {
   if (uploading.value) {
     ElMessage.warning('文件正在上传中，请稍候...')
+    return
+  }
+  
+  // 验证文件类型和大小
+  if (!validateFile(file)) {
     return
   }
   
@@ -774,6 +737,38 @@ const handleFileUpload = async (options) => {
   }
 }
 
+const validateFile = (file) => {
+  const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  const allowedVideoTypes = ['video/mp4', 'video/webm']
+  
+  if (file.type.startsWith('image/')) {
+    if (!allowedImageTypes.includes(file.type)) {
+      ElMessage.error('只支持 JPG、PNG、GIF、WebP 格式的图片')
+      return false
+    }
+    const isLt5M = file.size / 1024 / 1024 < 5
+    if (!isLt5M) {
+      ElMessage.error('图片大小不能超过 5MB')
+      return false
+    }
+  } else if (file.type.startsWith('video/')) {
+    if (!allowedVideoTypes.includes(file.type)) {
+      ElMessage.error('只支持 MP4、WebM 格式的视频')
+      return false
+    }
+    const isLt50M = file.size / 1024 / 1024 < 50
+    if (!isLt50M) {
+      ElMessage.error('视频大小不能超过 50MB')
+      return false
+    }
+  } else {
+    ElMessage.error('只支持图片和视频文件')
+    return false
+  }
+  
+  return true
+}
+
 const removeAttachment = (type, index) => {
   attachments.value[type].splice(index, 1)
 }
@@ -795,7 +790,6 @@ const hasCommentAttachments = (comment) => {
 // 生命周期
 onMounted(() => {
   fetchComments()
-  loadUploadConfig()
 })
 </script>
 

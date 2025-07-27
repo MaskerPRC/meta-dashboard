@@ -378,6 +378,108 @@ router.post('/change-password', (req, res) => {
   });
 });
 
+// 更新用户基本信息
+router.put('/profile', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return ResponseHelper.authError(res, req, 'errors.auth.required');
+  }
+
+  const { display_name, email } = req.body;
+  const userId = req.user.id;
+
+  // 验证输入
+  if (!display_name || display_name.trim().length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: '显示名称不能为空'
+    });
+  }
+
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: '邮箱格式不正确'
+    });
+  }
+
+  // 检查邮箱是否已被其他用户使用
+  if (email) {
+    db.get("SELECT id FROM users WHERE email = ? AND id != ?", [email, userId], (err, existingUser) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: '检查邮箱失败'
+        });
+      }
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: '该邮箱已被其他用户使用'
+        });
+      }
+
+      // 更新用户信息
+      updateUserProfile();
+    });
+  } else {
+    updateUserProfile();
+  }
+
+  function updateUserProfile() {
+    const updateFields = [];
+    const updateValues = [];
+
+    if (display_name) {
+      updateFields.push('display_name = ?');
+      updateValues.push(display_name.trim());
+    }
+
+    if (email) {
+      updateFields.push('email = ?');
+      updateValues.push(email);
+    }
+
+    updateValues.push(userId);
+
+    db.run(
+      `UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`,
+      updateValues,
+      function(err) {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            message: '更新用户信息失败'
+          });
+        }
+
+        // 获取更新后的用户信息
+        db.get("SELECT * FROM users WHERE id = ?", [userId], (selectErr, updatedUser) => {
+          if (selectErr) {
+            return res.status(500).json({
+              success: false,
+              message: '获取更新后的用户信息失败'
+            });
+          }
+
+          res.json({
+            success: true,
+            message: '用户信息更新成功',
+            user: {
+              id: updatedUser.id,
+              username: updatedUser.username,
+              email: updatedUser.email,
+              avatar_url: updatedUser.avatar_url,
+              display_name: updatedUser.display_name,
+              is_admin: updatedUser.is_admin
+            }
+          });
+        });
+      }
+    );
+  }
+});
+
 // 登出
 router.post('/logout', (req, res) => {
   req.logout((err) => {

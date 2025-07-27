@@ -341,7 +341,22 @@ export default {
     forgot_password: 'Forgot password?',
     no_account: "Don't have an account?",
     has_account: 'Already have an account?',
-    profile: 'Profile'
+    profile: 'Profile',
+    
+    // Profile related
+    profile_title: 'Profile',
+    profile_subtitle: 'Manage your account information',
+    display_name: 'Display Name',
+    display_name_placeholder: 'Enter display name',
+    email_placeholder: 'Enter email address',
+    update_profile: 'Update Profile',
+    update_password: 'Change Password',
+    current_password: 'Current Password',
+    new_password: 'New Password',
+    current_password_placeholder: 'Enter current password',
+    new_password_placeholder: 'Enter new password (at least 6 characters)',
+    profile_updated_success: 'Profile updated successfully',
+    password_updated_success: 'Password updated successfully'
   },
   
   // Comment system
@@ -366,5 +381,13 @@ export default {
     title: 'Language',
     chinese: '中文',
     english: 'English'
+  },
+
+  // Form common
+  form: {
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    save: 'Save',
+    submit: 'Submit'
   }
 } 

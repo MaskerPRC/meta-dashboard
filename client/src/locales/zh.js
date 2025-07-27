@@ -341,7 +341,22 @@ export default {
     forgot_password: '忘记密码？',
     no_account: '还没有账号？',
     has_account: '已有账号？',
-    profile: '个人资料'
+    profile: '个人资料',
+    
+    // 个人资料相关
+    profile_title: '个人资料',
+    profile_subtitle: '管理您的账户信息',
+    display_name: '显示名称',
+    display_name_placeholder: '请输入显示名称',
+    email_placeholder: '请输入邮箱地址',
+    update_profile: '更新资料',
+    update_password: '修改密码',
+    current_password: '当前密码',
+    new_password: '新密码',
+    current_password_placeholder: '请输入当前密码',
+    new_password_placeholder: '请输入新密码（至少6位）',
+    profile_updated_success: '个人资料更新成功',
+    password_updated_success: '密码修改成功'
   },
   
   // 评论系统
@@ -366,5 +381,13 @@ export default {
     title: '语言',
     chinese: '中文',
     english: 'English'
+  },
+
+  // 表单通用
+  form: {
+    cancel: '取消',
+    confirm: '确认',
+    save: '保存',
+    submit: '提交'
   }
 } 
