@@ -237,10 +237,12 @@ export default {
       github: 'GitHub',
       wechat: 'WeChat',
       phone: 'Phone',
+      issue: 'Submit Issues',
       click_email: 'Click to Email',
       click_visit: 'Click to Visit',
       click_copy: 'Click to Copy',
-      click_call: 'Click to Call'
+      click_call: 'Click to Call',
+      click_issue: 'Click to Submit'
     },
     
     // Conclusion
@@ -258,12 +260,171 @@ export default {
     stats: {
       total_projects: 'Total Projects',
       total_users: 'Registered Users',
-      total_comments: 'Total Comments'
+      total_comments: 'Total Comments',
+      average_progress: 'Average Progress'
     },
     project_management: 'Project Management',
     config_management: 'Site Configuration',
     user_management: 'User Management',
-    comment_management: 'Comment Management'
+    comment_management: 'Comment Management',
+    
+    // AI Project Generator
+    ai_generator: {
+      title: 'AI Project Generator',
+      step_1: {
+        title: 'Input Description',
+        description: 'Describe your project idea',
+        input_label: 'Project Description (supports Chinese/English, max 5000 characters)',
+        placeholder: 'Example: I want to create an online library management system where users can search books, borrow books, and view borrowing history. Administrators can add new books and manage user borrowing records. Using Vue.js frontend, Node.js backend, MySQL database.',
+        language_preference: 'Language Preference',
+        examples_title: '💡 Example Descriptions:',
+        start_generate: 'Start Generate'
+      },
+      step_2: {
+        title: 'AI Generation',
+        description: 'AI analyzes and generates project structure',
+        loading_text: 'AI is analyzing your description...'
+      },
+      step_3: {
+        title: 'Preview & Confirm',
+        description: 'Preview and confirm the generated project',
+        preview_title: 'AI Generated Project Preview:',
+        ai_generated: 'AI Generated',
+        project_description: 'Project Description:',
+        tech_stack: 'Tech Stack:',
+        tags: 'Tags:',
+        project_content: 'Project Content:',
+        regenerate: 'Regenerate',
+        create_project: 'Create Project'
+      },
+      cancel: 'Cancel',
+      messages: {
+        empty_description: 'Please enter project description',
+        generate_success: 'AI project generation successful!',
+        generate_failed: 'AI generation failed, please try again later',
+        create_success: 'Project created successfully!',
+        create_failed: 'Failed to save project'
+      }
+    },
+    
+    // Project Management
+    projects: {
+      search_placeholder: 'Search projects...',
+      export_data: 'Export Data',
+      batch_delete: 'Batch Delete',
+      table_headers: {
+        id: 'ID',
+        project_name: 'Project Name',
+        status: 'Status',
+        priority: 'Priority',
+        progress: 'Progress',
+        actions: 'Actions'
+      },
+      actions: {
+        edit: 'Edit',
+        view: 'View',
+        delete: 'Delete'
+      },
+      empty_text: 'No project data available',
+      messages: {
+        delete_confirm: 'Are you sure you want to delete project "{title}"? This action cannot be undone.',
+        delete_title: 'Delete Project',
+        delete_success: 'Project deleted successfully',
+        delete_failed: 'Failed to delete project',
+        batch_delete_warning: 'Please select projects to delete',
+        batch_delete_confirm: 'Are you sure you want to delete the selected {count} projects? This action cannot be undone.',
+        batch_delete_title: 'Batch Delete Projects',
+        batch_delete_success: 'Batch delete successful',
+        batch_delete_failed: 'Batch delete failed',
+        export_success: 'Data export successful',
+        export_failed: 'Failed to export data',
+        fetch_failed: 'Failed to fetch project list'
+      }
+    },
+    
+    // User Management
+    users: {
+      search_placeholder: 'Search users...',
+      table_headers: {
+        id: 'ID',
+        avatar: 'Avatar',
+        username: 'Username',
+        display_name: 'Display Name',
+        email: 'Email',
+        phone: 'Phone',
+        auth_method: 'Auth Method',
+        is_admin: 'Admin',
+        last_login: 'Last Login',
+        created_at: 'Created At',
+        actions: 'Actions'
+      },
+      auth_methods: {
+        local: 'Local Account',
+        google: 'Google',
+        github: 'GitHub'
+      },
+      actions: {
+        reset_password: 'Reset Password',
+        delete: 'Delete'
+      },
+      messages: {
+        reset_password_confirm: 'Are you sure you want to reset password for user "{username}"?',
+        reset_password_success: 'Password reset successful',
+        reset_password_failed: 'Password reset failed',
+        delete_confirm: 'Are you sure you want to delete user "{username}"? This action cannot be undone.',
+        delete_success: 'User deleted successfully',
+        delete_failed: 'Failed to delete user',
+        fetch_failed: 'Failed to fetch user list'
+      }
+    },
+    
+    // Comment Management
+    comments: {
+      table_headers: {
+        id: 'ID',
+        project: 'Project',
+        user: 'User',
+        content: 'Comment Content',
+        created_at: 'Created At',
+        actions: 'Actions'
+      },
+      actions: {
+        delete: 'Delete'
+      },
+      messages: {
+        delete_confirm: 'Are you sure you want to delete this comment? This action cannot be undone.',
+        delete_success: 'Comment deleted successfully',
+        delete_failed: 'Failed to delete comment',
+        fetch_failed: 'Failed to fetch comment list'
+      }
+    },
+    
+    // Site Configuration Management
+    site_config: {
+      wechat_group: {
+        title: 'WeChat Group QR Code Settings',
+        qr_code: 'Group QR Code',
+        group_title: 'Group Title',
+        group_description: 'Group Description',
+        upload_qr: 'Upload WeChat Group QR Code',
+        change_qr: 'Change QR Code',
+        title_placeholder: 'Enter WeChat group title',
+        description_placeholder: 'Enter WeChat group description',
+        save_all: 'Save All Configurations',
+        reset: 'Reset'
+      },
+      messages: {
+        image_only: 'Only image files are allowed!',
+        file_too_large: 'Image size cannot exceed 5MB!',
+        upload_success: 'QR code uploaded successfully',
+        upload_failed: 'Failed to upload QR code',
+        update_success: 'Configuration updated successfully',
+        update_failed: 'Failed to update configuration',
+        save_success: 'All configurations saved successfully',
+        save_failed: 'Failed to save configurations',
+        fetch_failed: 'Failed to fetch site configuration'
+      }
+    }
   },
   
      // Project related
@@ -292,6 +453,124 @@ export default {
     select_status: 'Select Project Status',
     select_priority: 'Select Priority',
     status_filter: 'Status Filter',
+    
+    // Edit page form
+    form_labels: {
+      project_name: 'Project Name',
+      project_description: 'Project Description',
+      progress_percentage: 'Progress Percentage',
+      github_repo: 'GitHub Repository',
+      demo_link: 'Demo Link',
+      start_time: 'Start Time',
+      expected_completion: 'Expected Completion',
+      tech_stack: 'Tech Stack',
+      project_tags: 'Project Tags',
+      project_content: 'Project Content'
+    },
+    
+    // Placeholder text
+    placeholders: {
+      enter_project_name: 'Enter project name',
+      enter_project_description: 'Enter brief project description',
+      github_repo_url: 'https://github.com/username/repo',
+      demo_url: 'https://demo.example.com',
+      select_start_time: 'Select start time',
+      select_completion_time: 'Select expected completion time',
+      add_tech_stack: 'Add tech stack',
+      add_tag: 'Add tag',
+      enter_project_content: 'Enter detailed project content, Markdown supported...\nTip: You can directly paste image or video files'
+    },
+    
+    // Editor related
+    editor: {
+      edit_mode: 'Edit',
+      preview_mode: 'Preview',
+      split_mode: 'Split',
+      insert_template: 'Insert Template',
+      attachments_added: 'Added Images and Videos',
+      empty_preview: 'No content yet'
+    },
+    
+    // Form validation messages
+    validation: {
+      project_name_required: 'Please enter project name',
+      project_name_length: 'Project name length should be 2-100 characters',
+      project_description_required: 'Please enter project description',
+      project_description_length: 'Project description length should be 10-500 characters',
+      status_required: 'Please select project status',
+      priority_required: 'Please select priority'
+    },
+    
+    // Action buttons
+    actions_buttons: {
+      add_tech_stack: '+ Add Tech Stack',
+      add_tag: '+ Add Tag',
+      cancel: 'Cancel',
+      save: 'Save',
+      create: 'Create'
+    },
+    
+    // Success/failure messages
+    messages: {
+      project_update_success: 'Project updated successfully',
+      project_create_success: 'Project created successfully',
+      save_project_failed: 'Failed to save project'
+    },
+
+    // Project template
+    template: {
+      default_content: `# Project Overview
+
+Brief description of this AI project's functionality and goals.
+
+## Project Background
+
+- Why was this project created?
+- What problem does it solve?
+
+## Main Features
+
+- [ ] Feature 1
+- [ ] Feature 2
+- [ ] Feature 3
+
+## Technical Highlights
+
+- What AI technologies were used?
+- What are the innovative aspects?
+
+## Development Process
+
+### Phase 1: Conception and Design
+- Requirements analysis
+- Technology selection
+- Prototype design
+
+### Phase 2: Development Implementation
+- Core functionality development
+- AI model integration
+- Testing and optimization
+
+### Phase 3: Deployment and Launch
+- Deployment configuration
+- Performance tuning
+- User feedback
+
+## Challenges Encountered
+
+- Technical challenge 1 and solution
+- Technical challenge 2 and solution
+
+## Learnings and Reflections
+
+- What was learned?
+- How could it be improved next time?
+
+## Related Links
+
+- [Source Repository]({{github_repo}})
+- [Live Demo]({{demo_url}})`
+    },
     
     status_options: {
       brainstorming: 'Brainstorming',

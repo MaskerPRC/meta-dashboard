@@ -258,6 +258,11 @@
               <span>{{ $t('about.contact.phone') }}：13022898959</span>
               <el-tag size="small" class="action-hint">{{ $t('about.contact.click_call') }}</el-tag>
             </div>
+            <div class="contact-item interactive" @click="openIssue">
+              <el-icon><ChatDotSquare /></el-icon>
+              <span>{{ $t('about.contact.issue') }}：https://github.com/MaskerPRC/meta-dashboard</span>
+              <el-tag size="small" class="action-hint">{{ $t('about.contact.click_issue') }}</el-tag>
+            </div>
           </div>
 
           <div class="contact-actions">
@@ -385,6 +390,11 @@ const copyWechat = async () => {
 const callPhone = () => {
   window.location.href = 'tel:13022898959'
   ElMessage.success('正在启动拨号功能...')
+}
+
+const openIssue = () => {
+  window.open('https://github.com/MaskerPRC/meta-dashboard/issues', '_blank')
+  ElMessage.success('正在打开GitHub Issues页面...')
 }
 
 // 加载微信群配置

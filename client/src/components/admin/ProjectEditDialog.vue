@@ -17,10 +17,10 @@
       <!-- 第一行：项目基本信息 -->
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="项目名称" prop="title">
+          <el-form-item :label="t('project.form_labels.project_name')" prop="title">
             <el-input
               v-model="formData.title"
-              placeholder="请输入项目名称"
+              :placeholder="t('project.placeholders.enter_project_name')"
               maxlength="100"
               show-word-limit
             />
@@ -50,7 +50,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="进度百分比" prop="progress">
+          <el-form-item :label="t('project.form_labels.progress_percentage')" prop="progress">
             <el-slider
               v-model="formData.progress"
               :min="0"
@@ -67,12 +67,12 @@
             <!-- 第二行：项目描述 -->
       <el-row :gutter="20">
         <el-col :span="24">
-          <el-form-item label="项目描述" prop="description">
+          <el-form-item :label="t('project.form_labels.project_description')" prop="description">
             <el-input
               v-model="formData.description"
               type="textarea"
               :rows="4"
-              placeholder="请输入项目简短描述"
+              :placeholder="t('project.placeholders.enter_project_description')"
               maxlength="500"
               show-word-limit
             />
@@ -83,27 +83,27 @@
       <!-- 第三行：链接和时间 -->
       <el-row :gutter="20">
         <el-col :span="6">
-          <el-form-item label="GitHub仓库">
+          <el-form-item :label="t('project.form_labels.github_repo')">
             <el-input
               v-model="formData.github_repo"
-              placeholder="https://github.com/username/repo"
+              :placeholder="t('project.placeholders.github_repo_url')"
             />
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="演示链接">
+          <el-form-item :label="t('project.form_labels.demo_link')">
             <el-input
               v-model="formData.demo_url"
-              placeholder="https://demo.example.com"
+              :placeholder="t('project.placeholders.demo_url')"
             />
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="开始时间">
+          <el-form-item :label="t('project.form_labels.start_time')">
             <el-date-picker
               v-model="formData.start_date"
               type="date"
-              placeholder="选择开始时间"
+              :placeholder="t('project.placeholders.select_start_time')"
               style="width: 100%"
               format="YYYY-MM-DD"
               value-format="YYYY-MM-DD"
@@ -111,11 +111,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="预期完成时间">
+          <el-form-item :label="t('project.form_labels.expected_completion')">
             <el-date-picker
               v-model="formData.due_date"
               type="date"
-              placeholder="选择预期完成时间"
+              :placeholder="t('project.placeholders.select_completion_time')"
               style="width: 100%"
               format="YYYY-MM-DD"
               value-format="YYYY-MM-DD"
@@ -127,7 +127,7 @@
       <!-- 第四行：技术栈和标签 -->
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="技术栈">
+          <el-form-item :label="t('project.form_labels.tech_stack')">
             <div class="tag-input-container">
               <el-tag
                 v-for="(tech, index) in formData.tech_stack"
@@ -145,7 +145,7 @@
                 size="small"
                 @keyup.enter="addTech"
                 @blur="addTech"
-                placeholder="添加技术栈"
+                :placeholder="t('project.placeholders.add_tech_stack')"
                 style="width: 100px"
               />
               <el-button
@@ -153,13 +153,13 @@
                 size="small"
                 @click="showTechInput = true"
               >
-                + 添加技术栈
+                {{ t('project.actions_buttons.add_tech_stack') }}
               </el-button>
             </div>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="项目标签">
+          <el-form-item :label="t('project.form_labels.project_tags')">
             <div class="tag-input-container">
               <el-tag
                 v-for="(tag, index) in formData.tags"
@@ -177,7 +177,7 @@
                 size="small"
                 @keyup.enter="addTag"
                 @blur="addTag"
-                placeholder="添加标签"
+                :placeholder="t('project.placeholders.add_tag')"
                 style="width: 80px"
               />
               <el-button
@@ -185,7 +185,7 @@
                 size="small"
                 @click="showTagInput = true"
               >
-                + 添加标签
+                {{ t('project.actions_buttons.add_tag') }}
               </el-button>
             </div>
           </el-form-item>
@@ -195,7 +195,7 @@
       <!-- 第五行：项目详细内容（全宽度） -->
       <el-row :gutter="20">
         <el-col :span="24">
-          <el-form-item label="项目详细内容" class="full-width-editor">
+          <el-form-item :label="t('project.form_labels.project_content')" class="full-width-editor">
             <div class="content-editor">
               <!-- 编辑器工具栏 -->
               <div class="editor-toolbar">
@@ -206,7 +206,7 @@
                     @click="editorMode = 'edit'"
                   >
                     <el-icon><Edit /></el-icon>
-                    编辑
+                    {{ t('project.editor.edit_mode') }}
                   </el-button>
                   <el-button
                     :type="editorMode === 'preview' ? 'primary' : 'default'"
@@ -214,7 +214,7 @@
                     @click="editorMode = 'preview'"
                   >
                     <el-icon><View /></el-icon>
-                    预览
+                    {{ t('project.editor.preview_mode') }}
                   </el-button>
                   <el-button
                     :type="editorMode === 'split' ? 'primary' : 'default'"
@@ -222,13 +222,13 @@
                     @click="editorMode = 'split'"
                   >
                     <el-icon><Operation /></el-icon>
-                    分屏
+                    {{ t('project.editor.split_mode') }}
                   </el-button>
                 </el-button-group>
 
                 <el-button size="small" @click="insertTemplate">
                   <el-icon><Document /></el-icon>
-                  插入模板
+                  {{ t('project.editor.insert_template') }}
                 </el-button>
                 
                 <el-upload
@@ -253,14 +253,14 @@
                     v-model="formData.content"
                     type="textarea"
                     :rows="18"
-                    placeholder="请输入项目详细内容，支持Markdown格式...&#10;提示：可以直接粘贴图片或视频文件"
+                    :placeholder="t('project.placeholders.enter_project_content')"
                     resize="none"
                     @paste="handlePaste"
                   />
                   
                   <!-- 附件预览区域 -->
                   <div v-if="hasAttachments" class="attachments-section">
-                    <div class="section-title">已添加的图片和视频</div>
+                    <div class="section-title">{{ t('project.editor.attachments_added') }}</div>
                     <div class="attachments-grid">
                       <!-- 图片预览 -->
                       <div v-for="(image, index) in formData.attachments.images" :key="`img-${index}`" class="attachment-item image-item">
@@ -300,9 +300,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
+        <el-button @click="handleClose">{{ t('project.actions_buttons.cancel') }}</el-button>
         <el-button type="primary" @click="handleSave" :loading="saving">
-          {{ project ? '保存' : '创建' }}
+          {{ project ? t('project.actions_buttons.save') : t('project.actions_buttons.create') }}
         </el-button>
       </div>
     </template>
@@ -366,24 +366,24 @@ const formData = reactive({
 
 const formRules = {
   title: [
-    { required: true, message: '请输入项目名称', trigger: 'blur' },
-    { min: 2, max: 100, message: '项目名称长度应在2-100个字符', trigger: 'blur' }
+    { required: true, message: t('project.validation.project_name_required'), trigger: 'blur' },
+    { min: 2, max: 100, message: t('project.validation.project_name_length'), trigger: 'blur' }
   ],
   description: [
-    { required: true, message: '请输入项目描述', trigger: 'blur' },
-    { min: 10, max: 500, message: '项目描述长度应在10-500个字符', trigger: 'blur' }
+    { required: true, message: t('project.validation.project_description_required'), trigger: 'blur' },
+    { min: 10, max: 500, message: t('project.validation.project_description_length'), trigger: 'blur' }
   ],
   status: [
-    { required: true, message: '请选择项目状态', trigger: 'change' }
+    { required: true, message: t('project.validation.status_required'), trigger: 'change' }
   ],
   priority: [
-    { required: true, message: '请选择优先级', trigger: 'change' }
+    { required: true, message: t('project.validation.priority_required'), trigger: 'change' }
   ]
 }
 
 // 计算属性
 const renderedContent = computed(() => {
-  if (!formData.content) return '<p class="empty-preview">暂无内容</p>'
+  if (!formData.content) return `<p class="empty-preview">${t('project.editor.empty_preview')}</p>`
 
   // 配置marked
   marked.setOptions({
@@ -590,58 +590,10 @@ const removeTag = (index) => {
 }
 
 const insertTemplate = () => {
-  const template = `# 项目简介
-
-简要描述这个AI项目的功能和目标。
-
-## 项目背景
-
-- 为什么要做这个项目？
-- 解决了什么问题？
-
-## 主要功能
-
-- [ ] 功能1
-- [ ] 功能2
-- [ ] 功能3
-
-## 技术亮点
-
-- 使用了哪些AI技术？
-- 有哪些创新点？
-
-## 开发过程
-
-### 第一阶段：构思和设计
-- 需求分析
-- 技术选型
-- 原型设计
-
-### 第二阶段：开发实现
-- 核心功能开发
-- AI模型集成
-- 测试优化
-
-### 第三阶段：部署上线
-- 部署配置
-- 性能调优
-- 用户反馈
-
-## 遇到的挑战
-
-- 技术挑战1及解决方案
-- 技术挑战2及解决方案
-
-## 收获与反思
-
-- 学到了什么？
-- 下次可以怎么改进？
-
-## 相关链接
-
-- [源码仓库](${formData.github_repo || 'https://github.com/username/repo'})
-- [在线演示](${formData.demo_url || 'https://demo.example.com'})
-`
+  const template = t('project.template.default_content')
+    .replace('{{github_repo}}', formData.github_repo || 'https://github.com/username/repo')
+    .replace('{{demo_url}}', formData.demo_url || 'https://demo.example.com')
+  
   formData.content = template
 }
 
@@ -662,11 +614,11 @@ const handleSave = async () => {
       response = await axios.post('/api/projects', data)
     }
 
-    ElMessage.success(props.project ? '项目更新成功' : '项目创建成功')
+    ElMessage.success(props.project ? t('project.messages.project_update_success') : t('project.messages.project_create_success'))
     emit('saved', response.data.project)
   } catch (error) {
     console.error('保存项目失败:', error)
-    ElMessage.error(error.response?.data?.message || '保存项目失败')
+    ElMessage.error(error.response?.data?.message || t('project.messages.save_project_failed'))
   } finally {
     saving.value = false
   }

@@ -205,6 +205,13 @@
       </div>
     </div>
   </div>
+
+  <!-- 项目编辑对话框 -->
+  <ProjectEditDialog
+    v-model="showEditDialog"
+    :project="project"
+    @saved="handleProjectSaved"
+  />
 </template>
 
 <script setup>
@@ -218,6 +225,7 @@ import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
 import dayjs from 'dayjs'
 import CommentsSection from '@/components/comment/CommentsSection.vue'
+import ProjectEditDialog from '@/components/admin/ProjectEditDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -227,6 +235,7 @@ const { t } = useI18n()
 // 状态
 const project = ref(null)
 const loading = ref(false)
+const showEditDialog = ref(false)
 
 // 计算属性
 const renderedContent = computed(() => {
@@ -323,11 +332,16 @@ const fetchProject = async () => {
 
 
 const editProject = () => {
-  // 跳转到管理页面并传递编辑参数
-  router.push({
-    path: '/admin',
-    query: { edit: project.value.id }
-  })
+  // 直接在当前页面打开编辑对话框
+  showEditDialog.value = true
+}
+
+// 处理项目保存
+const handleProjectSaved = async (savedProject) => {
+  // 更新当前页面的项目数据
+  project.value = savedProject
+  showEditDialog.value = false
+  ElMessage.success(t('admin.project_saved'))
 }
 
 const deleteProject = async () => {
