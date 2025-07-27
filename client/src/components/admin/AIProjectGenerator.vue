@@ -326,7 +326,7 @@ const getPriorityTagType = (priority) => {
 
 <style lang="scss" scoped>
 .ai-generate-container {
-  padding: 20px 0;
+  padding: 20px 24px;
 }
 
 .ai-step {
@@ -341,8 +341,8 @@ const getPriorityTagType = (priority) => {
 }
 
 .ai-examples {
-  margin-top: 20px;
-  padding: 16px;
+  margin-top: 24px;
+  padding: 20px;
   background: #f8f9fa;
   border-radius: 8px;
 }
@@ -351,7 +351,7 @@ const getPriorityTagType = (priority) => {
   font-size: 14px;
   font-weight: 600;
   color: #606266;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .examples-list {
@@ -393,18 +393,20 @@ const getPriorityTagType = (priority) => {
 }
 
 .generated-project-preview {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .project-card {
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 20px 24px 16px;
 }
 
 .project-title {
@@ -414,7 +416,7 @@ const getPriorityTagType = (priority) => {
 }
 
 .project-details {
-  padding: 16px 0;
+  padding: 0 24px 20px;
 }
 
 .detail-row {
