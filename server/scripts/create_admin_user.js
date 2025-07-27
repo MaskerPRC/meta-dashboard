@@ -175,7 +175,7 @@ async function main() {
 }
 
 // 执行脚本
-if (process.argv[1] === __filename) {
+if (require.main === module) {
   main();
 }
 
