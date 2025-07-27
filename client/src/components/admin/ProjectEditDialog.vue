@@ -230,6 +230,19 @@
                   <el-icon><Document /></el-icon>
                   插入模板
                 </el-button>
+                
+                <el-upload
+                  :auto-upload="false"
+                  :show-file-list="false"
+                  :on-change="handleFileChange"
+                  accept="image/*,video/*"
+                  style="display: inline-block; margin-left: 8px;"
+                >
+                  <el-button size="small" :loading="uploading">
+                    <el-icon><Picture /></el-icon>
+                    {{ t('project.attachments.upload') }}
+                  </el-button>
+                </el-upload>
               </div>
 
               <!-- 编辑器内容 -->
@@ -240,9 +253,38 @@
                     v-model="formData.content"
                     type="textarea"
                     :rows="18"
-                    placeholder="请输入项目详细内容，支持Markdown格式..."
+                    placeholder="请输入项目详细内容，支持Markdown格式...&#10;提示：可以直接粘贴图片或视频文件"
                     resize="none"
+                    @paste="handlePaste"
                   />
+                  
+                  <!-- 附件预览区域 -->
+                  <div v-if="hasAttachments" class="attachments-section">
+                    <div class="section-title">已添加的图片和视频</div>
+                    <div class="attachments-grid">
+                      <!-- 图片预览 -->
+                      <div v-for="(image, index) in formData.attachments.images" :key="`img-${index}`" class="attachment-item image-item">
+                        <img :src="image.url" :alt="image.filename" />
+                        <div class="attachment-overlay">
+                          <span class="filename">{{ image.filename }}</span>
+                          <el-button type="danger" size="small" @click="removeAttachment('images', index)">
+                            <el-icon><Delete /></el-icon>
+                          </el-button>
+                        </div>
+                      </div>
+                      
+                      <!-- 视频预览 -->
+                      <div v-for="(video, index) in formData.attachments.videos" :key="`vid-${index}`" class="attachment-item video-item">
+                        <video :src="video.url" preload="metadata"></video>
+                        <div class="attachment-overlay">
+                          <span class="filename">{{ video.filename }}</span>
+                          <el-button type="danger" size="small" @click="removeAttachment('videos', index)">
+                            <el-icon><Delete /></el-icon>
+                          </el-button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- 预览模式 -->
@@ -275,7 +317,7 @@ import { marked } from 'marked'
 import hljs from 'highlight.js'
 import axios from '../../utils/axios'
 import {
-  Edit, View, Operation, Document
+  Edit, View, Operation, Document, Picture, Delete
 } from '@element-plus/icons-vue'
 
 const { t } = useI18n()
@@ -299,6 +341,7 @@ const techInputRef = ref(null)
 const tagInputRef = ref(null)
 const saving = ref(false)
 const editorMode = ref('edit')
+const uploading = ref(false)
 
 const showTechInput = ref(false)
 const newTech = ref('')
@@ -317,7 +360,8 @@ const formData = reactive({
   start_date: '',
   due_date: '',
   tech_stack: [],
-  tags: []
+  tags: [],
+  attachments: { images: [], videos: [] }
 })
 
 const formRules = {
@@ -358,6 +402,10 @@ const renderedContent = computed(() => {
   return marked(formData.content)
 })
 
+const hasAttachments = computed(() => {
+  return formData.attachments.images.length > 0 || formData.attachments.videos.length > 0
+})
+
 // 方法
 const resetForm = () => {
   Object.assign(formData, {
@@ -372,12 +420,124 @@ const resetForm = () => {
     start_date: '',
     due_date: '',
     tech_stack: [],
-    tags: []
+    tags: [],
+    attachments: { images: [], videos: [] }
   })
 
   if (formRef.value) {
     formRef.value.clearValidate()
   }
+}
+
+// 文件处理方法
+const validateFile = (file) => {
+  const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  const allowedVideoTypes = ['video/mp4', 'video/webm']
+  
+  if (file.type.startsWith('image/')) {
+    if (!allowedImageTypes.includes(file.type)) {
+      ElMessage.error(t('project.attachments.supported_image_formats'))
+      return false
+    }
+    const isLt5M = file.size / 1024 / 1024 < 5
+    if (!isLt5M) {
+      ElMessage.error(t('project.attachments.max_image_size'))
+      return false
+    }
+  } else if (file.type.startsWith('video/')) {
+    if (!allowedVideoTypes.includes(file.type)) {
+      ElMessage.error(t('project.attachments.supported_video_formats'))
+      return false
+    }
+    const isLt50M = file.size / 1024 / 1024 < 50
+    if (!isLt50M) {
+      ElMessage.error(t('project.attachments.max_video_size'))
+      return false
+    }
+  } else {
+    ElMessage.error(t('project.attachments.invalid_format'))
+    return false
+  }
+  
+  return true
+}
+
+const uploadFile = async (file) => {
+  if (uploading.value) {
+    ElMessage.warning(t('project.attachments.uploading'))
+    return
+  }
+  
+  if (!validateFile(file)) {
+    return
+  }
+  
+  try {
+    uploading.value = true
+    const uploadFormData = new FormData()
+    uploadFormData.append('files', file)
+    
+    const response = await axios.post('/api/upload', uploadFormData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    
+    const { images, videos, errors } = response.data.data
+    
+    if (errors.length > 0) {
+      errors.forEach(error => {
+        ElMessage.error(`${error.filename}: ${error.error}`)
+      })
+    }
+    
+    if (images.length > 0) {
+      formData.attachments.images.push(...images)
+      ElMessage.success(`${t('project.attachments.upload_success')} ${images.length} ${t('project.attachments.images')}`)
+    }
+    
+    if (videos.length > 0) {
+      formData.attachments.videos.push(...videos)
+      ElMessage.success(`${t('project.attachments.upload_success')} ${videos.length} ${t('project.attachments.videos')}`)
+    }
+    
+  } catch (error) {
+    console.error('文件上传失败:', error)
+    ElMessage.error(error.response?.data?.message || t('project.attachments.upload_failed'))
+  } finally {
+    uploading.value = false
+  }
+}
+
+const handleFileChange = (file) => {
+  uploadFile(file.raw)
+}
+
+const handlePaste = async (event) => {
+  const items = event.clipboardData?.items
+  if (!items) return
+  
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+    
+    if (item.type.indexOf('image') !== -1) {
+      event.preventDefault()
+      const file = item.getAsFile()
+      if (file) {
+        await uploadFile(file)
+      }
+    } else if (item.kind === 'file') {
+      event.preventDefault()
+      const file = item.getAsFile()
+      if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+        await uploadFile(file)
+      }
+    }
+  }
+}
+
+const removeAttachment = (type, index) => {
+  formData.attachments[type].splice(index, 1)
 }
 
 const loadProjectData = () => {
@@ -394,7 +554,11 @@ const loadProjectData = () => {
       start_date: props.project.start_date || '',
       due_date: props.project.due_date || '',
       tech_stack: props.project.tech_stack ? [...props.project.tech_stack] : [],
-      tags: props.project.tags ? [...props.project.tags] : []
+      tags: props.project.tags ? [...props.project.tags] : [],
+      attachments: props.project.attachments ? {
+        images: [...(props.project.attachments.images || [])],
+        videos: [...(props.project.attachments.videos || [])]
+      } : { images: [], videos: [] }
     })
   } else {
     resetForm()
@@ -703,5 +867,72 @@ watch(showTagInput, (newVal) => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.attachments-section {
+  margin-top: 16px;
+  border-top: 1px solid var(--ai-border);
+  padding-top: 16px;
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ai-text-primary);
+    margin-bottom: 12px;
+  }
+
+  .attachments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .attachment-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--ai-bg-secondary);
+    border: 1px solid var(--ai-border);
+    aspect-ratio: 1;
+
+    img, video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .attachment-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      color: white;
+
+      .filename {
+        font-size: 12px;
+        text-align: center;
+        word-break: break-all;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    &:hover .attachment-overlay {
+      opacity: 1;
+    }
+  }
 }
 </style>

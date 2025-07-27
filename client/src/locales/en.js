@@ -310,6 +310,26 @@ export default {
       medium: 'Medium',
       high: 'High',
       urgent: 'Urgent'
+    },
+    
+    // Attachments functionality
+    attachments: {
+      title: 'Project Images and Videos',
+      images: 'Images',
+      videos: 'Videos',
+      upload: 'Upload Images/Videos',
+      uploading: 'Uploading...',
+      upload_success: 'Upload successful',
+      upload_failed: 'Upload failed',
+      paste_hint: 'Tip: You can directly paste image or video files',
+      remove: 'Remove',
+      preview: 'Preview',
+      file_too_large: 'File size exceeds limit',
+      invalid_format: 'Unsupported file format',
+      max_image_size: 'Image size cannot exceed 5MB',
+      max_video_size: 'Video size cannot exceed 50MB',
+      supported_image_formats: 'Supports JPG, PNG, GIF, WebP formats',
+      supported_video_formats: 'Supports MP4, WebM formats'
     }
   },
   

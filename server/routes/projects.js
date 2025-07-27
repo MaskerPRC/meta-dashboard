@@ -126,9 +126,19 @@ function saveProjectToDatabase(projectData) {
       INSERT INTO projects (
         title, description, content, status, priority, start_date,
         due_date, progress, tech_stack, github_repo, demo_url,
-        tags, order_index, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        tags, order_index, attachments, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `;
+    
+    // 处理附件数据
+    let attachmentsStr = '{"images":[],"videos":[]}';
+    if (projectData.attachments && typeof projectData.attachments === 'object') {
+      try {
+        attachmentsStr = JSON.stringify(projectData.attachments);
+      } catch (e) {
+        console.warn('AI生成项目附件数据格式错误:', e);
+      }
+    }
     
     const params = [
       projectData.title,
@@ -143,7 +153,8 @@ function saveProjectToDatabase(projectData) {
       projectData.github_repo,
       projectData.demo_url,
       Array.isArray(projectData.tags) ? projectData.tags.join(',') : projectData.tags,
-      projectData.order_index
+      projectData.order_index,
+      attachmentsStr
     ];
     
     db.run(sql, params, function(err) {
@@ -164,7 +175,8 @@ function saveProjectToDatabase(projectData) {
         resolve({
           ...newProject,
           tech_stack: newProject.tech_stack ? newProject.tech_stack.split(',') : [],
-          tags: newProject.tags ? newProject.tags.split(',') : []
+          tags: newProject.tags ? newProject.tags.split(',') : [],
+          attachments: newProject.attachments ? JSON.parse(newProject.attachments) : { images: [], videos: [] }
         });
       });
     });
@@ -178,7 +190,7 @@ router.get('/', (req, res) => {
   let sql = `
     SELECT id, title, description, status, priority, progress, 
            tech_stack, github_repo, demo_url, tags, order_index,
-           created_at, updated_at
+           attachments, created_at, updated_at
     FROM projects 
     WHERE 1=1
   `;
@@ -248,7 +260,8 @@ router.get('/', (req, res) => {
         projects: projects.map(project => ({
           ...project,
           tech_stack: project.tech_stack ? project.tech_stack.split(',') : [],
-          tags: project.tags ? project.tags.split(',') : []
+          tags: project.tags ? project.tags.split(',') : [],
+          attachments: project.attachments ? JSON.parse(project.attachments) : { images: [], videos: [] }
         })),
         pagination: {
           page: parseInt(page),
@@ -278,7 +291,8 @@ router.get('/:id', (req, res) => {
     res.json({
       ...project,
       tech_stack: project.tech_stack ? project.tech_stack.split(',') : [],
-      tags: project.tags ? project.tags.split(',') : []
+      tags: project.tags ? project.tags.split(',') : [],
+      attachments: project.attachments ? JSON.parse(project.attachments) : { images: [], videos: [] }
     });
   });
 });
@@ -288,7 +302,7 @@ router.post('/', requireAdmin, (req, res) => {
   const {
     title, description, content, status = 'idea', priority = 'medium',
     start_date, due_date, progress = 0, tech_stack, github_repo,
-    demo_url, tags, order_index = 0
+    demo_url, tags, order_index = 0, attachments
   } = req.body;
   
   if (!title) {
@@ -299,9 +313,19 @@ router.post('/', requireAdmin, (req, res) => {
     INSERT INTO projects (
       title, description, content, status, priority, start_date,
       due_date, progress, tech_stack, github_repo, demo_url,
-      tags, order_index, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      tags, order_index, attachments, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
   `;
+  
+  // 处理附件数据
+  let attachmentsStr = '{"images":[],"videos":[]}';
+  if (attachments && typeof attachments === 'object') {
+    try {
+      attachmentsStr = JSON.stringify(attachments);
+    } catch (e) {
+      console.warn('附件数据格式错误:', e);
+    }
+  }
   
   const params = [
     title, description, content, status, priority, start_date,
@@ -309,7 +333,7 @@ router.post('/', requireAdmin, (req, res) => {
     Array.isArray(tech_stack) ? tech_stack.join(',') : tech_stack,
     github_repo, demo_url,
     Array.isArray(tags) ? tags.join(',') : tags,
-    order_index
+    order_index, attachmentsStr
   ];
   
   db.run(sql, params, function(err) {
@@ -330,7 +354,8 @@ router.post('/', requireAdmin, (req, res) => {
         project: {
           ...newProject,
           tech_stack: newProject.tech_stack ? newProject.tech_stack.split(',') : [],
-          tags: newProject.tags ? newProject.tags.split(',') : []
+          tags: newProject.tags ? newProject.tags.split(',') : [],
+          attachments: newProject.attachments ? JSON.parse(newProject.attachments) : { images: [], videos: [] }
         }
       });
     });
@@ -343,7 +368,7 @@ router.put('/:id', requireAdmin, (req, res) => {
   const {
     title, description, content, status, priority, start_date,
     due_date, completion_date, progress, tech_stack, github_repo,
-    demo_url, tags, order_index
+    demo_url, tags, order_index, attachments
   } = req.body;
   
   if (!title) {
@@ -355,9 +380,19 @@ router.put('/:id', requireAdmin, (req, res) => {
       title = ?, description = ?, content = ?, status = ?, priority = ?,
       start_date = ?, due_date = ?, completion_date = ?, progress = ?,
       tech_stack = ?, github_repo = ?, demo_url = ?, tags = ?,
-      order_index = ?, updated_at = CURRENT_TIMESTAMP
+      order_index = ?, attachments = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `;
+  
+  // 处理附件数据
+  let attachmentsStr = '{"images":[],"videos":[]}';
+  if (attachments && typeof attachments === 'object') {
+    try {
+      attachmentsStr = JSON.stringify(attachments);
+    } catch (e) {
+      console.warn('附件数据格式错误:', e);
+    }
+  }
   
   const params = [
     title, description, content, status, priority, start_date,
@@ -365,7 +400,7 @@ router.put('/:id', requireAdmin, (req, res) => {
     Array.isArray(tech_stack) ? tech_stack.join(',') : tech_stack,
     github_repo, demo_url,
     Array.isArray(tags) ? tags.join(',') : tags,
-    order_index, id
+    order_index, attachmentsStr, id
   ];
   
   // 先获取更新前的数据
@@ -414,7 +449,8 @@ router.put('/:id', requireAdmin, (req, res) => {
           project: {
             ...updatedProject,
             tech_stack: updatedProject.tech_stack ? updatedProject.tech_stack.split(',') : [],
-            tags: updatedProject.tags ? updatedProject.tags.split(',') : []
+            tags: updatedProject.tags ? updatedProject.tags.split(',') : [],
+            attachments: updatedProject.attachments ? JSON.parse(updatedProject.attachments) : { images: [], videos: [] }
           }
         });
       });

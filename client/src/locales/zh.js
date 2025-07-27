@@ -310,6 +310,26 @@ export default {
       medium: '中',
       high: '高',
       urgent: '紧急'
+    },
+    
+    // 附件功能
+    attachments: {
+      title: '项目图片和视频',
+      images: '图片',
+      videos: '视频',
+      upload: '上传图片/视频',
+      uploading: '上传中...',
+      upload_success: '上传成功',
+      upload_failed: '上传失败',
+      paste_hint: '提示：可以直接粘贴图片或视频文件',
+      remove: '删除',
+      preview: '预览',
+      file_too_large: '文件大小超出限制',
+      invalid_format: '不支持的文件格式',
+      max_image_size: '图片大小不能超过 5MB',
+      max_video_size: '视频大小不能超过 50MB',
+      supported_image_formats: '支持 JPG、PNG、GIF、WebP 格式',
+      supported_video_formats: '支持 MP4、WebM 格式'
     }
   },
   

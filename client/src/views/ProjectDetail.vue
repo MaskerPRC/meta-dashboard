@@ -136,6 +136,53 @@
           <div v-else class="empty-content">
             <el-empty description="暂无详细内容" />
           </div>
+          
+          <!-- 项目附件 -->
+          <div v-if="hasAttachments" class="project-attachments">
+            <h3>{{ t('project.attachments.title') }}</h3>
+            
+            <!-- 图片展示 -->
+            <div v-if="project.attachments.images.length > 0" class="attachments-section">
+              <h4>{{ t('project.attachments.images') }}</h4>
+              <div class="images-grid">
+                <div 
+                  v-for="(image, index) in project.attachments.images" 
+                  :key="`img-${index}`"
+                  class="image-item"
+                  @click="previewImage(image, index)"
+                >
+                  <img :src="image.url" :alt="image.filename" />
+                  <div class="image-overlay">
+                    <span class="filename">{{ image.filename }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 视频展示 -->
+            <div v-if="project.attachments.videos.length > 0" class="attachments-section">
+              <h4>视频</h4>
+              <div class="videos-grid">
+                <div 
+                  v-for="(video, index) in project.attachments.videos" 
+                  :key="`vid-${index}`"
+                  class="video-item"
+                >
+                  <video 
+                    :src="video.url" 
+                    controls 
+                    preload="metadata"
+                    :poster="video.poster"
+                  >
+                    您的浏览器不支持视频播放。
+                  </video>
+                  <div class="video-info">
+                    <span class="filename">{{ video.filename }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- 评论区域 -->
@@ -187,6 +234,11 @@ const renderedContent = computed(() => {
   return marked(project.value.content)
 })
 
+const hasAttachments = computed(() => {
+  return project.value?.attachments && 
+         (project.value.attachments.images?.length > 0 || project.value.attachments.videos?.length > 0)
+})
+
 // 方法
 const getStatusName = (status) => {
   const statusMap = {
@@ -215,6 +267,32 @@ const getPriorityName = (priority) => {
 
 const formatDate = (dateString) => {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm')
+}
+
+const previewImage = (image, index) => {
+  // 使用Element Plus的图片预览功能
+  const images = project.value.attachments.images.map(img => img.url)
+  
+  // 创建预览窗口
+  const viewer = document.createElement('div')
+  viewer.className = 'image-viewer-overlay'
+  viewer.innerHTML = `
+    <div class="image-viewer">
+      <img src="${image.url}" alt="${image.filename}" />
+      <div class="image-viewer-toolbar">
+        <span class="image-info">${image.filename}</span>
+        <button class="close-btn" onclick="this.closest('.image-viewer-overlay').remove()">✕</button>
+      </div>
+    </div>
+  `
+  
+  viewer.onclick = (e) => {
+    if (e.target === viewer) {
+      viewer.remove()
+    }
+  }
+  
+  document.body.appendChild(viewer)
 }
 
 
@@ -785,6 +863,189 @@ onMounted(async () => {
             margin-top: 12px;
           }
         }
+      }
+    }
+  }
+}
+
+.project-attachments {
+  margin-top: 32px;
+  border-top: 1px solid var(--ai-border);
+  padding-top: 24px;
+
+  h3 {
+    color: var(--ai-text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .attachments-section {
+    margin-bottom: 32px;
+
+    h4 {
+      color: var(--ai-text-secondary);
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .image-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      border: 1px solid var(--ai-border);
+
+      &:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .image-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        padding: 16px 12px 12px;
+        color: white;
+
+        .filename {
+          font-size: 14px;
+          font-weight: 500;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+          word-break: break-all;
+        }
+      }
+    }
+
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .video-item {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--ai-border);
+      background: var(--ai-bg-secondary);
+
+      video {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        display: block;
+      }
+
+      .video-info {
+        padding: 12px 16px;
+        background: var(--ai-bg-primary);
+        border-top: 1px solid var(--ai-border);
+
+        .filename {
+          font-size: 14px;
+          color: var(--ai-text-primary);
+          font-weight: 500;
+          word-break: break-all;
+        }
+      }
+    }
+  }
+}
+
+/* 图片预览样式 */
+:global(.image-viewer-overlay) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+:global(.image-viewer) {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  cursor: default;
+}
+
+:global(.image-viewer img) {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+:global(.image-viewer-toolbar) {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: white;
+}
+
+:global(.image-info) {
+  font-size: 14px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:global(.close-btn) {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+:global(.close-btn:hover) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .project-attachments {
+    .attachments-section {
+      .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+      }
+
+      .videos-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
     }
   }
