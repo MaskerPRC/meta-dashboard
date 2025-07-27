@@ -31,7 +31,7 @@
               <div class="stat-label">{{ $t('admin.stats.total_projects') }}</div>
             </div>
           </div>
-          
+
           <div class="stat-card ai-card">
             <div class="stat-icon users">
               <el-icon size="32"><User /></el-icon>
@@ -41,7 +41,7 @@
               <div class="stat-label">{{ $t('admin.stats.total_users') }}</div>
             </div>
           </div>
-          
+
           <div class="stat-card ai-card">
             <div class="stat-icon comments">
               <el-icon size="32"><ChatDotSquare /></el-icon>
@@ -51,7 +51,7 @@
               <div class="stat-label">{{ $t('admin.stats.total_comments') }}</div>
             </div>
           </div>
-          
+
                      <div class="stat-card ai-card">
              <div class="stat-icon progress">
                <el-icon size="32"><ArrowUp /></el-icon>
@@ -86,7 +86,7 @@
                         <el-icon><Search /></el-icon>
                       </template>
                     </el-input>
-                    
+
                     <el-select
                       v-model="projectStatusFilter"
                       placeholder="状态筛选"
@@ -103,7 +103,7 @@
                       <el-option label="暂停中" value="paused" />
                     </el-select>
                   </div>
-                  
+
                   <div class="toolbar-right">
                     <el-button @click="exportProjects">
                       <el-icon><Download /></el-icon>
@@ -127,9 +127,9 @@
                     empty-text="暂无项目数据"
                   >
                     <el-table-column type="selection" width="55" />
-                    
+
                     <el-table-column prop="id" label="ID" width="80" />
-                    
+
                     <el-table-column prop="title" label="项目名称" min-width="200">
                       <template #default="scope">
                         <div class="project-title-cell">
@@ -140,7 +140,7 @@
                         </div>
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="status" label="状态" width="100">
                       <template #default="scope">
                         <el-tag :class="['status-tag', scope.row.status]" size="small">
@@ -148,7 +148,7 @@
                         </el-tag>
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="priority" label="优先级" width="100">
                       <template #default="scope">
                         <el-tag :class="['priority-tag', scope.row.priority]" size="small">
@@ -156,24 +156,24 @@
                         </el-tag>
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="progress" label="进度" width="120">
                       <template #default="scope">
-                        <el-progress 
-                          :percentage="scope.row.progress" 
+                        <el-progress
+                          :percentage="scope.row.progress"
                           :stroke-width="6"
                           :show-text="true"
                           :format="(percentage) => `${percentage}%`"
                         />
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="created_at" label="创建时间" width="120">
                       <template #default="scope">
                         {{ formatDate(scope.row.created_at) }}
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column label="操作" width="200">
                       <template #default="scope">
                         <el-button size="small" @click="editProject(scope.row)">
@@ -182,9 +182,9 @@
                         <el-button size="small" @click="viewProject(scope.row.id)">
                           查看
                         </el-button>
-                        <el-button 
-                          size="small" 
-                          type="danger" 
+                        <el-button
+                          size="small"
+                          type="danger"
                           @click="deleteProject(scope.row)"
                         >
                           删除
@@ -221,7 +221,7 @@
                     empty-text="暂无用户数据"
                   >
                     <el-table-column prop="id" label="ID" width="80" />
-                    
+
                     <el-table-column prop="avatar_url" label="头像" width="80">
                       <template #default="scope">
                         <el-avatar :src="scope.row.avatar_url" :size="40">
@@ -229,30 +229,30 @@
                         </el-avatar>
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="username" label="用户名" min-width="120" />
-                    
+
                     <el-table-column prop="display_name" label="显示名称" min-width="120" />
-                    
+
                     <el-table-column prop="email" label="邮箱" min-width="180" />
-                    
+
                     <el-table-column prop="phone" label="手机号" width="120">
                       <template #default="scope">
                         {{ scope.row.phone || '-' }}
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="provider" label="认证方式" width="100">
                       <template #default="scope">
-                        <el-tag 
-                          :type="getProviderTagType(scope.row)" 
+                        <el-tag
+                          :type="getProviderTagType(scope.row)"
                           size="small"
                         >
                           {{ getProviderName(scope.row) }}
                         </el-tag>
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="is_admin" label="管理员" width="80">
                       <template #default="scope">
                         <el-switch
@@ -262,31 +262,31 @@
                         />
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="last_login" label="最后登录" width="120">
                       <template #default="scope">
                         {{ scope.row.last_login ? formatDateTime(scope.row.last_login) : '-' }}
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="created_at" label="注册时间" width="120">
                       <template #default="scope">
                         {{ formatDate(scope.row.created_at) }}
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column label="操作" width="160">
                       <template #default="scope">
-                        <el-button 
+                        <el-button
                           v-if="isLocalUser(scope.row)"
-                          size="small" 
+                          size="small"
                           type="primary"
                           @click="resetUserPassword(scope.row)"
                         >
                           重置密码
                         </el-button>
-                        <el-button 
-                          size="small" 
+                        <el-button
+                          size="small"
                           type="danger"
                           @click="deleteUser(scope.row)"
                           :disabled="scope.row.id === authStore.user?.id"
@@ -311,7 +311,7 @@
                     empty-text="暂无评论数据"
                   >
                     <el-table-column prop="id" label="ID" width="80" />
-                    
+
                     <el-table-column prop="project.title" label="项目" min-width="150">
                       <template #default="scope">
                         <el-link @click="viewProject(scope.row.project.id)" type="primary">
@@ -319,9 +319,9 @@
                         </el-link>
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="user.username" label="用户" width="120" />
-                    
+
                     <el-table-column prop="content" label="评论内容" min-width="300">
                       <template #default="scope">
                         <div class="comment-content">
@@ -329,7 +329,7 @@
                           <div v-if="scope.row.content" class="text-content">
                             {{ scope.row.content }}
                           </div>
-                          
+
                           <!-- 附件显示 -->
                           <div v-if="hasAttachments(scope.row)" class="attachments-preview">
                             <!-- 图片附件 -->
@@ -353,7 +353,7 @@
                                 </div>
                               </div>
                             </div>
-                            
+
                             <!-- 视频附件 -->
                             <div v-if="scope.row.attachments?.videos?.length" class="videos-preview">
                               <div class="attachment-label">
@@ -373,18 +373,18 @@
                         </div>
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column prop="created_at" label="发布时间" width="120">
                       <template #default="scope">
                         {{ formatDateTime(scope.row.created_at) }}
                       </template>
                     </el-table-column>
-                    
+
                     <el-table-column label="操作" width="100">
                       <template #default="scope">
-                        <el-button 
-                          size="small" 
-                          type="danger" 
+                        <el-button
+                          size="small"
+                          type="danger"
                           @click="deleteComment(scope.row)"
                         >
                           删除
@@ -425,27 +425,29 @@
                           </el-upload>
                         </div>
                       </el-form-item>
-                      
+
                       <el-form-item label="群标题">
                         <el-input
-                          v-model="siteConfig.wechat_group_title?.value"
+                          :value="siteConfig.wechat_group_title?.value || ''"
+                          @input="(value) => { if (siteConfig.wechat_group_title) siteConfig.wechat_group_title.value = value }"
                           placeholder="请输入微信群标题"
                           style="width: 300px"
                           @blur="updateConfig('wechat_group_title', siteConfig.wechat_group_title?.value)"
                         />
                       </el-form-item>
-                      
+
                       <el-form-item label="群描述">
                         <el-input
                           type="textarea"
-                          v-model="siteConfig.wechat_group_description?.value"
+                          :value="siteConfig.wechat_group_description?.value || ''"
+                          @input="(value) => { if (siteConfig.wechat_group_description) siteConfig.wechat_group_description.value = value }"
                           placeholder="请输入微信群描述"
                           :rows="3"
                           style="width: 400px"
                           @blur="updateConfig('wechat_group_description', siteConfig.wechat_group_description?.value)"
                         />
                       </el-form-item>
-                      
+
                       <el-form-item>
                         <el-button type="primary" @click="saveAllConfigs">保存所有配置</el-button>
                         <el-button @click="loadSiteConfig">重置</el-button>
@@ -466,7 +468,7 @@
       :project="editingProject"
       @saved="handleProjectSaved"
     />
-    
+
     <!-- AI项目生成对话框 -->
     <el-dialog
       v-model="showAIGenerate"
@@ -481,7 +483,7 @@
           <el-step title="AI生成" description="AI解析并生成项目结构" />
           <el-step title="预览确认" description="预览并确认生成的项目" />
         </el-steps>
-        
+
         <!-- 第一步：文本输入 -->
         <div v-if="aiGenerateStep === 0" class="ai-step">
           <div class="step-title">请描述您想要创建的项目：</div>
@@ -503,12 +505,12 @@
               </el-radio-group>
             </el-form-item>
           </el-form>
-          
+
           <div class="ai-examples">
             <div class="examples-title">💡 示例描述：</div>
             <div class="examples-list">
-              <el-tag 
-                v-for="example in aiExamples" 
+              <el-tag
+                v-for="example in aiExamples"
                 :key="example"
                 class="example-tag"
                 @click="aiForm.text = example"
@@ -519,15 +521,15 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 第二步：AI生成中 -->
         <div v-if="aiGenerateStep === 1" class="ai-step">
           <div class="ai-loading">
             <el-icon class="is-loading" style="font-size: 48px; color: #409eff;"><Loading /></el-icon>
             <div class="loading-text">AI正在分析您的描述...</div>
             <div class="loading-progress">
-              <el-progress 
-                :percentage="aiProgress" 
+              <el-progress
+                :percentage="aiProgress"
                 :stroke-width="8"
                 status="success"
                 style="width: 300px; margin-top: 20px;"
@@ -535,7 +537,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 第三步：预览确认 -->
         <div v-if="aiGenerateStep === 2" class="ai-step">
           <div class="step-title">AI生成的项目预览：</div>
@@ -547,32 +549,32 @@
                   <el-tag type="success">AI生成</el-tag>
                 </div>
               </template>
-              
+
               <div class="project-details">
                 <div class="detail-row">
                   <span class="label">项目描述：</span>
                   <span class="value">{{ generatedProject.description }}</span>
                 </div>
-                
+
                 <div class="detail-row">
                   <span class="label">状态：</span>
                   <el-tag :type="getStatusTagType(generatedProject.status)">
                     {{ getStatusText(generatedProject.status) }}
                   </el-tag>
                 </div>
-                
+
                 <div class="detail-row">
                   <span class="label">优先级：</span>
                   <el-tag :type="getPriorityTagType(generatedProject.priority)">
                     {{ getPriorityText(generatedProject.priority) }}
                   </el-tag>
                 </div>
-                
+
                 <div class="detail-row" v-if="generatedProject.tech_stack?.length">
                   <span class="label">技术栈：</span>
                   <div class="tech-tags">
-                    <el-tag 
-                      v-for="tech in generatedProject.tech_stack" 
+                    <el-tag
+                      v-for="tech in generatedProject.tech_stack"
                       :key="tech"
                       size="small"
                       style="margin-right: 8px;"
@@ -581,12 +583,12 @@
                     </el-tag>
                   </div>
                 </div>
-                
+
                 <div class="detail-row" v-if="generatedProject.tags?.length">
                   <span class="label">标签：</span>
                   <div class="tag-list">
-                    <el-tag 
-                      v-for="tag in generatedProject.tags" 
+                    <el-tag
+                      v-for="tag in generatedProject.tags"
                       :key="tag"
                       size="small"
                       type="info"
@@ -596,7 +598,7 @@
                     </el-tag>
                   </div>
                 </div>
-                
+
                 <div class="detail-row">
                   <span class="label">项目内容：</span>
                   <div class="content-preview">
@@ -608,27 +610,27 @@
           </div>
         </div>
       </div>
-      
+
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeAIGenerate">取消</el-button>
-          <el-button 
-            v-if="aiGenerateStep === 0" 
-            type="primary" 
+          <el-button
+            v-if="aiGenerateStep === 0"
+            type="primary"
             :disabled="!aiForm.text.trim()"
             @click="startAIGenerate"
           >
             开始生成
           </el-button>
-          <el-button 
-            v-if="aiGenerateStep === 2" 
+          <el-button
+            v-if="aiGenerateStep === 2"
             @click="aiGenerateStep = 0"
           >
             重新生成
           </el-button>
-          <el-button 
-            v-if="aiGenerateStep === 2" 
-            type="primary" 
+          <el-button
+            v-if="aiGenerateStep === 2"
+            type="primary"
             @click="saveAIGeneratedProject"
           >
             创建项目
@@ -710,27 +712,27 @@ const configLoading = ref(false)
 // 计算属性
 const filteredProjects = computed(() => {
   let filtered = projects.value
-  
+
   if (projectSearch.value) {
     const search = projectSearch.value.toLowerCase()
-    filtered = filtered.filter(project => 
+    filtered = filtered.filter(project =>
       project.title.toLowerCase().includes(search) ||
       project.description.toLowerCase().includes(search)
     )
   }
-  
+
   if (projectStatusFilter.value) {
     filtered = filtered.filter(project => project.status === projectStatusFilter.value)
   }
-  
+
   return filtered
 })
 
 const filteredUsers = computed(() => {
   if (!userSearch.value) return users.value
-  
+
   const search = userSearch.value.toLowerCase()
-  return users.value.filter(user => 
+  return users.value.filter(user =>
     user.username.toLowerCase().includes(search) ||
     user.display_name?.toLowerCase().includes(search) ||
     user.email?.toLowerCase().includes(search)
@@ -743,10 +745,10 @@ const startAIGenerate = async () => {
     ElMessage.warning('请输入项目描述')
     return
   }
-  
+
   aiGenerateStep.value = 1
   aiProgress.value = 0
-  
+
   // 模拟进度更新
   const progressInterval = setInterval(() => {
     aiProgress.value += 10
@@ -754,23 +756,23 @@ const startAIGenerate = async () => {
       clearInterval(progressInterval)
     }
   }, 200)
-  
+
   try {
     const response = await axios.post('/api/projects/ai-generate', {
       text: aiForm.text,
       language: aiForm.language
     })
-    
+
     if (response.data.project) {
       generatedProject.value = response.data.project
       aiProgress.value = 100
-      
+
       setTimeout(() => {
         aiGenerateStep.value = 2
         clearInterval(progressInterval)
       }, 500)
     }
-    
+
     ElMessage.success('AI项目生成成功！')
   } catch (error) {
     console.error('AI生成失败:', error)
@@ -783,7 +785,7 @@ const startAIGenerate = async () => {
 const saveAIGeneratedProject = async () => {
   try {
     const response = await axios.post('/api/projects', generatedProject.value)
-    
+
     if (response.data.project) {
       ElMessage.success('项目创建成功！')
       closeAIGenerate()
@@ -808,7 +810,7 @@ const closeAIGenerate = () => {
 const getStatusText = (status) => {
   const statusMap = {
     'idea': '构思中',
-    'planning': '规划中', 
+    'planning': '规划中',
     'development': '开发中',
     'testing': '测试中',
     'deployed': '已部署',
@@ -881,7 +883,7 @@ const fetchUsers = async () => {
     usersLoading.value = true
     isLoadingUsers.value = true // 设置加载标记
     const response = await axios.get('/api/admin/users')
-    
+
     // 确保is_admin字段为布尔值（兼容性处理）
     users.value = response.data.users.map(user => ({
       ...user,
@@ -961,15 +963,15 @@ const deleteProject = async (project) => {
         confirmButtonClass: 'el-button--danger'
       }
     )
-    
+
     await axios.delete(`/api/projects/${project.id}`)
-    
+
     // 从列表中移除项目
     const index = projects.value.findIndex(p => p.id === project.id)
     if (index !== -1) {
       projects.value.splice(index, 1)
     }
-    
+
     ElMessage.success('项目删除成功')
     await fetchStats()
   } catch (error) {
@@ -985,7 +987,7 @@ const handleBatchDelete = async () => {
     ElMessage.warning('请选择要删除的项目')
     return
   }
-  
+
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${selectedProjects.value.length} 个项目吗？此操作不可恢复。`,
@@ -997,16 +999,16 @@ const handleBatchDelete = async () => {
         confirmButtonClass: 'el-button--danger'
       }
     )
-    
+
     const projectIds = selectedProjects.value.map(p => p.id)
-    await axios.delete('/api/admin/projects/batch', { 
+    await axios.delete('/api/admin/projects/batch', {
       data: { ids: projectIds }
     })
-    
+
     // 从列表中移除已删除的项目
     projects.value = projects.value.filter(p => !projectIds.includes(p.id))
     selectedProjects.value = []
-    
+
     ElMessage.success('批量删除成功')
     await fetchStats()
   } catch (error) {
@@ -1022,7 +1024,7 @@ const exportProjects = async () => {
     const response = await axios.get('/api/admin/export/projects', {
       responseType: 'blob'
     })
-    
+
     // 创建下载链接
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
@@ -1032,7 +1034,7 @@ const exportProjects = async () => {
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
-    
+
     ElMessage.success('数据导出成功')
   } catch (error) {
     console.error('导出数据失败:', error)
@@ -1045,12 +1047,12 @@ const updateUserAdmin = async (user) => {
   if (isLoadingUsers.value) {
     return
   }
-  
+
   try {
     await axios.put(`/api/admin/users/${user.id}/admin`, {
       is_admin: user.is_admin
     })
-    
+
     ElMessage.success(`${user.is_admin ? '授予' : '取消'}管理员权限成功`)
   } catch (error) {
     console.error('更新用户权限失败:', error)
@@ -1072,15 +1074,15 @@ const deleteComment = async (comment) => {
         confirmButtonClass: 'el-button--danger'
       }
     )
-    
+
     await axios.delete(`/api/admin/comments/${comment.id}`)
-    
+
     // 从列表中移除评论
     const index = comments.value.findIndex(c => c.id === comment.id)
     if (index !== -1) {
       comments.value.splice(index, 1)
     }
-    
+
     ElMessage.success('评论删除成功')
     await fetchStats()
   } catch (error) {
@@ -1102,7 +1104,7 @@ const handleProjectSaved = async (project) => {
     // 添加新项目
     projects.value.unshift(project)
   }
-  
+
   showCreateProject.value = false
   editingProject.value = null
   await fetchStats()
@@ -1219,15 +1221,15 @@ const deleteUser = async (user) => {
         confirmButtonClass: 'el-button--danger'
       }
     )
-    
+
     await axios.delete(`/api/admin/users/${user.id}`)
-    
+
     // 从列表中移除用户
     const index = users.value.findIndex(u => u.id === user.id)
     if (index !== -1) {
       users.value.splice(index, 1)
     }
-    
+
     ElMessage.success('用户删除成功')
     await fetchStats()
   } catch (error) {
@@ -1270,7 +1272,7 @@ const saveAllConfigs = async () => {
     Object.keys(siteConfig.value).forEach(key => {
       configs[key] = siteConfig.value[key].value
     })
-    
+
     await axios.put('/api/config', { configs })
     ElMessage.success('所有配置保存成功')
   } catch (error) {
@@ -1297,7 +1299,7 @@ const beforeQRUpload = (file) => {
 const handleQRUpload = async (uploadFile) => {
   const formData = new FormData()
   formData.append('image', uploadFile.file)
-  
+
   try {
     // 这里应该调用图片上传API，暂时使用base64
     const reader = new FileReader()
@@ -1328,7 +1330,7 @@ onMounted(async () => {
     fetchComments(),
     loadSiteConfig()
   ])
-  
+
   // 检查是否有编辑项目的查询参数
   if (route.query.edit) {
     const projectId = parseInt(route.query.edit)
@@ -1345,18 +1347,18 @@ onMounted(async () => {
 .admin-page {
   min-height: calc(100vh - 70px);
   background: var(--ai-bg-secondary);
-  
+
   .container {
     padding: 40px 20px;
     max-width: 1400px;
   }
-  
+
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 32px;
-    
+
     .header-content {
       .page-title {
         font-size: 2.5rem;
@@ -1364,39 +1366,39 @@ onMounted(async () => {
         margin: 0 0 8px;
         color: var(--ai-text-primary);
       }
-      
+
       .page-subtitle {
         font-size: 1.125rem;
         color: var(--ai-text-secondary);
         margin: 0;
       }
     }
-    
+
     @media (max-width: 768px) {
       flex-direction: column;
       align-items: flex-start;
       gap: 16px;
-      
+
       .page-title {
         font-size: 2rem !important;
       }
     }
   }
-  
+
   .stats-section {
     margin-bottom: 32px;
-    
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
-      
+
       .stat-card {
         padding: 24px;
         display: flex;
         align-items: center;
         gap: 16px;
-        
+
         .stat-icon {
           width: 60px;
           height: 60px;
@@ -1404,28 +1406,28 @@ onMounted(async () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          
+
           &.projects {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
           }
-          
+
           &.users {
             background: linear-gradient(135deg, #f093fb, #f5576c);
             color: white;
           }
-          
+
           &.comments {
             background: linear-gradient(135deg, #4facfe, #00f2fe);
             color: white;
           }
-          
+
           &.progress {
             background: linear-gradient(135deg, #43e97b, #38f9d7);
             color: white;
           }
         }
-        
+
         .stat-info {
           .stat-number {
             font-size: 2rem;
@@ -1434,7 +1436,7 @@ onMounted(async () => {
             line-height: 1;
             margin-bottom: 4px;
           }
-          
+
           .stat-label {
             font-size: 0.875rem;
             color: var(--ai-text-secondary);
@@ -1443,7 +1445,7 @@ onMounted(async () => {
       }
     }
   }
-  
+
   .content-layout {
     .main-content {
       .admin-tabs {
@@ -1451,36 +1453,36 @@ onMounted(async () => {
         border-radius: 12px;
         padding: 24px;
         border: 1px solid var(--ai-border);
-        
+
         .tab-content {
           margin-top: 20px;
         }
       }
     }
   }
-  
+
   .projects-toolbar,
   .users-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    
+
     .toolbar-left {
       display: flex;
       gap: 12px;
       align-items: center;
     }
-    
+
     .toolbar-right {
       display: flex;
       gap: 12px;
     }
-    
+
     @media (max-width: 768px) {
       flex-direction: column;
       gap: 12px;
-      
+
       .toolbar-left,
       .toolbar-right {
         width: 100%;
@@ -1488,14 +1490,14 @@ onMounted(async () => {
       }
     }
   }
-  
+
   .projects-table-container,
   .users-table-container,
   .comments-table-container {
     background: var(--ai-bg-primary);
     border-radius: 8px;
     overflow: hidden;
-    
+
     .project-title-cell {
       .project-desc {
         font-size: 0.875rem;
@@ -1507,163 +1509,163 @@ onMounted(async () => {
         overflow: hidden;
       }
     }
-    
-         .comment-content {
-       max-width: 300px;
-       line-height: 1.5;
-       
-       .text-content {
-         margin-bottom: 8px;
-         display: -webkit-box;
-         -webkit-line-clamp: 3;
-         -webkit-box-orient: vertical;
-         overflow: hidden;
-       }
-       
-       .attachments-preview {
-         .attachment-label {
-           display: flex;
-           align-items: center;
-           gap: 4px;
-           font-size: 12px;
-           color: var(--el-text-color-secondary);
-           margin-bottom: 6px;
-         }
-         
-         .images-preview {
-           margin-bottom: 8px;
-           
-           .images-grid {
-             display: flex;
-             gap: 6px;
-             align-items: center;
-             
-             .preview-image {
-               width: 40px;
-               height: 40px;
-               border-radius: 4px;
-               border: 1px solid var(--el-border-color-lighter);
-             }
-             
-             .more-images {
-               font-size: 12px;
-               color: var(--el-text-color-secondary);
-               background: var(--el-bg-color-page);
-               padding: 2px 6px;
-               border-radius: 4px;
-               border: 1px solid var(--el-border-color-lighter);
-             }
-           }
-         }
-         
-         .videos-preview {
-           .videos-list {
-             .video-item {
-               display: flex;
-               align-items: center;
-               gap: 8px;
-               margin-bottom: 4px;
-               
-               .file-size {
-                 font-size: 12px;
-                 color: var(--el-text-color-secondary);
-               }
-             }
-           }
-         }
-       }
-     }
-   }
-   
-   // 站点配置样式
-   .config-section {
-     .config-title {
-       font-size: 1.25rem;
-       font-weight: 600;
-       color: var(--ai-text-primary);
-       margin-bottom: 24px;
-       padding-bottom: 12px;
-       border-bottom: 1px solid var(--ai-border);
-     }
-     
-     .config-form {
-       .qr-upload-container {
-         .qr-preview,
-         .qr-placeholder {
-           width: 200px;
-           height: 200px;
-           border: 2px dashed var(--ai-border);
-           border-radius: 8px;
-           display: flex;
-           flex-direction: column;
-           align-items: center;
-           justify-content: center;
-           cursor: pointer;
-           transition: all 0.3s ease;
-           position: relative;
-           overflow: hidden;
-           
-           &:hover {
-             border-color: var(--ai-primary);
-             background: var(--ai-bg-secondary);
-           }
-         }
-         
-         .qr-preview {
-           border-style: solid;
-           
-           img {
-             width: 100%;
-             height: 100%;
-             object-fit: cover;
-           }
-           
-           .qr-mask {
-             position: absolute;
-             top: 0;
-             left: 0;
-             right: 0;
-             bottom: 0;
-             background: rgba(0, 0, 0, 0.6);
-             display: flex;
-             flex-direction: column;
-             align-items: center;
-             justify-content: center;
-             color: white;
-             opacity: 0;
-             transition: opacity 0.3s ease;
-             
-             &:hover {
-               opacity: 1;
-             }
-             
-             .el-icon {
-               font-size: 24px;
-               margin-bottom: 8px;
-             }
-             
-             span {
-               font-size: 14px;
-             }
-           }
-         }
-         
-         .qr-placeholder {
-           color: var(--ai-text-secondary);
-           
-           .el-icon {
-             font-size: 32px;
-             margin-bottom: 12px;
-           }
-           
-           span {
-             font-size: 14px;
-           }
-         }
-       }
-     }
-   }
 
+    .comment-content {
+      max-width: 300px;
+      line-height: 1.5;
+
+      .text-content {
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .attachments-preview {
+        .attachment-label {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 12px;
+          color: var(--el-text-color-secondary);
+          margin-bottom: 6px;
+        }
+
+        .images-preview {
+          margin-bottom: 8px;
+
+          .images-grid {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+
+            .preview-image {
+              width: 40px;
+              height: 40px;
+              border-radius: 4px;
+              border: 1px solid var(--el-border-color-lighter);
+            }
+
+            .more-images {
+              font-size: 12px;
+              color: var(--el-text-color-secondary);
+              background: var(--el-bg-color-page);
+              padding: 2px 6px;
+              border-radius: 4px;
+              border: 1px solid var(--el-border-color-lighter);
+            }
+          }
+        }
+
+        .videos-preview {
+          .videos-list {
+            .video-item {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin-bottom: 4px;
+
+              .file-size {
+                font-size: 12px;
+                color: var(--el-text-color-secondary);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 站点配置样式
+  .config-section {
+    .config-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--ai-text-primary);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--ai-border);
+    }
+
+    .config-form {
+      .qr-upload-container {
+        .qr-preview,
+        .qr-placeholder {
+          width: 200px;
+          height: 200px;
+          border: 2px dashed var(--ai-border);
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+
+          &:hover {
+            border-color: var(--ai-primary);
+            background: var(--ai-bg-secondary);
+          }
+        }
+
+        .qr-preview {
+          border-style: solid;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .qr-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+
+            &:hover {
+              opacity: 1;
+            }
+
+            .el-icon {
+              font-size: 24px;
+              margin-bottom: 8px;
+            }
+
+            span {
+              font-size: 14px;
+            }
+          }
+        }
+
+        .qr-placeholder {
+          color: var(--ai-text-secondary);
+
+          .el-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+          }
+
+          span {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+}
 /* AI生成对话框样式 */
 .ai-generate-container {
   padding: 20px 0;
@@ -1797,4 +1799,4 @@ onMounted(async () => {
   justify-content: flex-end;
   gap: 12px;
 }
-</style> 
+</style>
