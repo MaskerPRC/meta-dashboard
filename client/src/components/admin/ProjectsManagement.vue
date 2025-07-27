@@ -17,18 +17,18 @@
 
         <el-select
           v-model="projectStatusFilter"
-          placeholder="状态筛选"
+          :placeholder="t('project.status_filter')"
           clearable
           style="width: 140px"
           @change="handleProjectFilter"
         >
-          <el-option label="构思中" value="idea" />
-          <el-option label="规划中" value="planning" />
-          <el-option label="开发中" value="development" />
-          <el-option label="测试中" value="testing" />
-          <el-option label="已部署" value="deployed" />
-          <el-option label="已完成" value="completed" />
-          <el-option label="暂停中" value="paused" />
+          <el-option :label="t('project.status_options.brainstorming')" value="idea" />
+          <el-option :label="t('project.status_options.planning')" value="planning" />
+          <el-option :label="t('project.status_options.development')" value="development" />
+          <el-option :label="t('project.status_options.testing')" value="testing" />
+          <el-option :label="t('project.status_options.deployed')" value="deployed" />
+          <el-option :label="t('project.status_options.completed')" value="completed" />
+          <el-option :label="t('project.status_options.on_hold')" value="paused" />
         </el-select>
       </div>
 
@@ -90,7 +90,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" width="120">
+        <el-table-column prop="created_at" :label="t('project.created_at')" width="120">
           <template #default="scope">
             {{ formatDate(scope.row.created_at) }}
           </template>
@@ -120,12 +120,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Download, Delete } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
 
 const router = useRouter()
+const { t } = useI18n()
 
 // 响应式数据
 const projects = ref([])
@@ -298,26 +300,28 @@ const handleProjectSaved = async (project) => {
 }
 
 const getStatusName = (status) => {
-  const names = {
-    idea: '构思中',
-    planning: '规划中',
-    development: '开发中',
-    testing: '测试中',
-    deployed: '已部署',
-    completed: '已完成',
-    paused: '暂停中'
+  const statusMap = {
+    idea: 'brainstorming',
+    planning: 'planning',
+    development: 'development',
+    testing: 'testing',
+    deployed: 'deployed',
+    completed: 'completed',
+    paused: 'on_hold'
   }
-  return names[status] || '未知'
+  const translationKey = statusMap[status] || 'brainstorming'
+  return t(`project.status_options.${translationKey}`)
 }
 
 const getPriorityName = (priority) => {
-  const names = {
-    low: '低',
-    medium: '中',
-    high: '高',
-    critical: '紧急'
+  const priorityMap = {
+    low: 'low',
+    medium: 'medium',
+    high: 'high',
+    critical: 'urgent'
   }
-  return names[priority] || '中'
+  const translationKey = priorityMap[priority] || 'medium'
+  return t(`project.priority_options.${translationKey}`)
 }
 
 const formatDate = (date) => {

@@ -8,210 +8,17 @@
     </div>
 
     <!-- 评论输入框 -->
-    <div v-if="authStore.isAuthenticated" class="comment-form">
-      <div class="user-avatar">
-        <el-avatar :src="authStore.user?.avatar_url" :size="40">
-          <el-icon><User /></el-icon>
-        </el-avatar>
-      </div>
-      <div class="form-content">
-        <!-- 编辑器工具栏 -->
-        <div class="editor-toolbar">
-          <div class="toolbar-left">
-            <el-button-group>
-              <el-button 
-                :type="editMode === 'write' ? 'primary' : ''" 
-                size="small"
-                @click="editMode = 'write'"
-              >
-                <el-icon><Edit /></el-icon>
-                编写
-              </el-button>
-              <el-button 
-                :type="editMode === 'preview' ? 'primary' : ''" 
-                size="small"
-                @click="editMode = 'preview'"
-                :disabled="!newComment.trim()"
-              >
-                <el-icon><View /></el-icon>
-                预览
-              </el-button>
-            </el-button-group>
-            
-            <!-- 粘贴提示 -->
-            <div class="paste-hint">
-              <el-text size="small" type="info">
-                <el-icon><Upload /></el-icon>
-                支持直接粘贴图片和视频文件
-              </el-text>
-            </div>
-          </div>
-          <div class="toolbar-right">
-            <el-dropdown trigger="click" placement="bottom-end">
-              <el-button size="small" text>
-                <el-icon><QuestionFilled /></el-icon>
-                Markdown语法
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu class="markdown-help">
-                  <div class="help-content">
-                    <div class="help-item">
-                      <code>**粗体**</code> → <strong>粗体</strong>
-                    </div>
-                    <div class="help-item">
-                      <code>*斜体*</code> → <em>斜体</em>
-                    </div>
-                    <div class="help-item">
-                      <code>`代码`</code> → <code>代码</code>
-                    </div>
-                    <div class="help-item">
-                      <code>```代码块```</code>
-                    </div>
-                    <div class="help-item">
-                      <code>[链接](URL)</code>
-                    </div>
-                    <div class="help-item">
-                      <code>- 列表项</code>
-                    </div>
-                    <div class="help-item">
-                      <code>&gt; 引用</code>
-                    </div>
-                  </div>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
-        </div>
+    <CommentForm 
+      v-if="authStore.isAuthenticated"
+      v-model="newComment"
+      :submitting="submitting"
+      @submit="submitComment"
+    />
 
-        <!-- 编辑区域 -->
-        <div class="editor-container">
-          <el-input
-            v-show="editMode === 'write'"
-            v-model="newComment"
-            type="textarea"
-            :rows="5"
-            placeholder="支持Markdown语法，可直接粘贴图片文件（Ctrl+V）..."
-            maxlength="1000"
-            show-word-limit
-            resize="none"
-            class="markdown-input"
-            @paste="handlePaste"
-          />
-          
-          <!-- 预览区域 -->
-          <div 
-            v-show="editMode === 'preview'" 
-            class="markdown-preview"
-            v-html="previewContent"
-          ></div>
-        </div>
-
-        <!-- 附件预览 -->
-        <div v-if="hasAttachmentsToSubmit()" class="attachments-section">
-          <div class="attachments-header">
-            <span class="attachments-title">附件</span>
-          </div>
-          
-          <!-- 图片附件 -->
-          <div v-if="attachments.images.length > 0" class="attachment-group">
-            <div class="attachment-label">
-              <el-icon><Picture /></el-icon>
-              图片 ({{ attachments.images.length }})
-            </div>
-            <div class="images-grid">
-              <div 
-                v-for="(image, index) in attachments.images" 
-                :key="image.id"
-                class="attachment-item"
-              >
-                <el-image
-                  :src="image.url"
-                  :preview-src-list="attachments.images.map(img => img.url)"
-                  class="attachment-image"
-                  fit="cover"
-                  preview-teleported
-                />
-                <div class="attachment-info">
-                  <span class="filename">{{ image.filename }}</span>
-                  <span class="filesize">({{ formatFileSize(image.size) }})</span>
-                </div>
-                <el-button 
-                  class="remove-btn"
-                  type="danger" 
-                  size="small" 
-                  circle
-                  @click="removeAttachment('images', index)"
-                >
-                  <el-icon><Delete /></el-icon>
-                </el-button>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 视频附件 -->
-          <div v-if="attachments.videos.length > 0" class="attachment-group">
-            <div class="attachment-label">
-              <el-icon><VideoPlay /></el-icon>
-              视频 ({{ attachments.videos.length }})
-            </div>
-            <div class="videos-list">
-              <div 
-                v-for="(video, index) in attachments.videos" 
-                :key="video.id"
-                class="video-item"
-              >
-                <div class="video-info">
-                  <el-icon><VideoPlay /></el-icon>
-                  <div class="video-details">
-                    <span class="filename">{{ video.filename }}</span>
-                    <span class="filesize">({{ formatFileSize(video.size) }})</span>
-                  </div>
-                </div>
-                <div class="video-actions">
-                  <el-link :href="video.url" target="_blank" type="primary">预览</el-link>
-                  <el-button 
-                    type="danger" 
-                    size="small" 
-                    text
-                    @click="removeAttachment('videos', index)"
-                  >
-                    删除
-                  </el-button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <el-button 
-            type="primary" 
-            @click="submitComment"
-            :loading="submitting"
-            :disabled="!newComment.trim()"
-          >
-            <el-icon><ChatDotSquare /></el-icon>
-            发表评论
-          </el-button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 未登录提示 -->
-    <div v-else class="login-prompt">
-      <el-alert
-        title="登录后参与讨论"
-        type="info"
-        :closable="false"
-        show-icon
-      >
-        <template #default>
-          <p>登录后可以评论和参与项目讨论</p>
-          <el-button type="primary" size="small" @click="$router.push('/login')">
-            立即登录
-          </el-button>
-        </template>
-      </el-alert>
+    <!-- 登录提示 -->
+    <div v-else class="login-hint">
+      <el-icon><User /></el-icon>
+      <span>请先<router-link to="/login">登录</router-link>后参与讨论</span>
     </div>
 
     <!-- 评论列表 -->
@@ -219,36 +26,37 @@
       <div v-if="loading" class="loading-container">
         <el-skeleton :rows="3" animated />
       </div>
-      
+
       <div v-else-if="comments.length === 0" class="empty-comments">
-        <el-empty description="暂无评论，来发表第一条评论吧！" />
+        <el-icon><ChatDotSquare /></el-icon>
+        <p>暂无评论，来发表第一条评论吧！</p>
       </div>
-      
+
       <div v-else>
         <div 
           v-for="comment in comments" 
-          :key="comment.id"
+          :key="comment.id" 
           class="comment-item"
         >
           <div class="comment-avatar">
-            <el-avatar :src="comment.user.avatar_url" :size="36">
+            <el-avatar :src="comment.user.avatar_url" :size="40">
               <el-icon><User /></el-icon>
             </el-avatar>
           </div>
-          
+
           <div class="comment-content">
             <div class="comment-header">
-              <span class="comment-author">{{ comment.user.display_name || comment.user.username }}</span>
-              <span class="comment-time">{{ formatCommentTime(comment.created_at) }}</span>
+              <span class="username">{{ comment.user.username }}</span>
+              <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
               
-              <!-- 评论操作菜单 -->
+              <!-- 操作菜单 -->
               <el-dropdown 
                 v-if="canManageComment(comment)"
-                trigger="click"
+                trigger="click" 
+                placement="bottom-end"
                 @command="handleCommentAction"
-                class="comment-actions"
               >
-                <el-button text size="small">
+                <el-button size="small" text circle>
                   <el-icon><MoreFilled /></el-icon>
                 </el-button>
                 <template #dropdown>
@@ -271,78 +79,44 @@
                 </template>
               </el-dropdown>
             </div>
-            
-            <!-- 评论正文 -->
-            <div v-if="editingComment !== comment.id" class="comment-text">
-              <div v-if="comment.content" class="markdown-content" v-html="renderMarkdown(comment.content)"></div>
-              
-              <!-- 评论附件显示 -->
-              <div v-if="hasCommentAttachments(comment)" class="comment-attachments">
-                <!-- 图片附件 -->
-                <div v-if="comment.attachments?.images?.length" class="comment-images">
-                  <div class="attachment-label">
-                    <el-icon><Picture /></el-icon>
-                    图片 ({{ comment.attachments.images.length }})
-                  </div>
-                  <div class="images-grid">
-                    <el-image
-                      v-for="image in comment.attachments.images"
-                      :key="image.id"
-                      :src="image.url"
-                      :preview-src-list="comment.attachments.images.map(img => img.url)"
-                      class="comment-image"
-                      fit="cover"
-                      preview-teleported
-                    />
-                  </div>
-                </div>
-                
-                <!-- 视频附件 -->
-                <div v-if="comment.attachments?.videos?.length" class="comment-videos">
-                  <div class="attachment-label">
-                    <el-icon><VideoPlay /></el-icon>
-                    视频 ({{ comment.attachments.videos.length }})
-                  </div>
-                  <div class="videos-list">
-                    <div v-for="video in comment.attachments.videos" :key="video.id" class="video-item">
-                      <div class="video-info">
-                        <el-icon><VideoPlay /></el-icon>
-                        <div class="video-details">
-                          <span class="filename">{{ video.filename }}</span>
-                          <span class="filesize">({{ formatFileSize(video.size) }})</span>
-                        </div>
-                      </div>
-                      <el-link :href="video.url" target="_blank" type="primary">预览</el-link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 编辑状态 -->
-            <div v-else class="comment-edit">
-              <!-- 编辑工具栏 -->
-              <div class="edit-toolbar">
-                <el-button-group size="small">
-                  <el-button 
-                    :type="editEditMode === 'write' ? 'primary' : ''" 
-                    @click="editEditMode = 'write'"
-                  >
-                    <el-icon><Edit /></el-icon>
-                    编写
-                  </el-button>
-                  <el-button 
-                    :type="editEditMode === 'preview' ? 'primary' : ''" 
-                    @click="editEditMode = 'preview'"
-                    :disabled="!editContent.trim()"
-                  >
-                    <el-icon><View /></el-icon>
-                    预览
-                  </el-button>
-                </el-button-group>
-              </div>
 
-              <!-- 编辑区域 -->
+            <!-- 评论内容显示/编辑 -->
+            <div v-if="editingComment !== comment.id" class="comment-body">
+              <div 
+                class="comment-text"
+                v-html="renderMarkdown(comment.content)"
+              ></div>
+              
+              <!-- 评论附件 -->
+              <AttachmentPreview 
+                v-if="hasCommentAttachments(comment)"
+                :attachments="comment.attachments"
+                readonly
+              />
+            </div>
+
+            <!-- 编辑模式 -->
+            <div v-else class="edit-mode">
+                             <div class="edit-toolbar">
+                 <el-button-group size="small">
+                   <el-button 
+                     :type="editEditMode === 'write' ? 'primary' : ''" 
+                     @click="editEditMode = 'write'"
+                   >
+                     <el-icon><Edit /></el-icon>
+                     {{ t('comment.write') }}
+                   </el-button>
+                   <el-button 
+                     :type="editEditMode === 'preview' ? 'primary' : ''" 
+                     @click="editEditMode = 'preview'"
+                     :disabled="!editContent.trim()"
+                   >
+                     <el-icon><View /></el-icon>
+                     {{ t('comment.preview') }}
+                   </el-button>
+                 </el-button-group>
+               </div>
+              
               <div class="edit-container">
                 <el-input
                   v-show="editEditMode === 'write'"
@@ -355,7 +129,6 @@
                   placeholder="支持Markdown语法..."
                 />
                 
-                <!-- 编辑预览 -->
                 <div 
                   v-show="editEditMode === 'preview'" 
                   class="edit-preview"
@@ -396,6 +169,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
@@ -403,9 +177,11 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
+import CommentForm from './CommentForm.vue'
+import AttachmentPreview from './AttachmentPreview.vue'
 import {
   ChatLineSquare, User, ChatDotSquare, MoreFilled, 
-  Edit, Delete, View, QuestionFilled, Picture, VideoPlay, Upload
+  Edit, Delete, View
 } from '@element-plus/icons-vue'
 
 // 启用相对时间插件
@@ -434,6 +210,7 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 // 响应式数据
 const comments = ref([])
@@ -444,14 +221,7 @@ const newComment = ref('')
 const editingComment = ref(null)
 const editContent = ref('')
 const currentPage = ref(1)
-
-// Markdown 编辑相关状态
-const editMode = ref('write') // 'write' | 'preview'
-const editEditMode = ref('write') // 编辑评论时的模式
-
-// 文件上传相关状态  
-const uploading = ref(false)
-const attachments = ref({ images: [], videos: [] })
+const editEditMode = ref('write')
 
 const pagination = reactive({
   total: 0,
@@ -460,11 +230,6 @@ const pagination = reactive({
 })
 
 // 计算属性
-const previewContent = computed(() => {
-  if (!newComment.value.trim()) return '<p class="preview-empty">暂无内容</p>'
-  return renderMarkdown(newComment.value)
-})
-
 const editPreviewContent = computed(() => {
   if (!editContent.value.trim()) return '<p class="preview-empty">暂无内容</p>'
   return renderMarkdown(editContent.value)
@@ -482,7 +247,6 @@ const canEditComment = (comment) => {
   if (authStore.isAdmin) return true
   if (comment.user.id !== authStore.user?.id) return false
   
-  // 评论发布30分钟内可以编辑
   const commentTime = dayjs(comment.created_at)
   const now = dayjs()
   return now.diff(commentTime, 'minute') <= 30
@@ -493,7 +257,6 @@ const renderMarkdown = (content) => {
   if (!content) return ''
   
   try {
-    // 基本的安全过滤，防止XSS
     const sanitized = content
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
@@ -505,6 +268,16 @@ const renderMarkdown = (content) => {
     console.error('Markdown渲染失败:', error)
     return content
   }
+}
+
+const formatTime = (time) => {
+  return dayjs(time).fromNow()
+}
+
+const hasCommentAttachments = (comment) => {
+  if (!comment.attachments) return false
+  return (comment.attachments.images && comment.attachments.images.length > 0) ||
+         (comment.attachments.videos && comment.attachments.videos.length > 0)
 }
 
 const fetchComments = async () => {
@@ -528,25 +301,17 @@ const fetchComments = async () => {
   }
 }
 
-const submitComment = async () => {
-  if (!newComment.value.trim() && !hasAttachmentsToSubmit()) {
-    ElMessage.warning('评论内容不能为空')
-    return
-  }
-  
+const submitComment = async (data) => {
   try {
     submitting.value = true
     const response = await axios.post('/api/comments', {
       project_id: props.projectId,
-      content: newComment.value.trim(),
-      attachments: attachments.value
+      content: data.content,
+      attachments: data.attachments
     })
     
-    // 添加新评论到列表顶部
     comments.value.unshift(response.data.comment)
     newComment.value = ''
-    attachments.value = { images: [], videos: [] } // 清空附件
-    editMode.value = 'write' // 重置编辑模式
     pagination.total++
     
     ElMessage.success('评论发表成功')
@@ -572,7 +337,7 @@ const handleCommentAction = (command) => {
 const startEdit = (comment) => {
   editingComment.value = comment.id
   editContent.value = comment.content
-  editEditMode.value = 'write' // 重置编辑模式
+  editEditMode.value = 'write'
 }
 
 const cancelEdit = () => {
@@ -593,18 +358,16 @@ const saveEdit = async (commentId) => {
       content: editContent.value.trim()
     })
     
-    // 更新评论内容
-    const comment = comments.value.find(c => c.id === commentId)
-    if (comment) {
-      comment.content = response.data.comment.content
+    const index = comments.value.findIndex(c => c.id === commentId)
+    if (index !== -1) {
+      comments.value[index] = response.data.comment
     }
     
-    editingComment.value = null
-    editContent.value = ''
-    ElMessage.success('评论更新成功')
+    cancelEdit()
+    ElMessage.success('评论修改成功')
   } catch (error) {
-    console.error('更新评论失败:', error)
-    ElMessage.error(error.response?.data?.message || '更新评论失败')
+    console.error('修改评论失败:', error)
+    ElMessage.error(error.response?.data?.message || '修改评论失败')
   } finally {
     saving.value = false
   }
@@ -613,8 +376,8 @@ const saveEdit = async (commentId) => {
 const deleteComment = async (comment) => {
   try {
     await ElMessageBox.confirm(
-      '确定要删除这条评论吗？此操作不可恢复。',
-      '删除评论',
+      '确定要删除这条评论吗？此操作无法撤销。',
+      '确认删除',
       {
         confirmButtonText: '删除',
         cancelButtonText: '取消',
@@ -625,7 +388,6 @@ const deleteComment = async (comment) => {
     
     await axios.delete(`/api/comments/${comment.id}`)
     
-    // 从列表中移除评论
     const index = comments.value.findIndex(c => c.id === comment.id)
     if (index !== -1) {
       comments.value.splice(index, 1)
@@ -634,157 +396,15 @@ const deleteComment = async (comment) => {
     
     ElMessage.success('评论删除成功')
   } catch (error) {
-    if (error !== 'cancel') {
-      console.error('删除评论失败:', error)
-      ElMessage.error(error.response?.data?.message || '删除评论失败')
-    }
+    if (error === 'cancel') return
+    console.error('删除评论失败:', error)
+    ElMessage.error(error.response?.data?.message || '删除评论失败')
   }
 }
 
 const handlePageChange = (page) => {
   currentPage.value = page
   fetchComments()
-}
-
-const formatCommentTime = (time) => {
-  const commentTime = dayjs(time)
-  const now = dayjs()
-  
-  if (now.diff(commentTime, 'day') < 7) {
-    return commentTime.fromNow()
-  } else {
-    return commentTime.format('YYYY-MM-DD HH:mm')
-  }
-}
-
-// 文件粘贴上传相关方法
-const hasAttachmentsToSubmit = () => {
-  return attachments.value.images.length > 0 || attachments.value.videos.length > 0
-}
-
-const handlePaste = async (event) => {
-  const items = event.clipboardData?.items
-  if (!items) return
-  
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-    
-    // 处理图片
-    if (item.type.indexOf('image') !== -1) {
-      event.preventDefault()
-      const file = item.getAsFile()
-      if (file) {
-        await uploadFile(file)
-      }
-    }
-    // 处理文件（通过复制文件粘贴）
-    else if (item.kind === 'file') {
-      event.preventDefault()
-      const file = item.getAsFile()
-      if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
-        await uploadFile(file)
-      }
-    }
-  }
-}
-
-const uploadFile = async (file) => {
-  if (uploading.value) {
-    ElMessage.warning('文件正在上传中，请稍候...')
-    return
-  }
-  
-  // 验证文件类型和大小
-  if (!validateFile(file)) {
-    return
-  }
-  
-  try {
-    uploading.value = true
-    const formData = new FormData()
-    formData.append('files', file)
-    
-    const response = await axios.post('/api/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    
-    const { images, videos, errors } = response.data.data
-    
-    if (errors.length > 0) {
-      errors.forEach(error => {
-        ElMessage.error(`${error.filename}: ${error.error}`)
-      })
-    }
-    
-    // 添加成功上传的文件到附件列表
-    if (images.length > 0) {
-      attachments.value.images.push(...images)
-      ElMessage.success(`成功上传 ${images.length} 张图片`)
-    }
-    
-    if (videos.length > 0) {
-      attachments.value.videos.push(...videos)
-      ElMessage.success(`成功上传 ${videos.length} 个视频`)
-    }
-    
-  } catch (error) {
-    console.error('文件上传失败:', error)
-    ElMessage.error(error.response?.data?.message || '文件上传失败')
-  } finally {
-    uploading.value = false
-  }
-}
-
-const validateFile = (file) => {
-  const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-  const allowedVideoTypes = ['video/mp4', 'video/webm']
-  
-  if (file.type.startsWith('image/')) {
-    if (!allowedImageTypes.includes(file.type)) {
-      ElMessage.error('只支持 JPG、PNG、GIF、WebP 格式的图片')
-      return false
-    }
-    const isLt5M = file.size / 1024 / 1024 < 5
-    if (!isLt5M) {
-      ElMessage.error('图片大小不能超过 5MB')
-      return false
-    }
-  } else if (file.type.startsWith('video/')) {
-    if (!allowedVideoTypes.includes(file.type)) {
-      ElMessage.error('只支持 MP4、WebM 格式的视频')
-      return false
-    }
-    const isLt50M = file.size / 1024 / 1024 < 50
-    if (!isLt50M) {
-      ElMessage.error('视频大小不能超过 50MB')
-      return false
-    }
-  } else {
-    ElMessage.error('只支持图片和视频文件')
-    return false
-  }
-  
-  return true
-}
-
-const removeAttachment = (type, index) => {
-  attachments.value[type].splice(index, 1)
-}
-
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-const hasCommentAttachments = (comment) => {
-  if (!comment.attachments) return false
-  return (comment.attachments.images && comment.attachments.images.length > 0) ||
-         (comment.attachments.videos && comment.attachments.videos.length > 0)
 }
 
 // 生命周期
@@ -804,226 +424,34 @@ onMounted(() => {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 1.25rem;
+      font-size: 20px;
       font-weight: 600;
+      color: var(--el-text-color-primary);
       margin: 0;
-      color: var(--ai-text-primary);
+      
+      .el-icon {
+        color: var(--el-color-primary);
+      }
     }
   }
   
-  .comment-form {
+  .login-hint {
     display: flex;
-    gap: 12px;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+    background: var(--el-bg-color-page);
+    border: 1px dashed var(--el-border-color);
+    border-radius: 8px;
+    color: var(--el-text-color-secondary);
     margin-bottom: 32px;
     
-    .user-avatar {
-      flex-shrink: 0;
-    }
-    
-    .form-content {
-      flex: 1;
+    a {
+      color: var(--el-color-primary);
+      text-decoration: none;
       
-      .editor-toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-        padding: 8px 12px;
-        background: var(--el-bg-color-page);
-        border: 1px solid var(--el-border-color);
-        border-radius: 6px 6px 0 0;
-        border-bottom: none;
-        
-        .toolbar-left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          
-          .upload-buttons {
-            display: flex;
-            gap: 8px;
-            margin-left: 12px;
-          }
-        }
-        
-        .toolbar-right {
-          display: flex;
-          align-items: center;
-        }
-      }
-      
-      .editor-container {
-        position: relative;
-        border: 1px solid var(--el-border-color);
-        border-radius: 0 0 6px 6px;
-        overflow: hidden;
-        
-        .markdown-input {
-          :deep(.el-textarea__inner) {
-            border: none;
-            border-radius: 0;
-            font-family: 'Fira Code', 'Consolas', monospace;
-            line-height: 1.6;
-          }
-        }
-        
-        .markdown-preview {
-          min-height: 120px;
-          padding: 12px;
-          background: white;
-          line-height: 1.6;
-          
-          .preview-empty {
-            color: var(--el-text-color-placeholder);
-            font-style: italic;
-            margin: 0;
-          }
-        }
-      }
-      
-      .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 12px;
-      }
-      
-      .attachments-section {
-        margin-top: 12px;
-        padding: 12px;
-        border: 1px solid var(--el-border-color-lighter);
-        border-radius: 6px;
-        background: var(--el-bg-color-page);
-        
-        .attachments-header {
-          margin-bottom: 12px;
-          
-          .attachments-title {
-            font-weight: 600;
-            color: var(--ai-text-primary);
-          }
-        }
-        
-        .attachment-group {
-          margin-bottom: 16px;
-          
-          &:last-child {
-            margin-bottom: 0;
-          }
-          
-          .attachment-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--ai-text-secondary);
-            margin-bottom: 8px;
-          }
-          
-          .images-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            
-            .attachment-item {
-              position: relative;
-              
-              .attachment-image {
-                width: 100px;
-                height: 100px;
-                border-radius: 6px;
-                border: 1px solid var(--el-border-color-lighter);
-              }
-              
-              .attachment-info {
-                margin-top: 4px;
-                text-align: center;
-                
-                .filename {
-                  display: block;
-                  font-size: 12px;
-                  color: var(--ai-text-primary);
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  max-width: 100px;
-                }
-                
-                .filesize {
-                  font-size: 11px;
-                  color: var(--ai-text-secondary);
-                }
-              }
-              
-              .remove-btn {
-                position: absolute;
-                top: -8px;
-                right: -8px;
-                width: 20px;
-                height: 20px;
-                font-size: 12px;
-              }
-            }
-          }
-          
-          .videos-list {
-            .video-item {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 8px 12px;
-              border: 1px solid var(--el-border-color-lighter);
-              border-radius: 6px;
-              margin-bottom: 8px;
-              background: white;
-              
-              &:last-child {
-                margin-bottom: 0;
-              }
-              
-              .video-info {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                flex: 1;
-                
-                .video-details {
-                  .filename {
-                    display: block;
-                    font-size: 14px;
-                    color: var(--ai-text-primary);
-                    margin-bottom: 2px;
-                  }
-                  
-                  .filesize {
-                    font-size: 12px;
-                    color: var(--ai-text-secondary);
-                  }
-                }
-              }
-              
-              .video-actions {
-                display: flex;
-                gap: 8px;
-                align-items: center;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  .login-prompt {
-    margin-bottom: 32px;
-    
-    :deep(.el-alert__content) {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      
-      p {
-        margin: 0;
+      &:hover {
+        text-decoration: underline;
       }
     }
   }
@@ -1035,17 +463,28 @@ onMounted(() => {
     
     .empty-comments {
       text-align: center;
-      padding: 40px 20px;
+      padding: 60px 20px;
+      color: var(--el-text-color-secondary);
+      
+      .el-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+      
+      p {
+        font-size: 16px;
+        margin: 0;
+      }
     }
     
     .comment-item {
       display: flex;
-      gap: 12px;
-      padding: 20px 0;
-      border-bottom: 1px solid var(--ai-border);
+      gap: 16px;
+      margin-bottom: 24px;
       
       &:last-child {
-        border-bottom: none;
+        margin-bottom: 0;
       }
       
       .comment-avatar {
@@ -1061,145 +500,86 @@ onMounted(() => {
           gap: 12px;
           margin-bottom: 8px;
           
-          .comment-author {
-            font-weight: 600;
-            color: var(--ai-text-primary);
+          .username {
+            font-weight: 500;
+            color: var(--el-text-color-primary);
           }
           
           .comment-time {
-            font-size: 0.875rem;
-            color: var(--ai-text-secondary);
+            color: var(--el-text-color-secondary);
+            font-size: 12px;
           }
           
-          .comment-actions {
+          .el-dropdown {
             margin-left: auto;
           }
         }
         
-        .comment-text {
-          color: var(--ai-text-primary);
-          line-height: 1.6;
-          
-          .markdown-content {
+        .comment-body {
+          .comment-text {
+            color: var(--el-text-color-regular);
             line-height: 1.6;
             margin-bottom: 12px;
-          }
-          
-          .comment-attachments {
-            .attachment-label {
-              display: flex;
-              align-items: center;
-              gap: 6px;
-              font-size: 13px;
-              font-weight: 500;
-              color: var(--ai-text-secondary);
-              margin-bottom: 8px;
-              margin-top: 12px;
-            }
             
-            .comment-images {
-              margin-bottom: 12px;
+            :deep(p) {
+              margin: 0 0 8px 0;
               
-              .images-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 8px;
-                max-width: 400px;
-                
-                .comment-image {
-                  width: 120px;
-                  height: 120px;
-                  border-radius: 6px;
-                  border: 1px solid var(--el-border-color-lighter);
-                  cursor: pointer;
-                  transition: transform 0.2s;
-                  
-                  &:hover {
-                    transform: scale(1.05);
-                  }
-                }
+              &:last-child {
+                margin-bottom: 0;
               }
             }
             
-            .comment-videos {
-              .videos-list {
-                .video-item {
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  padding: 8px 12px;
-                  border: 1px solid var(--el-border-color-lighter);
-                  border-radius: 6px;
-                  margin-bottom: 6px;
-                  background: var(--el-bg-color-page);
-                  
-                  &:last-child {
-                    margin-bottom: 0;
-                  }
-                  
-                  .video-info {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    flex: 1;
-                    
-                    .video-details {
-                      .filename {
-                        font-size: 14px;
-                        color: var(--ai-text-primary);
-                        margin-bottom: 2px;
-                      }
-                      
-                      .filesize {
-                        font-size: 12px;
-                        color: var(--ai-text-secondary);
-                      }
-                    }
-                  }
-                }
-              }
+            :deep(pre) {
+              background: var(--el-bg-color-page);
+              padding: 12px;
+              border-radius: 4px;
+              overflow-x: auto;
+              margin: 8px 0;
+            }
+            
+            :deep(code) {
+              background: var(--el-bg-color-page);
+              padding: 2px 4px;
+              border-radius: 2px;
+              font-size: 0.9em;
+            }
+            
+            :deep(blockquote) {
+              border-left: 4px solid var(--el-color-primary);
+              padding-left: 12px;
+              margin: 8px 0;
+              color: var(--el-text-color-secondary);
             }
           }
         }
         
-        .comment-edit {
+        .edit-mode {
           .edit-toolbar {
-            margin-bottom: 8px;
+            margin-bottom: 12px;
           }
           
           .edit-container {
-            border: 1px solid var(--el-border-color);
-            border-radius: 6px;
-            overflow: hidden;
             margin-bottom: 12px;
-            
-            .el-textarea {
-              :deep(.el-textarea__inner) {
-                border: none;
-                border-radius: 0;
-                font-family: 'Fira Code', 'Consolas', monospace;
-                line-height: 1.6;
-              }
-            }
             
             .edit-preview {
               min-height: 100px;
               padding: 12px;
-              background: white;
-              line-height: 1.6;
+              border: 1px solid var(--el-border-color);
+              border-radius: 4px;
+              background-color: var(--el-bg-color-page);
               
               .preview-empty {
                 color: var(--el-text-color-placeholder);
-                font-style: italic;
-                margin: 0;
+                text-align: center;
+                margin: 20px 0;
               }
             }
           }
           
           .edit-actions {
             display: flex;
-            justify-content: flex-end;
             gap: 8px;
+            justify-content: flex-end;
           }
         }
       }
@@ -1209,164 +589,11 @@ onMounted(() => {
   .comments-pagination {
     display: flex;
     justify-content: center;
-    margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid var(--ai-border);
+    margin-top: 32px;
   }
 }
 
-// 危险操作样式
 :deep(.danger-item) {
-  color: var(--el-color-danger);
-  
-  &:hover {
-    background-color: var(--el-color-danger-light-9);
-  }
-}
-
-// Markdown帮助下拉菜单样式
-:deep(.markdown-help) {
-  .help-content {
-    padding: 12px;
-    max-width: 250px;
-    
-    .help-item {
-      margin-bottom: 8px;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
-      
-      code {
-        background: var(--el-bg-color-page);
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-family: 'Fira Code', monospace;
-        font-size: 11px;
-      }
-    }
-  }
-}
-
-// Markdown内容样式
-.markdown-content {
-  :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
-    margin: 16px 0 8px 0;
-    font-weight: 600;
-    line-height: 1.25;
-  }
-  
-  :deep(h1) { font-size: 1.5em; }
-  :deep(h2) { font-size: 1.3em; }
-  :deep(h3) { font-size: 1.1em; }
-  :deep(h4) { font-size: 1em; }
-  :deep(h5) { font-size: 0.9em; }
-  :deep(h6) { font-size: 0.8em; }
-  
-  :deep(p) {
-    margin: 8px 0;
-    line-height: 1.6;
-  }
-  
-  :deep(ul), :deep(ol) {
-    margin: 8px 0;
-    padding-left: 20px;
-    
-    li {
-      margin: 4px 0;
-    }
-  }
-  
-  :deep(blockquote) {
-    margin: 12px 0;
-    padding: 8px 16px;
-    border-left: 4px solid var(--ai-primary);
-    background: var(--el-bg-color-page);
-    border-radius: 0 4px 4px 0;
-    
-    p {
-      margin: 0;
-      color: var(--el-text-color-regular);
-    }
-  }
-  
-  :deep(code) {
-    background: var(--el-bg-color-page);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    font-size: 0.9em;
-    color: var(--el-color-danger);
-  }
-  
-  :deep(pre) {
-    background: var(--el-bg-color-page);
-    padding: 12px;
-    border-radius: 6px;
-    margin: 12px 0;
-    overflow-x: auto;
-    border: 1px solid var(--el-border-color-lighter);
-    
-    code {
-      background: none;
-      padding: 0;
-      color: inherit;
-      font-size: 0.9em;
-      line-height: 1.5;
-    }
-  }
-  
-  :deep(a) {
-    color: var(--ai-primary);
-    text-decoration: none;
-    
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-  
-  :deep(strong) {
-    font-weight: 600;
-  }
-  
-  :deep(em) {
-    font-style: italic;
-  }
-  
-  :deep(table) {
-    border-collapse: collapse;
-    margin: 12px 0;
-    width: 100%;
-    
-    th, td {
-      border: 1px solid var(--el-border-color);
-      padding: 8px 12px;
-      text-align: left;
-    }
-    
-    th {
-      background: var(--el-bg-color-page);
-      font-weight: 600;
-    }
-  }
-  
-  :deep(hr) {
-    border: none;
-    border-top: 1px solid var(--el-border-color);
-    margin: 16px 0;
-  }
-  
-  // 第一个和最后一个元素的边距调整
-  :deep(*:first-child) {
-    margin-top: 0;
-  }
-  
-  :deep(*:last-child) {
-    margin-bottom: 0;
-  }
+  color: var(--el-color-danger) !important;
 }
 </style> 

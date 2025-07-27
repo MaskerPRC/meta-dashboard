@@ -266,21 +266,32 @@ export default {
     comment_management: '评论管理'
   },
   
-  // 项目相关
-  project: {
-    title: '标题',
-    description: '描述',
-    content: '内容',
-    status: '状态',
-    priority: '优先级',
-    created_at: '创建时间',
-    updated_at: '更新时间',
-    actions: '操作',
-    edit: '编辑',
-    delete: '删除',
-    view: '查看',
-    save: '保存',
-    cancel: '取消',
+     // 项目相关
+   project: {
+     title: '标题',
+     description: '描述',
+     content: '内容',
+     status: '状态',
+     priority: '优先级',
+     created_at: '创建时间',
+     updated_at: '更新时间',
+     actions: '操作',
+     edit: '编辑',
+     delete: '删除',
+     view: '查看',
+     save: '保存',
+     cancel: '取消',
+     back_to_list: '返回项目列表',
+     edit_project: '编辑项目',
+     delete_project: '删除项目',
+     progress_history: '进展历史',
+     view_development_timeline: '查看项目发展轨迹',
+         project_details: '项目详情',
+    not_found: '项目不存在',
+    check_link: '请检查链接是否正确',
+    select_status: '选择项目状态',
+    select_priority: '选择优先级',
+    status_filter: '状态筛选',
     
     status_options: {
       brainstorming: '构思中',
@@ -373,7 +384,9 @@ export default {
     no_comments: '暂无评论，来发表第一条评论吧！',
     load_more: '加载更多',
     upload_image: '上传图片',
-    upload_video: '上传视频'
+    upload_video: '上传视频',
+    paste_support: '支持直接粘贴图片和视频文件',
+    paste_hint: '支持Markdown语法，可直接粘贴图片文件（Ctrl+V）...'
   },
   
   // 语言切换
@@ -381,13 +394,5 @@ export default {
     title: '语言',
     chinese: '中文',
     english: 'English'
-  },
-
-  // 表单通用
-  form: {
-    cancel: '取消',
-    confirm: '确认',
-    save: '保存',
-    submit: '提交'
   }
 } 

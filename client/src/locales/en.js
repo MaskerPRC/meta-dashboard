@@ -266,21 +266,32 @@ export default {
     comment_management: 'Comment Management'
   },
   
-  // Project related
-  project: {
-    title: 'Title',
-    description: 'Description',
-    content: 'Content',
-    status: 'Status',
-    priority: 'Priority',
-    created_at: 'Created At',
-    updated_at: 'Updated At',
-    actions: 'Actions',
-    edit: 'Edit',
-    delete: 'Delete',
-    view: 'View',
-    save: 'Save',
-    cancel: 'Cancel',
+     // Project related
+   project: {
+     title: 'Title',
+     description: 'Description',
+     content: 'Content',
+     status: 'Status',
+     priority: 'Priority',
+     created_at: 'Created At',
+     updated_at: 'Updated At',
+     actions: 'Actions',
+     edit: 'Edit',
+     delete: 'Delete',
+     view: 'View',
+     save: 'Save',
+     cancel: 'Cancel',
+     back_to_list: 'Back to Project List',
+     edit_project: 'Edit Project',
+     delete_project: 'Delete Project',
+     progress_history: 'Progress History',
+     view_development_timeline: 'View Development Timeline',
+         project_details: 'Project Details',
+    not_found: 'Project Not Found',
+    check_link: 'Please check if the link is correct',
+    select_status: 'Select Project Status',
+    select_priority: 'Select Priority',
+    status_filter: 'Status Filter',
     
     status_options: {
       brainstorming: 'Brainstorming',
@@ -373,7 +384,9 @@ export default {
     no_comments: 'No comments yet, be the first to comment!',
     load_more: 'Load More',
     upload_image: 'Upload Image',
-    upload_video: 'Upload Video'
+    upload_video: 'Upload Video',
+    paste_support: 'Support pasting images and videos directly',
+    paste_hint: 'Supports Markdown syntax, you can paste image files directly (Ctrl+V)...'
   },
   
   // Language switcher
@@ -381,13 +394,5 @@ export default {
     title: 'Language',
     chinese: '中文',
     english: 'English'
-  },
-
-  // Form common
-  form: {
-    cancel: 'Cancel',
-    confirm: 'Confirm',
-    save: 'Save',
-    submit: 'Submit'
   }
 } 

@@ -104,7 +104,10 @@
 <script setup>
 import { computed } from 'vue'
 import { Calendar, Link, View, Cpu } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
+
+const { t } = useI18n()
 
 const props = defineProps({
   project: {
@@ -117,27 +120,29 @@ defineEmits(['click'])
 
 // 获取状态名称
 const getStatusName = (status) => {
-  const names = {
-    idea: '构思中',
-    planning: '规划中',
-    development: '开发中',
-    testing: '测试中',
-    deployed: '已部署',
-    completed: '已完成',
-    paused: '暂停中'
+  const statusMap = {
+    idea: 'brainstorming',
+    planning: 'planning',
+    development: 'development',
+    testing: 'testing',
+    deployed: 'deployed',
+    completed: 'completed',
+    paused: 'on_hold'
   }
-  return names[status] || '未知'
+  const translationKey = statusMap[status] || 'brainstorming'
+  return t(`project.status_options.${translationKey}`)
 }
 
 // 获取优先级名称
 const getPriorityName = (priority) => {
-  const names = {
-    low: '低',
-    medium: '中',
-    high: '高',
-    critical: '紧急'
+  const priorityMap = {
+    low: 'low',
+    medium: 'medium',
+    high: 'high',
+    critical: 'urgent'
   }
-  return names[priority] || '中'
+  const translationKey = priorityMap[priority] || 'medium'
+  return t(`project.priority_options.${translationKey}`)
 }
 
 // 获取进度条颜色

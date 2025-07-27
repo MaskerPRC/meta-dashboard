@@ -8,7 +8,7 @@
           返回项目详情
         </button>
         <div class="project-info" v-if="project">
-          <h1>{{ project.title }} - 进展历史</h1>
+          <h1>{{ project.title }} - {{ t('project.progress_history') }}</h1>
           <p class="project-status">
             状态: <span :class="`status-${project.status}`">{{ getStatusText(project.status) }}</span>
             进度: <span class="progress">{{ project.progress }}%</span>
@@ -240,6 +240,7 @@
 <script>
 import { marked } from 'marked';
 import MarkdownEditor from '@/components/common/MarkdownEditor.vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import axios from '@/utils/axios';
 
@@ -247,6 +248,10 @@ export default {
   name: 'ProjectHistory',
   components: {
     MarkdownEditor
+  },
+  setup() {
+    const { t } = useI18n();
+    return { t };
   },
   data() {
     return {
@@ -447,16 +452,17 @@ export default {
     },
     
     getStatusText(status) {
-      const texts = {
-        idea: '构思中',
-        planning: '规划中',
-        development: '开发中',
-        testing: '测试中',
-        deployed: '已部署',
-        paused: '暂停',
-        completed: '已完成'
+      const statusMap = {
+        idea: 'brainstorming',
+        planning: 'planning',
+        development: 'development',
+        testing: 'testing',
+        deployed: 'deployed',
+        paused: 'on_hold',
+        completed: 'completed'
       };
-      return texts[status] || status;
+      const translationKey = statusMap[status] || 'brainstorming';
+      return t(`project.status_options.${translationKey}`);
     },
     
     formatTime(timestamp) {

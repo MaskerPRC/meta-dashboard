@@ -2,7 +2,7 @@
   <el-dialog
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    :title="project ? '编辑项目' : '创建新项目'"
+    :title="project ? t('project.edit_project') : t('admin.new_project')"
     width="1200px"
     :close-on-click-modal="false"
     @close="handleClose"
@@ -27,25 +27,25 @@
           </el-form-item>
         </el-col>
         <el-col :span="5">
-          <el-form-item label="项目状态" prop="status">
-            <el-select v-model="formData.status" placeholder="选择项目状态" style="width: 100%">
-              <el-option label="构思中" value="idea" />
-              <el-option label="规划中" value="planning" />
-              <el-option label="开发中" value="development" />
-              <el-option label="测试中" value="testing" />
-              <el-option label="已部署" value="deployed" />
-              <el-option label="已完成" value="completed" />
-              <el-option label="暂停中" value="paused" />
+          <el-form-item :label="t('project.status')" prop="status">
+            <el-select v-model="formData.status" :placeholder="t('project.select_status')" style="width: 100%">
+              <el-option :label="t('project.status_options.brainstorming')" value="idea" />
+              <el-option :label="t('project.status_options.planning')" value="planning" />
+              <el-option :label="t('project.status_options.development')" value="development" />
+              <el-option :label="t('project.status_options.testing')" value="testing" />
+              <el-option :label="t('project.status_options.deployed')" value="deployed" />
+              <el-option :label="t('project.status_options.completed')" value="completed" />
+              <el-option :label="t('project.status_options.on_hold')" value="paused" />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="5">
-          <el-form-item label="优先级" prop="priority">
-            <el-select v-model="formData.priority" placeholder="选择优先级" style="width: 100%">
-              <el-option label="低优先级" value="low" />
-              <el-option label="中优先级" value="medium" />
-              <el-option label="高优先级" value="high" />
-              <el-option label="紧急" value="critical" />
+          <el-form-item :label="t('project.priority')" prop="priority">
+            <el-select v-model="formData.priority" :placeholder="t('project.select_priority')" style="width: 100%">
+              <el-option :label="t('project.priority_options.low')" value="low" />
+              <el-option :label="t('project.priority_options.medium')" value="medium" />
+              <el-option :label="t('project.priority_options.high')" value="high" />
+              <el-option :label="t('project.priority_options.urgent')" value="critical" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -269,6 +269,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
@@ -276,6 +277,8 @@ import axios from '../../utils/axios'
 import {
   Edit, View, Operation, Document
 } from '@element-plus/icons-vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: {

@@ -172,8 +172,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, computed, watch } from 'vue'
+import { ElMessage, ElDialog, ElSteps, ElStep, ElForm, ElFormItem, ElInput, ElRadioGroup, ElRadio, ElButton, ElDivider, ElTag, ElProgress, ElAlert } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { Loading } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 
@@ -203,6 +204,8 @@ const examples = ref([
   '建立一个电商平台，包含商品展示、购物车、订单管理、支付集成。支持移动端和PC端，使用微服务架构。',
   '设计一个在线学习平台，学生可以观看视频课程、完成作业、参与讨论。教师可以上传课程内容和管理学生。'
 ])
+
+const { t } = useI18n()
 
 // 方法
 const startGenerate = async () => {
@@ -274,15 +277,16 @@ const closeDialog = () => {
 // 状态和优先级相关方法
 const getStatusText = (status) => {
   const statusMap = {
-    'idea': '构思中',
-    'planning': '规划中',
-    'development': '开发中',
-    'testing': '测试中',
-    'deployed': '已部署',
-    'completed': '已完成',
-    'paused': '暂停中'
+    'idea': 'brainstorming',
+    'planning': 'planning',
+    'development': 'development',
+    'testing': 'testing',
+    'deployed': 'deployed',
+    'completed': 'completed',
+    'paused': 'on_hold'
   }
-  return statusMap[status] || status
+  const translationKey = statusMap[status] || 'brainstorming'
+  return t(`project.status_options.${translationKey}`)
 }
 
 const getStatusTagType = (status) => {
@@ -300,12 +304,13 @@ const getStatusTagType = (status) => {
 
 const getPriorityText = (priority) => {
   const priorityMap = {
-    'low': '低优先级',
-    'medium': '中优先级',
-    'high': '高优先级',
-    'critical': '紧急'
+    'low': 'low',
+    'medium': 'medium',
+    'high': 'high',
+    'critical': 'urgent'
   }
-  return priorityMap[priority] || priority
+  const translationKey = priorityMap[priority] || 'medium'
+  return t(`project.priority_options.${translationKey}`)
 }
 
 const getPriorityTagType = (priority) => {

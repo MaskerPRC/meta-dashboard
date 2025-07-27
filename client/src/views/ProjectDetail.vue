@@ -5,7 +5,7 @@
       <div class="back-navigation">
         <el-button @click="$router.back()" text>
           <el-icon><ArrowLeft /></el-icon>
-          返回项目列表
+          {{ t('project.back_to_list') }}
         </el-button>
       </div>
 
@@ -37,11 +37,11 @@
           <!-- 项目元信息 -->
           <div class="project-meta">
             <div class="meta-item">
-              <span class="meta-label">创建时间：</span>
+              <span class="meta-label">{{ t('project.created_at') }}：</span>
               <span class="meta-value">{{ formatDate(project.created_at) }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">更新时间：</span>
+              <span class="meta-label">{{ t('project.updated_at') }}：</span>
               <span class="meta-value">{{ formatDate(project.updated_at) }}</span>
             </div>
           </div>
@@ -57,8 +57,8 @@
                 <el-icon><Clock /></el-icon>
               </div>
               <div class="link-content">
-                <div class="link-title">进展历史</div>
-                <div class="link-desc">查看项目发展轨迹</div>
+                <div class="link-title">{{ t('project.progress_history') }}</div>
+                <div class="link-desc">{{ t('project.view_development_timeline') }}</div>
               </div>
               <div class="link-arrow">
                 <el-icon><ArrowRight /></el-icon>
@@ -120,18 +120,18 @@
           <div v-if="authStore.isAdmin" class="admin-actions">
             <el-button type="primary" @click="editProject">
               <el-icon><Edit /></el-icon>
-              编辑项目
+              {{ t('project.edit_project') }}
             </el-button>
             <el-button type="danger" @click="deleteProject">
               <el-icon><Delete /></el-icon>
-              删除项目
+              {{ t('project.delete_project') }}
             </el-button>
           </div>
         </div>
 
         <!-- 项目内容 -->
         <div class="project-content ai-card">
-          <h2>项目详情</h2>
+          <h2>{{ t('project.project_details') }}</h2>
           <div v-if="project.content" class="markdown-content" v-html="renderedContent"></div>
           <div v-else class="empty-content">
             <el-empty description="暂无详细内容" />
@@ -146,12 +146,12 @@
       <div v-else class="not-found">
         <el-result 
           icon="warning" 
-          title="项目不存在" 
-          sub-title="请检查链接是否正确"
+          :title="t('project.not_found')" 
+          :sub-title="t('project.check_link')"
         >
           <template #extra>
             <router-link to="/projects">
-              <el-button type="primary">返回项目列表</el-button>
+              <el-button type="primary">{{ t('project.back_to_list') }}</el-button>
             </router-link>
           </template>
         </el-result>
@@ -163,6 +163,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Edit, Delete, Link, View, ArrowRight, Clock } from '@element-plus/icons-vue'
 import { marked } from 'marked'
@@ -174,6 +175,7 @@ import CommentsSection from '@/components/comment/CommentsSection.vue'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 // 状态
 const project = ref(null)
@@ -188,25 +190,27 @@ const renderedContent = computed(() => {
 // 方法
 const getStatusName = (status) => {
   const statusMap = {
-    idea: '想法',
-    planning: '规划中',
-    development: '开发中',
-    testing: '测试中',
-    completed: '已完成',
-    deployed: '已上线',
-    maintenance: '维护中'
+    idea: 'brainstorming',
+    planning: 'planning',
+    development: 'development',
+    testing: 'testing',
+    completed: 'completed',
+    deployed: 'deployed',
+    maintenance: 'deployed'
   }
-  return statusMap[status] || status
+  const translationKey = statusMap[status] || 'brainstorming'
+  return t(`project.status_options.${translationKey}`)
 }
 
 const getPriorityName = (priority) => {
   const priorityMap = {
-    low: '低',
-    medium: '中',
-    high: '高',
-    urgent: '紧急'
+    low: 'low',
+    medium: 'medium',
+    high: 'high',
+    urgent: 'urgent'
   }
-  return priorityMap[priority] || priority
+  const translationKey = priorityMap[priority] || 'medium'
+  return t(`project.priority_options.${translationKey}`)
 }
 
 const formatDate = (dateString) => {
