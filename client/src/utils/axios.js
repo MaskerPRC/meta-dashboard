@@ -11,6 +11,9 @@ const axiosInstance = axios.create({
   }
 })
 
+// 设置全局默认配置，确保所有请求都携带cookie
+axios.defaults.withCredentials = true
+
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   config => {

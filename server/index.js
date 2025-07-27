@@ -30,15 +30,15 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS配置
+// CORS配置（修复域名一致性）
 const getAllowedOrigins = () => {
   if (process.env.NODE_ENV === 'production') {
     // 生产环境：从环境变量获取允许的域名，支持多个域名用逗号分隔
     const origins = process.env.ALLOWED_ORIGINS || 'https://share.agitao.net'
     return origins.split(',').map(origin => origin.trim())
   } else {
-    // 开发环境
-    return ['http://localhost:5173', 'http://127.0.0.1:5173']
+    // 开发环境：确保域名一致性（关键修复）
+    return ['http://localhost:5173', 'http://localhost:3015']
   }
 }
 
@@ -66,7 +66,8 @@ const sessionConfig = {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24小时
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    domain: process.env.COOKIE_DOMAIN
   }
 };
 
@@ -95,13 +96,13 @@ app.use('/api/project-history', require('./routes/project-history').router);
 if (process.env.NODE_ENV === 'production') {
   const distPath = path.join(__dirname, '../client/dist');
   const indexPath = path.join(distPath, 'index.html');
-  
+
   // 检查前端构建文件是否存在
   const fs = require('fs');
   if (fs.existsSync(distPath) && fs.existsSync(indexPath)) {
     console.log('📁 前端构建文件存在，启用静态文件服务');
     app.use(express.static(distPath));
-    
+
     app.get('*', (req, res) => {
       // 排除API路由
       if (!req.path.startsWith('/api/')) {
@@ -111,13 +112,13 @@ if (process.env.NODE_ENV === 'production') {
   } else {
     console.log('⚠️ 前端构建文件不存在，跳过静态文件服务');
     console.log('📁 查找路径:', distPath);
-    
+
     // 为非API路由返回简单提示
     app.get('*', (req, res) => {
       if (!req.path.startsWith('/api/')) {
-        res.status(404).json({ 
-          message: '前端应用未构建', 
-          note: '请运行 npm run build 构建前端应用' 
+        res.status(404).json({
+          message: '前端应用未构建',
+          note: '请运行 npm run build 构建前端应用'
         });
       }
     });

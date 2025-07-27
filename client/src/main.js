@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router'
 import i18n from './locales'
 import './style/global.scss'
+import { useAuthStore } from './stores/auth'
 
 const app = createApp(App)
 
@@ -17,7 +18,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(i18n)
 app.use(router)
 app.use(ElementPlus, {
@@ -25,4 +27,8 @@ app.use(ElementPlus, {
   zIndex: 3000,
 })
 
-app.mount('#app') 
+// 应用启动时检查认证状态
+const authStore = useAuthStore()
+authStore.checkAuthStatus().then(() => {
+  app.mount('#app')
+}) 

@@ -360,7 +360,6 @@ const handleLocalLogin = async () => {
       
       // 更新认证状态
       authStore.user = response.data.user
-      authStore.isAuthenticated = true
       
       // 跳转到首页或目标页面
       const redirect = route.query.redirect || '/'
@@ -403,7 +402,6 @@ const handleRegister = async () => {
       
       // 更新认证状态
       authStore.user = response.data.user
-      authStore.isAuthenticated = true
       
       // 跳转到首页或目标页面
       const redirect = route.query.redirect || '/'

@@ -2,32 +2,45 @@ const express = require('express');
 const passport = require('passport');
 const db = require('../config/database');
 const ResponseHelper = require('../utils/responseHelper');
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 const router = express.Router();
 
 // 手动设置Session Cookie的公共函数
 const setManualSessionCookie = (req, res) => {
   const sessionSecret = process.env.SESSION_SECRET || 'ai-dashboard-secret-key-change-in-production';
-  
+
   // 使用express-session的签名机制
   const crypto = require('crypto');
   const signature = crypto
-    .createHmac('sha256', sessionSecret)
-    .update(req.sessionID)
-    .digest('base64')
-    .replace(/\=+$/, '');
-  
+      .createHmac('sha256', sessionSecret)
+      .update(req.sessionID)
+      .digest('base64')
+
   const signedSessionId = `s:${req.sessionID}.${signature}`;
-  
-  // 手动设置Cookie（与express-session兼容）
-  res.cookie('connect.sid', signedSessionId, {
-    domain: '.agitao.net',
+
+  // 根据环境设置Cookie配置
+  const cookieOptions = {
+    domain: process.env.COOKIE_DOMAIN,
     path: '/',
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
     maxAge: 24 * 60 * 60 * 1000,
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
-  });
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    // 生产环境：跨子域名配置
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = 'none';
+  } else {
+    // 开发环境：同域名配置（关键修复）
+    cookieOptions.secure = false; // HTTP环境
+    cookieOptions.sameSite = 'lax'; // 同域名不需要none
+    // 开发环境不设置domain，让浏览器自动处理
+  }
+
+  // 手动设置Cookie（与express-session完全兼容）
+  res.cookie('connect.sid', signedSessionId, cookieOptions);
 };
 
 // GitHub登录
@@ -36,28 +49,28 @@ router.get('/github', passport.authenticate('github', {
 }));
 
 // GitHub回调
-router.get('/github/callback', 
-  passport.authenticate('github', { failureRedirect: '/login?error=github' }),
-  (req, res) => {
-    // 手动保存session
-    req.session.save((saveErr) => {
-      if (saveErr) {
-        console.error('Session保存失败:', saveErr);
-        return res.status(500).send('Session保存失败');
-      }
-      
-      // 手动设置Cookie
-      setManualSessionCookie(req, res);
-      
-      // 登录成功，重定向到前端
-      const frontendUrl = process.env.FRONTEND_URL || 
-        (process.env.NODE_ENV === 'production' 
-          ? 'https://share.agitao.net' 
-          : 'http://localhost:5173');
-      
-      res.redirect(frontendUrl);
-    });
-  }
+router.get('/github/callback',
+    passport.authenticate('github', { failureRedirect: '/login?error=github' }),
+    (req, res) => {
+      // 手动保存session
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error('Session保存失败:', saveErr);
+          return res.status(500).send('Session保存失败');
+        }
+
+        // 手动设置Cookie
+        setManualSessionCookie(req, res);
+
+        // 登录成功，重定向到前端
+        const frontendUrl = process.env.FRONTEND_URL ||
+            (process.env.NODE_ENV === 'production'
+                ? 'https://share.agitao.net'
+                : 'http://localhost:5173');
+
+        res.redirect(frontendUrl);
+      });
+    }
 );
 
 // Google登录
@@ -67,27 +80,27 @@ router.get('/google', passport.authenticate('google', {
 
 // Google回调
 router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login?error=google' }),
-  (req, res) => {
-    // 手动保存session
-    req.session.save((saveErr) => {
-      if (saveErr) {
-        console.error('Session保存失败:', saveErr);
-        return res.status(500).send('Session保存失败');
-      }
-      
-      // 手动设置Cookie
-      setManualSessionCookie(req, res);
-      
-      // 登录成功，重定向到前端
-      const frontendUrl = process.env.FRONTEND_URL || 
-        (process.env.NODE_ENV === 'production' 
-          ? 'https://share.agitao.net' 
-          : 'http://localhost:5173');
-      
-      res.redirect(frontendUrl);
-    });
-  }
+    passport.authenticate('google', { failureRedirect: '/login?error=google' }),
+    (req, res) => {
+      // 手动保存session
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error('Session保存失败:', saveErr);
+          return res.status(500).send('Session保存失败');
+        }
+
+        // 手动设置Cookie
+        setManualSessionCookie(req, res);
+
+        // 登录成功，重定向到前端
+        const frontendUrl = process.env.FRONTEND_URL ||
+            (process.env.NODE_ENV === 'production'
+                ? 'https://share.agitao.net'
+                : 'http://localhost:5173');
+
+        res.redirect(frontendUrl);
+      });
+    }
 );
 
 // 微信登录
@@ -95,27 +108,27 @@ router.get('/wechat', passport.authenticate('wechat'));
 
 // 微信回调
 router.get('/wechat/callback',
-  passport.authenticate('wechat', { failureRedirect: '/login?error=wechat' }),
-  (req, res) => {
-    // 手动保存session
-    req.session.save((saveErr) => {
-      if (saveErr) {
-        console.error('Session保存失败:', saveErr);
-        return res.status(500).send('Session保存失败');
-      }
-      
-      // 手动设置Cookie
-      setManualSessionCookie(req, res);
-      
-      // 登录成功，重定向到前端
-      const frontendUrl = process.env.FRONTEND_URL || 
-        (process.env.NODE_ENV === 'production' 
-          ? 'https://share.agitao.net' 
-          : 'http://localhost:5173');
-      
-      res.redirect(frontendUrl);
-    });
-  }
+    passport.authenticate('wechat', { failureRedirect: '/login?error=wechat' }),
+    (req, res) => {
+      // 手动保存session
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error('Session保存失败:', saveErr);
+          return res.status(500).send('Session保存失败');
+        }
+
+        // 手动设置Cookie
+        setManualSessionCookie(req, res);
+
+        // 登录成功，重定向到前端
+        const frontendUrl = process.env.FRONTEND_URL ||
+            (process.env.NODE_ENV === 'production'
+                ? 'https://share.agitao.net'
+                : 'http://localhost:5173');
+
+        res.redirect(frontendUrl);
+      });
+    }
 );
 
 // 获取当前用户信息
@@ -143,27 +156,39 @@ router.post('/login', (req, res, next) => {
     if (err) {
       return ResponseHelper.serverError(res, req, 'errors.server.internal_error');
     }
-    
+
     if (!user) {
       return ResponseHelper.authError(res, req, 'errors.auth.login_failed');
     }
-    
+
     req.logIn(user, (loginErr) => {
       if (loginErr) {
         return ResponseHelper.serverError(res, req, 'errors.auth.login_failed');
       }
-      
-      res.json({
-        success: true,
-        message: req.t('success.login'),
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          avatar_url: user.avatar_url,
-          display_name: user.display_name,
-          is_admin: user.is_admin
+
+      // ✨ 关键修复：使用与GitHub登录相同的session保存和cookie设置方法
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.log(`❌ [LOGIN] Session保存失败:`, saveErr);
+          return ResponseHelper.serverError(res, req, 'errors.auth.login_failed');
         }
+
+        // 手动设置Cookie（与GitHub登录相同的方法）
+        setManualSessionCookie(req, res);
+
+
+        res.json({
+          success: true,
+          message: req.t('success.login'),
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            avatar_url: user.avatar_url,
+            display_name: user.display_name,
+            is_admin: user.is_admin
+          }
+        });
       });
     });
   })(req, res, next);
@@ -172,20 +197,20 @@ router.post('/login', (req, res, next) => {
 // 注册
 router.post('/register', (req, res) => {
   const { username, email, password, confirmPassword, phone } = req.body;
-  
+
   // 验证输入
   if (!username || !email || !password) {
     return ResponseHelper.validationError(res, req, 'errors.validation.required_field');
   }
-  
+
   if (password !== confirmPassword) {
     return ResponseHelper.validationError(res, req, 'errors.auth.password_mismatch');
   }
-  
+
   if (password.length < 6) {
     return ResponseHelper.validationError(res, req, 'errors.auth.password_too_short');
   }
-  
+
   // 检查用户名和邮箱是否已存在
   db.get("SELECT * FROM users WHERE username = ? OR email = ?", [username, email], (err, existingUser) => {
     if (err) {
@@ -194,7 +219,7 @@ router.post('/register', (req, res) => {
         message: '注册失败，数据库错误'
       });
     }
-    
+
     if (existingUser) {
       const field = existingUser.username === username ? '用户名' : '邮箱';
       return res.status(400).json({
@@ -202,12 +227,12 @@ router.post('/register', (req, res) => {
         message: `${field}已被注册`
       });
     }
-    
+
     // 生成盐值和密码哈希
     const bcrypt = require('bcryptjs');
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password + salt, 10);
-    
+
     // 创建新用户
     db.run(`
       INSERT INTO users (username, email, password_hash, salt, phone, display_name, created_at, last_login)
@@ -219,7 +244,7 @@ router.post('/register', (req, res) => {
           message: '注册失败'
         });
       }
-      
+
       // 获取新创建的用户信息
       db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (selectErr, newUser) => {
         if (selectErr) {
@@ -228,7 +253,7 @@ router.post('/register', (req, res) => {
             message: '注册成功但获取用户信息失败'
           });
         }
-        
+
         // 自动登录
         req.logIn(newUser, (loginErr) => {
           if (loginErr) {
@@ -238,7 +263,7 @@ router.post('/register', (req, res) => {
               user: null
             });
           }
-          
+
           res.json({
             success: true,
             message: '注册成功',
@@ -265,32 +290,32 @@ router.post('/change-password', (req, res) => {
       message: '请先登录'
     });
   }
-  
+
   const { currentPassword, newPassword, confirmPassword } = req.body;
-  
+
   if (!currentPassword || !newPassword) {
     return res.status(400).json({
       success: false,
       message: '当前密码和新密码不能为空'
     });
   }
-  
+
   if (newPassword !== confirmPassword) {
     return res.status(400).json({
       success: false,
       message: '两次输入的新密码不一致'
     });
   }
-  
+
   if (newPassword.length < 6) {
     return res.status(400).json({
       success: false,
       message: '新密码长度至少6位'
     });
   }
-  
+
   const userId = req.user.id;
-  
+
   // 获取用户当前信息
   db.get("SELECT * FROM users WHERE id = ?", [userId], (err, user) => {
     if (err || !user) {
@@ -299,13 +324,13 @@ router.post('/change-password', (req, res) => {
         message: '获取用户信息失败'
       });
     }
-    
+
     // 如果用户没有设置过密码，允许直接设置新密码
     if (!user.password_hash || !user.salt) {
       const bcrypt = require('bcryptjs');
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(newPassword + salt, 10);
-      
+
       db.run("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", [hash, salt, userId], (updateErr) => {
         if (updateErr) {
           return res.status(500).json({
@@ -313,7 +338,7 @@ router.post('/change-password', (req, res) => {
             message: '设置密码失败'
           });
         }
-        
+
         res.json({
           success: true,
           message: '密码设置成功'
@@ -321,22 +346,22 @@ router.post('/change-password', (req, res) => {
       });
       return;
     }
-    
+
     // 验证当前密码
     const bcrypt = require('bcryptjs');
     const isValidPassword = bcrypt.compareSync(currentPassword + user.salt, user.password_hash);
-    
+
     if (!isValidPassword) {
       return res.status(400).json({
         success: false,
         message: '当前密码错误'
       });
     }
-    
+
     // 生成新的盐值和密码哈希
     const newSalt = bcrypt.genSaltSync(10);
     const newHash = bcrypt.hashSync(newPassword + newSalt, 10);
-    
+
     db.run("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", [newHash, newSalt, userId], (updateErr) => {
       if (updateErr) {
         return res.status(500).json({
@@ -344,7 +369,7 @@ router.post('/change-password', (req, res) => {
           message: '修改密码失败'
         });
       }
-      
+
       res.json({
         success: true,
         message: '密码修改成功'
@@ -384,4 +409,4 @@ router.get('/status', (req, res) => {
   });
 });
 
-module.exports = router; 
+module.exports = router;
