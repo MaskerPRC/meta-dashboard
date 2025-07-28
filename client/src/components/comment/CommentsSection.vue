@@ -47,6 +47,17 @@
           <div class="comment-content">
             <div class="comment-header">
               <span class="username">{{ comment.user.username }}</span>
+              
+              <!-- 评论有效性状态 (仅管理员可见) -->
+              <el-tag 
+                v-if="isAdmin && comment.validity_status && comment.validity_status !== 'pending'"
+                :type="getValidityTagType(comment.validity_status)"
+                size="small"
+                class="validity-tag"
+              >
+                {{ getValidityStatusText(comment.validity_status) }}
+              </el-tag>
+              
               <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
               
               <!-- 操作菜单 -->
@@ -212,6 +223,9 @@ const props = defineProps({
 const authStore = useAuthStore()
 const { t } = useI18n()
 
+// 计算属性
+const isAdmin = computed(() => authStore.isAdmin)
+
 // 响应式数据
 const comments = ref([])
 const loading = ref(false)
@@ -267,6 +281,26 @@ const renderMarkdown = (content) => {
   } catch (error) {
     console.error('Markdown渲染失败:', error)
     return content
+  }
+}
+
+// 获取检测状态的标签类型
+const getValidityTagType = (status) => {
+  switch (status) {
+    case 'valid': return 'success'
+    case 'invalid': return 'warning'  // 客户端用warning，避免太刺眼
+    case 'error': return 'info'
+    default: return 'info'
+  }
+}
+
+// 获取检测状态的文本
+const getValidityStatusText = (status) => {
+  switch (status) {
+    case 'valid': return '✓ 有价值'
+    case 'invalid': return '! 待改进'
+    case 'error': return '检测异常'
+    default: return ''
   }
 }
 
@@ -503,6 +537,11 @@ onMounted(() => {
           .username {
             font-weight: 500;
             color: var(--el-text-color-primary);
+          }
+          
+          .validity-tag {
+            font-size: 10px;
+            margin-left: 8px;
           }
           
           .comment-time {

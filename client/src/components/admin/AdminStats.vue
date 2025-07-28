@@ -37,7 +37,7 @@
         </div>
         <div class="stat-info">
           <div class="stat-number">{{ stats.avgProgress }}%</div>
-          <div class="stat-label">平均进度</div>
+          <div class="stat-label">{{ $t('admin.stats.average_progress') }}</div>
         </div>
       </div>
     </div>
@@ -46,8 +46,11 @@
 
 <script setup>
 import { reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Document, User, ChatDotSquare, ArrowUp } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
+
+const { t } = useI18n()
 
 const stats = reactive({
   totalProjects: 0,

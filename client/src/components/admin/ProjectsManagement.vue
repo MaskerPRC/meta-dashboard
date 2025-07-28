@@ -5,7 +5,7 @@
       <div class="toolbar-left">
         <el-input
           v-model="projectSearch"
-          placeholder="搜索项目..."
+          :placeholder="t('admin.projects.search_placeholder')"
           style="width: 300px"
           clearable
           @input="handleProjectSearch"
@@ -35,11 +35,11 @@
       <div class="toolbar-right">
         <el-button @click="exportProjects">
           <el-icon><Download /></el-icon>
-          导出数据
+          {{ t('admin.projects.export_data') }}
         </el-button>
         <el-button type="danger" @click="handleBatchDelete">
           <el-icon><Delete /></el-icon>
-          批量删除
+          {{ t('admin.projects.batch_delete') }}
         </el-button>
       </div>
     </div>
@@ -52,11 +52,11 @@
         style="width: 100%"
         @selection-change="handleProjectSelectionChange"
         v-loading="projectsLoading"
-        empty-text="暂无项目数据"
+        :empty-text="t('admin.projects.empty_text')"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="title" label="项目名称" min-width="200">
+        <el-table-column prop="id" :label="t('admin.projects.table_headers.id')" width="80" />
+        <el-table-column prop="title" :label="t('admin.projects.table_headers.project_name')" min-width="200">
           <template #default="scope">
             <div class="project-title-cell">
               <el-link @click="editProject(scope.row)" type="primary">
@@ -66,21 +66,21 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" :label="t('admin.projects.table_headers.status')" width="100">
           <template #default="scope">
             <el-tag :class="['status-tag', scope.row.status]" size="small">
               {{ getStatusName(scope.row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="priority" label="优先级" width="100">
+        <el-table-column prop="priority" :label="t('admin.projects.table_headers.priority')" width="100">
           <template #default="scope">
             <el-tag :class="['priority-tag', scope.row.priority]" size="small">
               {{ getPriorityName(scope.row.priority) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="progress" label="进度" width="120">
+        <el-table-column prop="progress" :label="t('admin.projects.table_headers.progress')" width="120">
           <template #default="scope">
             <el-progress
               :percentage="scope.row.progress"
@@ -95,20 +95,20 @@
             {{ formatDate(scope.row.created_at) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column :label="t('admin.projects.table_headers.actions')" width="200">
           <template #default="scope">
             <el-button size="small" @click="editProject(scope.row)">
-              编辑
+              {{ t('admin.projects.actions.edit') }}
             </el-button>
             <el-button size="small" @click="viewProject(scope.row.id)">
-              查看
+              {{ t('admin.projects.actions.view') }}
             </el-button>
             <el-button
               size="small"
               type="danger"
               @click="deleteProject(scope.row)"
             >
-              删除
+              {{ t('admin.projects.actions.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -166,10 +166,10 @@ const fetchProjects = async () => {
       params: { limit: 1000 }
     })
     projects.value = response.data.projects
-  } catch (error) {
-    console.error('获取项目列表失败:', error)
-    ElMessage.error('获取项目列表失败')
-  } finally {
+      } catch (error) {
+      console.error('获取项目列表失败:', error)
+      ElMessage.error(t('admin.projects.messages.fetch_failed'))
+    } finally {
     projectsLoading.value = false
   }
 }
@@ -197,11 +197,11 @@ const viewProject = (id) => {
 const deleteProject = async (project) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除项目 "${project.title}" 吗？此操作不可恢复。`,
-      '删除项目',
+      t('admin.projects.messages.delete_confirm', { title: project.title }),
+      t('admin.projects.messages.delete_title'),
       {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('admin.projects.actions.delete'),
+        cancelButtonText: t('form.cancel'),
         type: 'warning',
         confirmButtonClass: 'el-button--danger'
       }
@@ -215,29 +215,29 @@ const deleteProject = async (project) => {
       projects.value.splice(index, 1)
     }
 
-    ElMessage.success('项目删除成功')
+    ElMessage.success(t('admin.projects.messages.delete_success'))
     emit('stats-updated')
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除项目失败:', error)
-      ElMessage.error(error.response?.data?.message || '删除项目失败')
+      ElMessage.error(error.response?.data?.message || t('admin.projects.messages.delete_failed'))
     }
   }
 }
 
 const handleBatchDelete = async () => {
   if (selectedProjects.value.length === 0) {
-    ElMessage.warning('请选择要删除的项目')
+    ElMessage.warning(t('admin.projects.messages.batch_delete_warning'))
     return
   }
 
   try {
     await ElMessageBox.confirm(
-      `确定要删除选中的 ${selectedProjects.value.length} 个项目吗？此操作不可恢复。`,
-      '批量删除项目',
+      t('admin.projects.messages.batch_delete_confirm', { count: selectedProjects.value.length }),
+      t('admin.projects.messages.batch_delete_title'),
       {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('admin.projects.actions.delete'),
+        cancelButtonText: t('form.cancel'),
         type: 'warning',
         confirmButtonClass: 'el-button--danger'
       }
@@ -252,12 +252,12 @@ const handleBatchDelete = async () => {
     projects.value = projects.value.filter(p => !projectIds.includes(p.id))
     selectedProjects.value = []
 
-    ElMessage.success('批量删除成功')
+    ElMessage.success(t('admin.projects.messages.batch_delete_success'))
     emit('stats-updated')
   } catch (error) {
     if (error !== 'cancel') {
       console.error('批量删除失败:', error)
-      ElMessage.error(error.response?.data?.message || '批量删除失败')
+      ElMessage.error(error.response?.data?.message || t('admin.projects.messages.batch_delete_failed'))
     }
   }
 }
@@ -278,10 +278,10 @@ const exportProjects = async () => {
     link.remove()
     window.URL.revokeObjectURL(url)
 
-    ElMessage.success('数据导出成功')
+    ElMessage.success(t('admin.projects.messages.export_success'))
   } catch (error) {
     console.error('导出数据失败:', error)
-    ElMessage.error('导出数据失败')
+    ElMessage.error(t('admin.projects.messages.export_failed'))
   }
 }
 

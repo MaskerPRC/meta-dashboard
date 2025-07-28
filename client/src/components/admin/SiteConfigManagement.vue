@@ -1,10 +1,10 @@
 <template>
   <div class="tab-content">
     <div class="config-section">
-      <h3 class="config-title">微信群二维码设置</h3>
+      <h3 class="config-title">{{ t('admin.site_config.wechat_group.title') }}</h3>
       <div class="config-form">
         <el-form label-width="120px">
-          <el-form-item label="群二维码">
+          <el-form-item :label="t('admin.site_config.wechat_group.qr_code')">
             <div class="qr-upload-container">
               <el-upload
                 :show-file-list="false"
@@ -16,33 +16,33 @@
                   <img :src="siteConfig.wechat_group_qr.value" alt="微信群二维码" />
                   <div class="qr-mask">
                     <el-icon><Plus /></el-icon>
-                    <span>更换二维码</span>
+                    <span>{{ t('admin.site_config.wechat_group.change_qr') }}</span>
                   </div>
                 </div>
                 <div class="qr-placeholder" v-else>
                   <el-icon><Plus /></el-icon>
-                  <span>上传微信群二维码</span>
+                  <span>{{ t('admin.site_config.wechat_group.upload_qr') }}</span>
                 </div>
               </el-upload>
             </div>
           </el-form-item>
 
-          <el-form-item label="群标题">
+          <el-form-item :label="t('admin.site_config.wechat_group.group_title')">
             <el-input
               :value="siteConfig.wechat_group_title?.value || ''"
               @input="(value) => { if (siteConfig.wechat_group_title) siteConfig.wechat_group_title.value = value }"
-              placeholder="请输入微信群标题"
+              :placeholder="t('admin.site_config.wechat_group.title_placeholder')"
               style="width: 300px"
               @blur="updateConfig('wechat_group_title', siteConfig.wechat_group_title?.value)"
             />
           </el-form-item>
 
-          <el-form-item label="群描述">
+          <el-form-item :label="t('admin.site_config.wechat_group.group_description')">
             <el-input
               type="textarea"
               :value="siteConfig.wechat_group_description?.value || ''"
               @input="(value) => { if (siteConfig.wechat_group_description) siteConfig.wechat_group_description.value = value }"
-              placeholder="请输入微信群描述"
+              :placeholder="t('admin.site_config.wechat_group.description_placeholder')"
               :rows="3"
               style="width: 400px"
               @blur="updateConfig('wechat_group_description', siteConfig.wechat_group_description?.value)"
@@ -50,8 +50,8 @@
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="saveAllConfigs">保存所有配置</el-button>
-            <el-button @click="loadSiteConfig">重置</el-button>
+            <el-button type="primary" @click="saveAllConfigs">{{ t('admin.site_config.wechat_group.save_all') }}</el-button>
+            <el-button @click="loadSiteConfig">{{ t('admin.site_config.wechat_group.reset') }}</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -61,9 +61,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
+
+const { t } = useI18n()
 
 // 响应式数据
 const siteConfig = ref({})
@@ -77,7 +80,7 @@ const loadSiteConfig = async () => {
     siteConfig.value = response.data.configs
   } catch (error) {
     console.error('获取站点配置失败:', error)
-    ElMessage.error('获取站点配置失败')
+    ElMessage.error(t('admin.site_config.messages.fetch_failed'))
   } finally {
     configLoading.value = false
   }
@@ -86,10 +89,10 @@ const loadSiteConfig = async () => {
 const updateConfig = async (key, value) => {
   try {
     await axios.put(`/api/config/${key}`, { value })
-    ElMessage.success('配置更新成功')
+    ElMessage.success(t('admin.site_config.messages.update_success'))
   } catch (error) {
     console.error('更新配置失败:', error)
-    ElMessage.error('更新配置失败')
+    ElMessage.error(t('admin.site_config.messages.update_failed'))
     // 重新加载配置以恢复原值
     loadSiteConfig()
   }
@@ -103,10 +106,10 @@ const saveAllConfigs = async () => {
     })
 
     await axios.put('/api/config', { configs })
-    ElMessage.success('所有配置保存成功')
+    ElMessage.success(t('admin.site_config.messages.save_success'))
   } catch (error) {
     console.error('保存配置失败:', error)
-    ElMessage.error('保存配置失败')
+    ElMessage.error(t('admin.site_config.messages.save_failed'))
   }
 }
 
@@ -115,11 +118,11 @@ const beforeQRUpload = (file) => {
   const isLt5M = file.size / 1024 / 1024 < 5
 
   if (!isImage) {
-    ElMessage.error('只能上传图片文件!')
+    ElMessage.error(t('admin.site_config.messages.image_only'))
     return false
   }
   if (!isLt5M) {
-    ElMessage.error('图片大小不能超过 5MB!')
+    ElMessage.error(t('admin.site_config.messages.file_too_large'))
     return false
   }
   return true
@@ -140,12 +143,12 @@ const handleQRUpload = async (uploadFile) => {
         siteConfig.value.wechat_group_qr = {}
       }
       siteConfig.value.wechat_group_qr.value = base64Data
-      ElMessage.success('二维码上传成功')
+      ElMessage.success(t('admin.site_config.messages.upload_success'))
     }
     reader.readAsDataURL(uploadFile.file)
   } catch (error) {
     console.error('上传二维码失败:', error)
-    ElMessage.error('上传二维码失败')
+    ElMessage.error(t('admin.site_config.messages.upload_failed'))
   }
 }
 

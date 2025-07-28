@@ -2,7 +2,7 @@
   <el-dialog
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    title="AI智能生成项目"
+    :title="t('admin.ai_generator.title')"
     width="800px"
     :close-on-click-modal="false"
     @close="closeDialog"
@@ -10,26 +10,26 @@
     <div class="ai-generate-container">
       <!-- 步骤指示器 -->
       <el-steps :active="currentStep" finish-status="success" style="margin-bottom: 30px">
-        <el-step title="输入描述" description="描述您的项目想法" />
-        <el-step title="AI生成" description="AI解析并生成项目结构" />
-        <el-step title="预览确认" description="预览并确认生成的项目" />
+        <el-step :title="t('admin.ai_generator.step_1.title')" :description="t('admin.ai_generator.step_1.description')" />
+        <el-step :title="t('admin.ai_generator.step_2.title')" :description="t('admin.ai_generator.step_2.description')" />
+        <el-step :title="t('admin.ai_generator.step_3.title')" :description="t('admin.ai_generator.step_3.description')" />
       </el-steps>
 
       <!-- 第一步：文本输入 -->
       <div v-if="currentStep === 0" class="ai-step">
-        <div class="step-title">请描述您想要创建的项目：</div>
+        <div class="step-title">{{ t('admin.ai_generator.step_1.title') }}：</div>
         <el-form :model="form" label-position="top">
-          <el-form-item label="项目描述（支持中英文，最多5000字符）">
+          <el-form-item :label="t('admin.ai_generator.step_1.input_label')">
             <el-input
               v-model="form.text"
               type="textarea"
               :rows="8"
-              placeholder="例如：我想做一个在线图书管理系统，用户可以搜索图书、借阅图书、查看借阅历史。管理员可以添加新书、管理用户借阅记录。使用Vue.js前端，Node.js后端，MySQL数据库。"
+              :placeholder="t('admin.ai_generator.step_1.placeholder')"
               maxlength="5000"
               show-word-limit
             />
           </el-form-item>
-          <el-form-item label="语言偏好">
+          <el-form-item :label="t('admin.ai_generator.step_1.language_preference')">
             <el-radio-group v-model="form.language">
               <el-radio value="zh">中文</el-radio>
               <el-radio value="en">English</el-radio>
@@ -38,7 +38,7 @@
         </el-form>
 
         <div class="ai-examples">
-          <div class="examples-title">💡 示例描述：</div>
+          <div class="examples-title">{{ t('admin.ai_generator.step_1.examples_title') }}</div>
           <div class="examples-list">
             <el-tag
               v-for="example in examples"
@@ -57,7 +57,7 @@
       <div v-if="currentStep === 1" class="ai-step">
         <div class="ai-loading">
           <el-icon class="is-loading" style="font-size: 48px; color: #409eff;"><Loading /></el-icon>
-          <div class="loading-text">AI正在分析您的描述...</div>
+          <div class="loading-text">{{ t('admin.ai_generator.step_2.loading_text') }}</div>
           <div class="loading-progress">
             <el-progress
               :percentage="progress"
@@ -71,38 +71,38 @@
 
       <!-- 第三步：预览确认 -->
       <div v-if="currentStep === 2" class="ai-step">
-        <div class="step-title">AI生成的项目预览：</div>
+        <div class="step-title">{{ t('admin.ai_generator.step_3.preview_title') }}</div>
         <div class="generated-project-preview">
           <el-card class="project-card">
             <template #header>
               <div class="card-header">
                 <span class="project-title">{{ generatedProject.title }}</span>
-                <el-tag type="success">AI生成</el-tag>
+                <el-tag type="success">{{ t('admin.ai_generator.step_3.ai_generated') }}</el-tag>
               </div>
             </template>
 
             <div class="project-details">
               <div class="detail-row">
-                <span class="label">项目描述：</span>
+                <span class="label">{{ t('admin.ai_generator.step_3.project_description') }}</span>
                 <span class="value">{{ generatedProject.description }}</span>
               </div>
 
               <div class="detail-row">
-                <span class="label">状态：</span>
+                <span class="label">{{ t('project.status') }}：</span>
                 <el-tag :type="getStatusTagType(generatedProject.status)">
                   {{ getStatusText(generatedProject.status) }}
                 </el-tag>
               </div>
 
               <div class="detail-row">
-                <span class="label">优先级：</span>
+                <span class="label">{{ t('project.priority') }}：</span>
                 <el-tag :type="getPriorityTagType(generatedProject.priority)">
                   {{ getPriorityText(generatedProject.priority) }}
                 </el-tag>
               </div>
 
               <div class="detail-row" v-if="generatedProject.tech_stack?.length">
-                <span class="label">技术栈：</span>
+                <span class="label">{{ t('admin.ai_generator.step_3.tech_stack') }}</span>
                 <div class="tech-tags">
                   <el-tag
                     v-for="tech in generatedProject.tech_stack"
@@ -116,7 +116,7 @@
               </div>
 
               <div class="detail-row" v-if="generatedProject.tags?.length">
-                <span class="label">标签：</span>
+                <span class="label">{{ t('admin.ai_generator.step_3.tags') }}</span>
                 <div class="tag-list">
                   <el-tag
                     v-for="tag in generatedProject.tags"
@@ -131,7 +131,7 @@
               </div>
 
               <div class="detail-row">
-                <span class="label">项目内容：</span>
+                <span class="label">{{ t('admin.ai_generator.step_3.project_content') }}</span>
                 <div class="content-preview">
                   {{ generatedProject.content }}
                 </div>
@@ -144,27 +144,27 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="closeDialog">取消</el-button>
+        <el-button @click="closeDialog">{{ t('admin.ai_generator.cancel') }}</el-button>
         <el-button
           v-if="currentStep === 0"
           type="primary"
           :disabled="!form.text.trim()"
           @click="startGenerate"
         >
-          开始生成
+          {{ t('admin.ai_generator.step_1.start_generate') }}
         </el-button>
         <el-button
           v-if="currentStep === 2"
           @click="currentStep = 0"
         >
-          重新生成
+          {{ t('admin.ai_generator.step_3.regenerate') }}
         </el-button>
         <el-button
           v-if="currentStep === 2"
           type="primary"
           @click="saveProject"
         >
-          创建项目
+          {{ t('admin.ai_generator.step_3.create_project') }}
         </el-button>
       </div>
     </template>
@@ -210,7 +210,7 @@ const { t } = useI18n()
 // 方法
 const startGenerate = async () => {
   if (!form.text.trim()) {
-    ElMessage.warning('请输入项目描述')
+    ElMessage.warning(t('admin.ai_generator.messages.empty_description'))
     return
   }
 
@@ -241,10 +241,10 @@ const startGenerate = async () => {
       }, 500)
     }
 
-    ElMessage.success('AI项目生成成功！')
+    ElMessage.success(t('admin.ai_generator.messages.generate_success'))
   } catch (error) {
     console.error('AI生成失败:', error)
-    ElMessage.error(error.response?.data?.message || 'AI生成失败，请稍后重试')
+    ElMessage.error(error.response?.data?.message || t('admin.ai_generator.messages.generate_failed'))
     currentStep.value = 0
     clearInterval(progressInterval)
   }
@@ -255,13 +255,13 @@ const saveProject = async () => {
     const response = await axios.post('/api/projects', generatedProject.value)
 
     if (response.data.project) {
-      ElMessage.success('项目创建成功！')
+      ElMessage.success(t('admin.ai_generator.messages.create_success'))
       emit('project-created', response.data.project)
       closeDialog()
     }
   } catch (error) {
     console.error('保存项目失败:', error)
-    ElMessage.error(error.response?.data?.message || '保存项目失败')
+    ElMessage.error(error.response?.data?.message || t('admin.ai_generator.messages.create_failed'))
   }
 }
 

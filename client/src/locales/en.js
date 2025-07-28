@@ -345,6 +345,7 @@ export default {
     // User Management
     users: {
       search_placeholder: 'Search users...',
+      empty_text: 'No user data available',
       table_headers: {
         id: 'ID',
         avatar: 'Avatar',
@@ -361,41 +362,58 @@ export default {
       auth_methods: {
         local: 'Local Account',
         google: 'Google',
-        github: 'GitHub'
+        github: 'GitHub',
+        wechat: 'WeChat'
       },
       actions: {
         reset_password: 'Reset Password',
         delete: 'Delete'
       },
       messages: {
-        reset_password_confirm: 'Are you sure you want to reset password for user "{username}"?',
+        fetch_failed: 'Failed to fetch user list',
+        admin_grant_success: 'Admin privileges granted successfully',
+        admin_revoke_success: 'Admin privileges revoked successfully',
+        admin_update_failed: 'Failed to update user privileges',
+        reset_password_title: 'Reset User Password',
+        reset_password_prompt: 'Please enter new password (at least 6 characters):',
+        reset_password_confirm: 'Confirm',
+        reset_password_cancel: 'Cancel',
+        reset_password_validation: 'Password length must be at least 6 characters',
         reset_password_success: 'Password reset successful',
         reset_password_failed: 'Password reset failed',
         delete_confirm: 'Are you sure you want to delete user "{username}"? This action cannot be undone.',
+        delete_title: 'Delete User',
         delete_success: 'User deleted successfully',
-        delete_failed: 'Failed to delete user',
-        fetch_failed: 'Failed to fetch user list'
+        delete_failed: 'Failed to delete user'
       }
     },
     
     // Comment Management
     comments: {
+      empty_text: 'No comment data available',
       table_headers: {
         id: 'ID',
         project: 'Project',
         user: 'User',
         content: 'Comment Content',
+        validity_status: 'Validity Status',
         created_at: 'Created At',
         actions: 'Actions'
       },
+      attachment_labels: {
+        images: 'Images',
+        videos: 'Videos'
+      },
       actions: {
+        revalidate: 'Revalidate',
         delete: 'Delete'
       },
       messages: {
+        fetch_failed: 'Failed to fetch comment list',
         delete_confirm: 'Are you sure you want to delete this comment? This action cannot be undone.',
+        delete_title: 'Delete Comment',
         delete_success: 'Comment deleted successfully',
-        delete_failed: 'Failed to delete comment',
-        fetch_failed: 'Failed to fetch comment list'
+        delete_failed: 'Failed to delete comment'
       }
     },
     
@@ -514,7 +532,8 @@ export default {
     messages: {
       project_update_success: 'Project updated successfully',
       project_create_success: 'Project created successfully',
-      save_project_failed: 'Failed to save project'
+      save_project_failed: 'Failed to save project',
+      project_saved: 'Project saved successfully'
     },
 
     // Project template

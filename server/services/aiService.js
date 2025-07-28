@@ -53,6 +53,149 @@ class AIService {
   }
 
   /**
+   * 检测评论内容的有效性
+   * @param {string} content - 评论内容
+   * @param {string} language - 语言偏好 (zh/en)
+   * @returns {Promise<Object>} 检测结果
+   */
+  async validateCommentWithAI(content, language = 'zh') {
+    try {
+      if (!this.isOpenAIAvailable) {
+        throw new Error('OpenAI配置不可用');
+      }
+
+      const prompt = this.createCommentValidationPrompt(content, language);
+      
+      console.log('🤖 调用OpenAI API检测评论有效性...');
+      
+      const completion = await openai.chat.completions.create({
+        model: defaultConfig.model,
+        messages: [
+          {
+            role: "system",
+            content: language === 'zh' 
+              ? "你是一个专业的内容审核助手，能够判断评论的价值和有效性。你需要评估评论是否有建设性、是否与项目相关、是否包含有价值的信息。"
+              : "You are a professional content moderation assistant who can judge the value and validity of comments. You need to assess whether comments are constructive, project-related, and contain valuable information."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.3, // 使用较低的温度确保结果稳定
+        max_tokens: 500,
+        timeout: defaultConfig.timeout
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) {
+        throw new Error('OpenAI返回空响应');
+      }
+
+      // 解析评论检测结果
+      const validationResult = this.parseCommentValidationResponse(response);
+      
+      console.log('✅ 评论有效性检测完成');
+      return validationResult;
+
+    } catch (error) {
+      console.error('❌ 评论有效性检测失败:', error.message);
+      return {
+        isValid: false,
+        score: 0,
+        reason: `检测错误: ${error.message}`,
+        status: 'error'
+      };
+    }
+  }
+
+  /**
+   * 创建评论验证提示
+   * @param {string} content - 评论内容
+   * @param {string} language - 语言偏好
+   * @returns {string} 提示文本
+   */
+  createCommentValidationPrompt(content, language) {
+    if (language === 'zh') {
+      return `请评估以下评论的有效性和价值：
+
+评论内容：
+"${content}"
+
+请从以下维度进行评估：
+1. 是否具有建设性和实用性
+2. 是否与项目相关
+3. 是否包含有价值的信息或建议
+4. 语言是否文明礼貌
+5. 是否为垃圾内容或无意义内容
+
+请返回JSON格式的结果，包含以下字段：
+{
+  "isValid": true/false,
+  "score": 0-100的分数,
+  "reason": "详细的评估原因",
+  "status": "valid/invalid"
+}`;
+    } else {
+      return `Please evaluate the validity and value of the following comment:
+
+Comment content:
+"${content}"
+
+Please evaluate from the following dimensions:
+1. Is it constructive and practical
+2. Is it project-related
+3. Does it contain valuable information or suggestions
+4. Is the language civilized and polite
+5. Is it spam or meaningless content
+
+Please return the result in JSON format with the following fields:
+{
+  "isValid": true/false,
+  "score": 0-100 score,
+  "reason": "detailed evaluation reason",
+  "status": "valid/invalid"
+}`;
+    }
+  }
+
+  /**
+   * 解析评论验证响应
+   * @param {string} response - AI的文本响应
+   * @returns {Object} 解析后的验证结果
+   */
+  parseCommentValidationResponse(response) {
+    try {
+      // 尝试提取JSON部分
+      const jsonMatch = response.match(/\{[\s\S]*?\}/);
+      if (!jsonMatch) {
+        throw new Error('响应中未找到有效的JSON格式');
+      }
+
+      const jsonStr = jsonMatch[0];
+      const parsed = JSON.parse(jsonStr);
+
+      // 验证必要字段并设置默认值
+      const result = {
+        isValid: parsed.isValid || false,
+        score: Math.max(0, Math.min(100, parseInt(parsed.score) || 0)),
+        reason: parsed.reason || '未提供评估原因',
+        status: parsed.status || (parsed.isValid ? 'valid' : 'invalid')
+      };
+
+      return result;
+    } catch (error) {
+      console.error('解析评论验证响应失败:', error);
+      return {
+        isValid: false,
+        score: 0,
+        reason: '解析AI响应失败',
+        status: 'error'
+      };
+    }
+  }
+
+  /**
    * 解析AI响应的JSON数据
    * @param {string} response - AI的文本响应
    * @returns {Object} 解析后的项目数据

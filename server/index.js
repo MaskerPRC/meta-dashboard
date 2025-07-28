@@ -59,15 +59,14 @@ app.use(middleware.handle(i18next));
 // Session配置
 const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'ai-dashboard-secret-key-change-in-production',
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   rolling: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // 开发环境设为false，生产环境使用HTTPS时设为true
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24小时
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    domain: process.env.COOKIE_DOMAIN
+    sameSite: 'lax' // 开发环境使用lax更安全
   }
 };
 

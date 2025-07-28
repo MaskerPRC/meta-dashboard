@@ -345,6 +345,7 @@ export default {
     // 用户管理
     users: {
       search_placeholder: '搜索用户...',
+      empty_text: '暂无用户数据',
       table_headers: {
         id: 'ID',
         avatar: '头像',
@@ -361,41 +362,58 @@ export default {
       auth_methods: {
         local: '本地账户',
         google: 'Google',
-        github: 'GitHub'
+        github: 'GitHub',
+        wechat: '微信'
       },
       actions: {
         reset_password: '重置密码',
         delete: '删除'
       },
       messages: {
-        reset_password_confirm: '确定要重置用户 "{username}" 的密码吗？',
+        fetch_failed: '获取用户列表失败',
+        admin_grant_success: '授予管理员权限成功',
+        admin_revoke_success: '取消管理员权限成功',
+        admin_update_failed: '更新用户权限失败',
+        reset_password_title: '重置用户密码',
+        reset_password_prompt: '请输入新密码（至少6位）：',
+        reset_password_confirm: '确定',
+        reset_password_cancel: '取消',
+        reset_password_validation: '密码长度至少6位',
         reset_password_success: '密码重置成功',
-        reset_password_failed: '密码重置失败',
+        reset_password_failed: '重置密码失败',
         delete_confirm: '确定要删除用户 "{username}" 吗？此操作不可恢复。',
+        delete_title: '删除用户',
         delete_success: '用户删除成功',
-        delete_failed: '删除用户失败',
-        fetch_failed: '获取用户列表失败'
+        delete_failed: '删除用户失败'
       }
     },
     
     // 评论管理
     comments: {
+      empty_text: '暂无评论数据',
       table_headers: {
         id: 'ID',
         project: '项目',
         user: '用户',
         content: '评论内容',
+        validity_status: '有效性状态',
         created_at: '发布时间',
         actions: '操作'
       },
+      attachment_labels: {
+        images: '图片',
+        videos: '视频'
+      },
       actions: {
+        revalidate: '重新检测',
         delete: '删除'
       },
       messages: {
+        fetch_failed: '获取评论列表失败',
         delete_confirm: '确定要删除这条评论吗？此操作不可恢复。',
+        delete_title: '删除评论',
         delete_success: '评论删除成功',
-        delete_failed: '删除评论失败',
-        fetch_failed: '获取评论列表失败'
+        delete_failed: '删除评论失败'
       }
     },
     
@@ -514,7 +532,8 @@ export default {
     messages: {
       project_update_success: '项目更新成功',
       project_create_success: '项目创建成功',
-      save_project_failed: '保存项目失败'
+      save_project_failed: '保存项目失败',
+      project_saved: '项目保存成功'
     },
 
     // 项目模板

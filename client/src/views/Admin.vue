@@ -10,7 +10,7 @@
         <div class="header-actions">
           <el-button type="success" @click="showAIGenerate = true" style="margin-right: 12px">
             <el-icon><Document /></el-icon>
-            AI智能生成项目
+            {{ $t('admin.ai_generator.title') }}
           </el-button>
           <el-button type="primary" @click="showCreateProject = true">
             <el-icon><Plus /></el-icon>
@@ -46,6 +46,28 @@
 
             <!-- 评论管理 -->
             <el-tab-pane :label="$t('admin.comment_management')" name="comments">
+              <div class="comments-management-header">
+                <div class="batch-actions">
+                  <el-button 
+                    type="primary" 
+                    @click="batchValidateComments"
+                    :loading="batchValidating"
+                  >
+                    <el-icon><MagicStick /></el-icon>
+                    批量检测评论
+                  </el-button>
+                  <el-input-number
+                    v-model="batchValidateLimit"
+                    :min="1"
+                    :max="50"
+                    style="width: 120px; margin-left: 10px"
+                    placeholder="检测数量"
+                  />
+                  <span style="margin-left: 10px; color: var(--el-text-color-secondary)">
+                    每次最多检测{{ batchValidateLimit }}条待检测评论
+                  </span>
+                </div>
+              </div>
               <CommentsManagement 
                 ref="commentsManagementRef"
                 @stats-updated="handleStatsUpdated"
@@ -79,7 +101,7 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { Plus, Document } from '@element-plus/icons-vue'
+import { Plus, Document, MagicStick } from '@element-plus/icons-vue'
 import ProjectEditDialog from '../components/admin/ProjectEditDialog.vue'
 import AdminStats from '../components/admin/AdminStats.vue'
 import ProjectsManagement from '../components/admin/ProjectsManagement.vue'
@@ -94,6 +116,8 @@ const route = useRoute()
 
 // 响应式数据
 const activeTab = ref('projects')
+const batchValidating = ref(false)
+const batchValidateLimit = ref(10)
 const showCreateProject = ref(false)
 const showAIGenerate = ref(false)
 const editingProject = ref(null)
@@ -106,6 +130,34 @@ const commentsManagementRef = ref(null)
 const siteConfigManagementRef = ref(null)
 
 // 方法
+// 批量检测评论
+const batchValidateComments = async () => {
+  try {
+    batchValidating.value = true
+    
+    const response = await axios.post('/api/admin/comments/batch-validate', {
+      status: 'pending',
+      limit: batchValidateLimit.value
+    })
+    
+    ElMessage.success(`批量检测完成：成功处理 ${response.data.processed} 条，失败 ${response.data.failed} 条`)
+    
+    // 刷新评论列表
+    if (commentsManagementRef.value) {
+      commentsManagementRef.value.fetchComments()
+    }
+    
+    // 刷新统计信息
+    handleStatsUpdated()
+    
+  } catch (error) {
+    console.error('批量检测失败:', error)
+    ElMessage.error('批量检测失败: ' + (error.response?.data?.message || error.message))
+  } finally {
+    batchValidating.value = false
+  }
+}
+
 const editProject = async (project = null) => {
   if (project) {
     try {
@@ -222,6 +274,20 @@ onMounted(async () => {
         padding: 24px;
         border: 1px solid var(--ai-border);
       }
+    }
+  }
+
+  .comments-management-header {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--ai-bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--ai-border-color);
+
+    .batch-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
   }
 }

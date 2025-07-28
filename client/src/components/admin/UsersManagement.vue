@@ -3,7 +3,7 @@
     <div class="users-toolbar">
       <el-input
         v-model="userSearch"
-        placeholder="搜索用户..."
+        :placeholder="t('admin.users.search_placeholder')"
         style="width: 300px"
         clearable
         @input="handleUserSearch"
@@ -19,11 +19,11 @@
         :data="filteredUsers"
         style="width: 100%"
         v-loading="usersLoading"
-        empty-text="暂无用户数据"
+        :empty-text="t('admin.users.empty_text')"
       >
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="id" :label="t('admin.users.table_headers.id')" width="80" />
 
-        <el-table-column prop="avatar_url" label="头像" width="80">
+        <el-table-column prop="avatar_url" :label="t('admin.users.table_headers.avatar')" width="80">
           <template #default="scope">
             <el-avatar :src="scope.row.avatar_url" :size="40">
               <el-icon><User /></el-icon>
@@ -31,19 +31,19 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="username" label="用户名" min-width="120" />
+        <el-table-column prop="username" :label="t('admin.users.table_headers.username')" min-width="120" />
 
-        <el-table-column prop="display_name" label="显示名称" min-width="120" />
+        <el-table-column prop="display_name" :label="t('admin.users.table_headers.display_name')" min-width="120" />
 
-        <el-table-column prop="email" label="邮箱" min-width="180" />
+        <el-table-column prop="email" :label="t('admin.users.table_headers.email')" min-width="180" />
 
-        <el-table-column prop="phone" label="手机号" width="120">
+        <el-table-column prop="phone" :label="t('admin.users.table_headers.phone')" width="120">
           <template #default="scope">
             {{ scope.row.phone || '-' }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="provider" label="认证方式" width="100">
+        <el-table-column prop="provider" :label="t('admin.users.table_headers.auth_method')" width="100">
           <template #default="scope">
             <el-tag
               :type="getProviderTagType(scope.row)"
@@ -54,7 +54,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="is_admin" label="管理员" width="80">
+        <el-table-column prop="is_admin" :label="t('admin.users.table_headers.is_admin')" width="80">
           <template #default="scope">
             <el-switch
               v-model="scope.row.is_admin"
@@ -64,19 +64,19 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="last_login" label="最后登录" width="120">
+        <el-table-column prop="last_login" :label="t('admin.users.table_headers.last_login')" width="120">
           <template #default="scope">
             {{ scope.row.last_login ? formatDateTime(scope.row.last_login) : '-' }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="created_at" label="注册时间" width="120">
+        <el-table-column prop="created_at" :label="t('admin.users.table_headers.created_at')" width="120">
           <template #default="scope">
             {{ formatDate(scope.row.created_at) }}
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="160">
+        <el-table-column :label="t('admin.users.table_headers.actions')" width="160">
           <template #default="scope">
             <el-button
               v-if="isLocalUser(scope.row)"
@@ -84,7 +84,7 @@
               type="primary"
               @click="resetUserPassword(scope.row)"
             >
-              重置密码
+              {{ t('admin.users.actions.reset_password') }}
             </el-button>
             <el-button
               size="small"
@@ -92,7 +92,7 @@
               @click="deleteUser(scope.row)"
               :disabled="scope.row.id === authStore.user?.id"
             >
-              删除
+              {{ t('admin.users.actions.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -103,12 +103,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, User } from '@element-plus/icons-vue'
 import { useAuthStore } from '../../stores/auth'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 
 // 响应式数据
@@ -146,7 +148,7 @@ const fetchUsers = async () => {
     }))
   } catch (error) {
     console.error('获取用户列表失败:', error)
-    ElMessage.error('获取用户列表失败')
+    ElMessage.error(t('admin.users.messages.fetch_failed'))
   } finally {
     usersLoading.value = false
     // 延迟重置标记，确保数据已完全加载并渲染
@@ -171,20 +173,20 @@ const updateUserAdmin = async (user) => {
       is_admin: user.is_admin
     })
 
-    ElMessage.success(`${user.is_admin ? '授予' : '取消'}管理员权限成功`)
+    ElMessage.success(user.is_admin ? t('admin.users.messages.admin_grant_success') : t('admin.users.messages.admin_revoke_success'))
   } catch (error) {
     console.error('更新用户权限失败:', error)
-    ElMessage.error('更新用户权限失败')
+    ElMessage.error(t('admin.users.messages.admin_update_failed'))
     // 恢复原值
     user.is_admin = !user.is_admin
   }
 }
 
 const getProviderName = (user) => {
-  if (user.password_hash) return '本地账户'
-  if (user.github_id) return 'GitHub'
-  if (user.google_id) return 'Google'
-  if (user.wechat_id) return '微信'
+  if (user.password_hash) return t('admin.users.auth_methods.local')
+  if (user.github_id) return t('admin.users.auth_methods.github')
+  if (user.google_id) return t('admin.users.auth_methods.google')
+  if (user.wechat_id) return t('admin.users.auth_methods.wechat')
   return '未知'
 }
 
@@ -203,15 +205,15 @@ const isLocalUser = (user) => {
 const resetUserPassword = async (user) => {
   try {
     await ElMessageBox.prompt(
-      '请输入新密码（至少6位）：',
-      `重置用户 ${user.username} 的密码`,
+      t('admin.users.messages.reset_password_prompt'),
+      t('admin.users.messages.reset_password_title', { username: user.username }),
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: t('admin.users.messages.reset_password_confirm'),
+        cancelButtonText: t('admin.users.messages.reset_password_cancel'),
         inputType: 'password',
         inputValidator: (value) => {
           if (!value || value.length < 6) {
-            return '密码长度至少6位'
+            return t('admin.users.messages.reset_password_validation')
           }
           return true
         }
@@ -221,12 +223,12 @@ const resetUserPassword = async (user) => {
       await axios.put(`/api/admin/users/${user.id}/password`, {
         new_password: value
       })
-      ElMessage.success('密码重置成功')
+      ElMessage.success(t('admin.users.messages.reset_password_success'))
     })
   } catch (error) {
     if (error !== 'cancel') {
       console.error('重置密码失败:', error)
-      ElMessage.error(error.response?.data?.message || '重置密码失败')
+      ElMessage.error(error.response?.data?.message || t('admin.users.messages.reset_password_failed'))
     }
   }
 }
@@ -234,11 +236,11 @@ const resetUserPassword = async (user) => {
 const deleteUser = async (user) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除用户 "${user.username}" 吗？此操作不可恢复。`,
-      '删除用户',
+      t('admin.users.messages.delete_confirm', { username: user.username }),
+      t('admin.users.messages.delete_title'),
       {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('admin.users.actions.delete'),
+        cancelButtonText: t('form.cancel'),
         type: 'warning',
         confirmButtonClass: 'el-button--danger'
       }
@@ -252,12 +254,12 @@ const deleteUser = async (user) => {
       users.value.splice(index, 1)
     }
 
-    ElMessage.success('用户删除成功')
+    ElMessage.success(t('admin.users.messages.delete_success'))
     emit('stats-updated')
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除用户失败:', error)
-      ElMessage.error(error.response?.data?.message || '删除用户失败')
+      ElMessage.error(error.response?.data?.message || t('admin.users.messages.delete_failed'))
     }
   }
 }
