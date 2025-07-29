@@ -10,7 +10,7 @@ export default {
     login: '登录',
     logout: '登出'
   },
-  
+
   // 页面标题
   title: {
     home: 'AI项目看板 - 一年100个AI产品挑战',
@@ -22,7 +22,7 @@ export default {
     global_history: '全局项目进展',
     not_found: '页面不存在'
   },
-  
+
   // 首页
   home: {
     title: 'AI项目看板',
@@ -32,7 +32,7 @@ export default {
     start_journey: '开始挑战之旅',
     view_projects: '查看项目列表',
     learn_more: '了解更多',
-    
+
     // 统计数据
     stats: {
       ai_projects: 'AI项目',
@@ -40,7 +40,7 @@ export default {
       completed: '已完成',
       in_development: '开发中'
     },
-    
+
     // 项目状态概览
     status_overview: {
       title: '项目状态概览',
@@ -52,11 +52,11 @@ export default {
       completed: '已完成',
       on_hold: '暂停中'
     },
-    
+
     // 最新项目
     latest_projects: '最新项目',
     progress: '进度',
-    
+
     // 挑战宣言
     challenge_manifesto: {
       title: '挑战宣言',
@@ -64,10 +64,10 @@ export default {
       description: '2025年，用100个AI产品记录这个时代最激动人心的技术变革。每一个产品都是一次勇敢的尝试，每一行代码都在书写未来。'
     }
   },
-  
+
   // 项目列表页面
   projects: {
-    title: 'AI项目看板',
+    title: '项目列表',
     subtitle: '探索100个AI产品挑战的完整历程',
     search_placeholder: '搜索项目名称、描述或标签...',
     total_projects: '总项目数',
@@ -82,7 +82,7 @@ export default {
     sort_by_progress: '进度',
     sort_by_priority: '优先级'
   },
-  
+
   // 全局进展页面
   global_history: {
     title: '全局项目进展',
@@ -99,7 +99,7 @@ export default {
     records_count: '条记录',
     previous: '之前',
     current: '现在',
-    
+
     // 记录内容
     record_types: {
       milestone: '里程碑',
@@ -108,127 +108,127 @@ export default {
       manual_record: '手动记录'
     }
   },
-  
+
   // 关于挑战页面
   about: {
     title: '一年100个AI产品挑战',
     subtitle: '把梦想落在键盘上，用代码书写AI时代的个人传奇',
-    
+
     stats: {
       launched_projects: '已启动项目',
       average_progress: '平均进度',
       completed_projects: '已完成项目'
     },
-    
+
     // 关于这个挑战
     challenge_info: {
       title: '关于这个挑战',
       why_title: '为什么要在2025年做100个AI产品？',
-      
+
       tech_dividend: {
         title: '技术红利时代',
         content: 'LLM的普及正在带来"软件的超级高产时代"。个人开发者甚至非技术人员都能快速产出大量软件，深入各行各业，解决过去工程界久攻不下的问题。'
       },
-      
+
       personal_breakthrough: {
         title: '个人能力突破',
         content: '通过持续的产品开发实践，验证AI工具的真实能力，积累从想法到产品的完整经验，在AI让我们"真正只做想做的事"之前，先做一件足够挑战自己的事。'
       },
-      
+
       transparent_sharing: {
         title: '透明分享',
         content: '记录每一个产品的构思、开发、上线和反馈过程，分享做产品的经验、踩过的坑、复盘思考，为其他AI产品开发者提供参考。'
       }
     },
-    
+
     // 挑战规则
     challenge_rules: {
       title: '挑战规则',
       subtitle: '明确的目标和标准，确保挑战的可执行性',
-      
+
       target_quantity: {
         title: '目标数量',
         content: '2025年发布100个可用的AI产品（平均约3.6天/个）'
       },
-      
+
       criteria: {
         title: '判定标准',
         content: '能被真实用户使用（哪怕是极小众），有清晰功能与价值'
       },
-      
+
       transparency: {
         title: '过程透明',
         content: '每款产品的灵感、开发记录、上线情况、数据反馈都会公开'
       },
-      
+
       toolstack: {
         title: '工具栈',
         content: '主力使用LLM辅助开发（Cursor、Claude等），加速从想法到上线'
       },
-      
+
       iteration: {
         title: '允许迭代',
         content: '每个产品上线后可继续优化，但不影响下一个产品的推进'
       },
-      
+
       review_rhythm: {
         title: '复盘节奏',
         content: '每完成10个产品，做一次阶段复盘，调整方向和策略'
       }
     },
-    
+
     // 技术工具栈
     tech_stack: {
       title: '技术工具栈',
       subtitle: '充分利用AI工具提升开发效率',
-      
+
       ai_tools: {
         title: 'AI开发工具',
         tools: ['Cursor', 'Claude', 'ChatGPT', 'GitHub Copilot', 'v0.dev', 'Bolt.new']
       },
-      
+
       frontend: {
         title: '前端技术',
         tools: ['Vue.js', 'React', 'Next.js', 'Nuxt.js', 'TypeScript', 'Tailwind CSS', 'Element Plus']
       },
-      
+
       backend: {
         title: '后端技术',
         tools: ['Node.js', 'Python', 'FastAPI', 'Express', 'NestJS', 'Supabase', 'Firebase']
       },
-      
+
       deployment: {
         title: '部署平台',
         tools: ['Vercel', 'Netlify', 'Railway', 'Render', 'Cloudflare', 'AWS', 'Zeabur']
       }
     },
-    
+
     // 如何参与
     how_to_participate: {
       title: '如何参与',
       subtitle: '欢迎以各种方式参与这个挑战',
-      
+
       feedback: {
         title: '反馈产品',
         content: '试用我的产品，告诉我你的感受和建议，帮助我改进产品质量。'
       },
-      
+
       exchange: {
         title: '交流想法',
         content: '如果你也在做类似的事，欢迎互相借鉴，分享经验和资源。'
       },
-      
+
       cooperation: {
         title: '资源合作',
         content: '如果你有需求、数据、渠道等资源，欢迎对接探讨合作机会。'
       },
-      
+
       encouragement: {
         title: '纯粹鼓励',
         content: '一句"加油"，也是燃料。你的关注和支持是我前进的动力。'
       }
     },
-    
+
     // 联系方式
     contact: {
       title: '联系我',
@@ -244,14 +244,14 @@ export default {
       click_call: '点击拨打',
       click_issue: '点击提交'
     },
-    
+
     // 结语
     conclusion: {
       quote: '"2025年，我会把这100个小小的软件，作为我和这个时代对话的方式。它们不一定每个都完美，但每一个都是真诚的尝试。"',
       signature: '—— 继续向前的我'
     }
   },
-  
+
   // 管理后台
   admin: {
     title: '管理后台',
@@ -267,7 +267,7 @@ export default {
     config_management: '站点配置',
     user_management: '用户管理',
     comment_management: '评论管理',
-    
+
     // AI项目生成器
     ai_generator: {
       title: 'AI智能生成项目',
@@ -306,7 +306,7 @@ export default {
         create_failed: '保存项目失败'
       }
     },
-    
+
     // 项目管理
     projects: {
       search_placeholder: '搜索项目...',
@@ -341,7 +341,7 @@ export default {
         fetch_failed: '获取项目列表失败'
       }
     },
-    
+
     // 用户管理
     users: {
       search_placeholder: '搜索用户...',
@@ -387,7 +387,7 @@ export default {
         delete_failed: '删除用户失败'
       }
     },
-    
+
     // 评论管理
     comments: {
       empty_text: '暂无评论数据',
@@ -416,7 +416,7 @@ export default {
         delete_failed: '删除评论失败'
       }
     },
-    
+
     // 站点配置管理
     site_config: {
       wechat_group: {
@@ -444,7 +444,7 @@ export default {
       }
     }
   },
-  
+
      // 项目相关
    project: {
      title: '标题',
@@ -471,7 +471,7 @@ export default {
     select_status: '选择项目状态',
     select_priority: '选择优先级',
     status_filter: '状态筛选',
-    
+
     // 编辑页面表单
     form_labels: {
       project_name: '项目名称',
@@ -485,7 +485,7 @@ export default {
       project_tags: '项目标签',
       project_content: '项目详细内容'
     },
-    
+
     // 占位符文本
     placeholders: {
       enter_project_name: '请输入项目名称',
@@ -498,7 +498,7 @@ export default {
       add_tag: '添加标签',
       enter_project_content: '请输入项目详细内容，支持Markdown格式...\n提示：可以直接粘贴图片或视频文件'
     },
-    
+
     // 编辑器相关
     editor: {
       edit_mode: '编辑',
@@ -508,7 +508,7 @@ export default {
       attachments_added: '已添加的图片和视频',
       empty_preview: '暂无内容'
     },
-    
+
     // 表单验证消息
     validation: {
       project_name_required: '请输入项目名称',
@@ -518,7 +518,7 @@ export default {
       status_required: '请选择项目状态',
       priority_required: '请选择优先级'
     },
-    
+
     // 操作按钮
     actions_buttons: {
       add_tech_stack: '+ 添加技术栈',
@@ -527,7 +527,7 @@ export default {
       save: '保存',
       create: '创建'
     },
-    
+
     // 成功/失败消息
     messages: {
       project_update_success: '项目更新成功',
@@ -590,7 +590,7 @@ export default {
 - [源码仓库]({{github_repo}})
 - [在线演示]({{demo_url}})`
     },
-    
+
     status_options: {
       brainstorming: '构思中',
       planning: '规划中',
@@ -602,14 +602,14 @@ export default {
       completed: '已完成',
       on_hold: '暂停中'
     },
-    
+
     priority_options: {
       low: '低',
       medium: '中',
       high: '高',
       urgent: '紧急'
     },
-    
+
     // 附件功能
     attachments: {
       title: '项目图片和视频',
@@ -630,7 +630,7 @@ export default {
       supported_video_formats: '支持 MP4、WebM 格式'
     }
   },
-  
+
   // 表单和按钮
   form: {
     submit: '提交',
@@ -646,7 +646,7 @@ export default {
     go_to: '跳转',
     total: '总共'
   },
-  
+
   // 消息
   message: {
     success: '操作成功',
@@ -655,7 +655,7 @@ export default {
     no_data: '暂无数据',
     loading: '加载中...'
   },
-  
+
   // 认证
   auth: {
     welcome_back: '欢迎回来',
@@ -671,7 +671,7 @@ export default {
     no_account: '还没有账号？',
     has_account: '已有账号？',
     profile: '个人资料',
-    
+
     // 个人资料相关
     profile_title: '个人资料',
     profile_subtitle: '管理您的账户信息',
@@ -687,7 +687,7 @@ export default {
     profile_updated_success: '个人资料更新成功',
     password_updated_success: '密码修改成功'
   },
-  
+
   // 评论系统
   comment: {
     title: '评论',
@@ -706,11 +706,11 @@ export default {
     paste_support: '支持直接粘贴图片和视频文件',
     paste_hint: '支持Markdown语法，可直接粘贴图片文件（Ctrl+V）...'
   },
-  
+
   // 语言切换
   language: {
     title: '语言',
     chinese: '中文',
     english: 'English'
   }
-} 
+}
