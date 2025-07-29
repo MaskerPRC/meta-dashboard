@@ -3,3 +3,4 @@ node_modules
 .idea
 server/.env
 client/dist
+server/data/ai_dashboard_backup*
