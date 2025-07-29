@@ -7,8 +7,8 @@
 - 📊 **可视化看板** - 直观展示100个AI项目的进展状态
 - ✅ **任务管理** - 支持新增任务，点击查看详细描述
 - 📝 **Markdown支持** - 任务描述支持Markdown格式编写
-- 🔐 **OAuth登录** - 支持GitHub和Google账号登录
-- 👑 **权限管理** - 管理员全权限，普通用户只读+评论
+- 🔐 **OAuth登录** - 支持GitHub、Google和微信账号登录
+- 👑 **角色管理** - 支持admin/viewer角色，基于配置自动分配权限
 - 💬 **评论系统** - 登录用户可对项目进行评论互动
 - 🎨 **AI主题风格** - 专为AI项目开发场景设计的现代化界面
 
@@ -16,7 +16,7 @@
 
 - **后端**: Node.js + Express + SQLite
 - **前端**: Vue.js 3 + Vite + Element Plus
-- **认证**: OAuth 2.0 (GitHub + Google)
+- **认证**: OAuth 2.0 (GitHub + Google + 微信)
 - **数据库**: SQLite (轻量级，易部署)
 
 ## 🚀 快速开始
@@ -55,6 +55,16 @@ GITHUB_CLIENT_SECRET=your-github-client-secret
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
+# 微信公众号OAuth配置（网页授权，支持二维码登录）
+WECHAT_OA_APPID=your-wechat-oa-appid
+WECHAT_OA_SECRET=your-wechat-oa-secret
+# 管理员微信昵称列表（多个用逗号分隔）
+ADMIN_WECHAT_NICKNAMES=管理员昵称1,管理员昵称2,管理员昵称3
+
+# 管理员配置（用于GitHub和Google登录）
+ADMIN_GITHUB_USERNAME=your-admin-github-username
+ADMIN_EMAIL=your-admin-email@example.com
+
 # 可选：自定义OAuth回调URL基础路径
 OAUTH_CALLBACK_BASE_URL=https://your-api-domain.com
 ```
@@ -71,6 +81,26 @@ VITE_API_BASE_URL=https://your-api-domain.com
 1. **FRONTEND_URL** 是最关键的配置，它告诉API服务器登录成功后应该重定向到哪个前端应用URL
 2. 如果不配置 `FRONTEND_URL`，生产环境默认重定向到 `https://your-frontend-domain.com`（需要手动修改）
 3. 开发环境默认重定向到 `http://localhost:5173`
+
+### 角色管理系统
+
+系统支持两种用户角色：
+- **admin**: 管理员角色，拥有完整的项目管理权限
+- **viewer**: 访客角色，只能查看项目和发表评论
+
+#### 角色分配规则
+
+1. **GitHub登录**: 如果用户名匹配 `ADMIN_GITHUB_USERNAME` 环境变量，则为admin角色
+2. **Google登录**: 如果邮箱匹配 `ADMIN_EMAIL` 环境变量，则为admin角色  
+3. **微信登录**: 如果微信昵称在 `ADMIN_WECHAT_NICKNAMES` 列表中，则为admin角色
+4. **本地注册**: 默认为viewer角色
+
+#### 微信认证特殊说明
+
+- 微信登录成功后，管理员用户会自动重定向到 `/admin` 页面
+- 普通用户重定向到首页
+- 支持基于微信昵称的细粒度权限控制
+- 微信用户信息会自动同步更新（头像、昵称等）
 
 ### 登录流程
 

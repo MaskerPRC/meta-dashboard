@@ -2,6 +2,7 @@ const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const LocalStrategy = require('passport-local').Strategy;
+// 启用微信策略用于扫码登录
 const WechatStrategy = require('passport-wechat').Strategy;
 const bcrypt = require('bcryptjs');
 const db = require('./database');
@@ -195,92 +196,113 @@ passport.use(new LocalStrategy({
   });
 }));
 
-// 微信OAuth策略
+// 微信开放平台扫码登录策略
 passport.use(new WechatStrategy({
   appID: process.env.WECHAT_APP_ID || 'your-wechat-app-id',
   appSecret: process.env.WECHAT_APP_SECRET || 'your-wechat-app-secret',
   callbackURL: process.env.WECHAT_CALLBACK_URL || `${getCallbackBaseURL()}/api/auth/wechat/callback`,
-  scope: 'snsapi_login' // 网站应用使用snsapi_login，获取用户基本信息
-}, async (accessToken, refreshToken, profile, done) => {
+  client: 'web', // 使用网站应用模式（扫码登录）
+  scope: 'snsapi_login', // 开放平台扫码登录授权范围
+  state: true // 启用 state 参数防止 CSRF
+}, async (accessToken, refreshToken, profile, expires_in, done) => {
   try {
-    console.log('微信登录 - 用户信息:', profile);
+    console.log('微信登录 - 获取到的用户信息:', profile);
+    console.log('微信登录 - expires_in:', expires_in);
     
-    // 检查用户是否已存在（使用unionid或openid）
-    const wechatId = profile.unionid || profile.openid;
-    
-    db.get("SELECT * FROM users WHERE wechat_id = ? OR wechat_unionid = ?", [wechatId, profile.unionid], (err, existingUser) => {
-      if (err) return done(err);
+    const openid = profile.openid;
+    const wechatUser = {
+      nickname: profile.nickname,
+      headimgurl: profile.headimgurl,
+      unionid: profile.unionid
+    };
 
-      if (existingUser) {
-        // 用户已存在，更新信息
-        db.run(`
-          UPDATE users SET 
-            wechat_id = ?,
-            wechat_unionid = ?,
-            username = ?, 
-            avatar_url = ?, 
-            display_name = ?,
-            last_login = CURRENT_TIMESTAMP
-          WHERE id = ?
-        `, [
-          profile.openid,
-          profile.unionid || null,
-          existingUser.username || profile.nickname || `wechat_${profile.openid.slice(-8)}`,
-          profile.headimgurl || '',
-          profile.nickname || existingUser.display_name,
-          existingUser.id
-        ], function(updateErr) {
-          if (updateErr) return done(updateErr);
+    // 获取管理员微信昵称列表（从环境变量读取）
+    const adminWechatNicknames = process.env.ADMIN_WECHAT_NICKNAMES ?
+      process.env.ADMIN_WECHAT_NICKNAMES.split(',').map(name => name.trim()) : [];
 
-          // 返回更新后的用户信息
-          db.get("SELECT * FROM users WHERE id = ?", [existingUser.id], (selectErr, updatedUser) => {
-            return done(selectErr, updatedUser);
-          });
+    // 判断用户角色：检查微信昵称是否在管理员列表中
+    const isAdmin = adminWechatNicknames.length > 0 &&
+      adminWechatNicknames.includes(wechatUser.nickname);
+    const userRole = isAdmin ? 'admin' : 'viewer';
+
+    // 使用 Promise 包装数据库操作
+    const findUser = () => {
+      return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM users WHERE wechat_id = ?', [openid], (err, user) => {
+          if (err) reject(err);
+          else resolve(user);
         });
-      } else {
-        // 新用户，创建账户
-        // 生成唯一用户名
-        const baseUsername = profile.nickname || `wechat_${profile.openid.slice(-8)}`;
-        let username = baseUsername;
-        
-        // 确保用户名唯一
-        const checkUsernameAndCreate = (attemptUsername, attempt = 1) => {
-          db.get("SELECT * FROM users WHERE username = ?", [attemptUsername], (checkErr, existingUsername) => {
-            if (checkErr) return done(checkErr);
-            
-            if (existingUsername) {
-              // 用户名已存在，尝试新的用户名
-              const newUsername = `${baseUsername}_${attempt}`;
-              checkUsernameAndCreate(newUsername, attempt + 1);
-            } else {
-              // 用户名可用，创建用户
-              db.run(`
-                INSERT INTO users (wechat_id, wechat_unionid, username, avatar_url, display_name, created_at, last_login)
-                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-              `, [
-                profile.openid,
-                profile.unionid || null,
-                attemptUsername,
-                profile.headimgurl || '',
-                profile.nickname || attemptUsername
-              ], function(insertErr) {
-                if (insertErr) return done(insertErr);
+      });
+    };
 
-                // 返回新创建的用户
-                db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (selectErr, newUser) => {
-                  console.log('微信登录 - 新用户创建成功:', newUser?.username);
-                  return done(selectErr, newUser);
-                });
-              });
-            }
-          });
-        };
-        
-        checkUsernameAndCreate(username);
-      }
-    });
+    const updateUser = (existingUser) => {
+      return new Promise((resolve, reject) => {
+        db.run(`UPDATE users SET 
+          username = ?, display_name = ?, avatar_url = ?, role = ?, is_admin = ?,
+          wechat_unionid = ?, last_login = CURRENT_TIMESTAMP
+          WHERE wechat_id = ?`, [
+          wechatUser.nickname,
+          wechatUser.nickname,
+          wechatUser.headimgurl,
+          userRole,
+          isAdmin ? 1 : 0,
+          wechatUser.unionid || null,
+          openid
+        ], function(err) {
+          if (err) reject(err);
+          else resolve(existingUser.id);
+        });
+      });
+    };
+
+    const createUser = () => {
+      return new Promise((resolve, reject) => {
+        db.run(`INSERT INTO users 
+          (username, display_name, avatar_url, wechat_id, wechat_unionid, role, is_admin, created_at, last_login) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`, [
+          wechatUser.nickname,
+          wechatUser.nickname,
+          wechatUser.headimgurl,
+          openid,
+          wechatUser.unionid || null,
+          userRole,
+          isAdmin ? 1 : 0
+        ], function(err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        });
+      });
+    };
+
+    const getUserById = (userId) => {
+      return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
+          if (err) reject(err);
+          else resolve(user);
+        });
+      });
+    };
+
+    // 主要逻辑
+    const existingUser = await findUser();
+    let userId;
+
+    if (existingUser) {
+      // 更新现有用户
+      userId = await updateUser(existingUser);
+      console.log(`微信登录成功 - 更新用户: ${wechatUser.nickname}, 角色: ${userRole}`);
+    } else {
+      // 创建新用户
+      userId = await createUser();
+      console.log(`微信登录成功 - 创建新用户: ${wechatUser.nickname}, 角色: ${userRole}`);
+    }
+
+    // 获取最终用户信息
+    const finalUser = await getUserById(userId);
+    return done(null, finalUser);
+
   } catch (error) {
-    console.error('微信登录失败:', error);
+    console.error('微信登录策略错误:', error);
     return done(error);
   }
 }));

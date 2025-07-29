@@ -3,8 +3,24 @@ const passport = require('passport');
 const db = require('../config/database');
 const ResponseHelper = require('../utils/responseHelper');
 const crypto = require("crypto");
+// 移除不再使用的 CryptoJS，因为 passport-wechat 自动处理 state 参数
 const bcrypt = require("bcryptjs");
+// axios 保留，其他地方可能还在使用
+const axios = require('axios');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
+
+// OAuth登录限流中间件
+const oauthLoginRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分钟
+  max: 5, // 限制每个IP在窗口期内最多5次请求
+  message: {
+    success: false,
+    message: '登录请求过于频繁，请稍后再试'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // 手动设置Session Cookie的公共函数
 const setManualSessionCookie = (req, res) => {
@@ -103,32 +119,71 @@ router.get('/google/callback',
     }
 );
 
-// 微信登录
-router.get('/wechat', passport.authenticate('wechat'));
+// 微信开放平台扫码登录 - 使用 Passport 策略
+router.get('/wechat', oauthLoginRateLimit, passport.authenticate('wechat', {
+  // passport-wechat 会自动处理 state 参数和重定向
+}));
 
-// 微信回调
-router.get('/wechat/callback',
-    passport.authenticate('wechat', { failureRedirect: '/login?error=wechat' }),
-    (req, res) => {
-      // 手动保存session
+// 微信登录回调处理 - 使用 Passport 策略
+router.get('/wechat/callback', oauthLoginRateLimit,
+  passport.authenticate('wechat', { 
+    failureRedirect: '/login?error=wechat',
+    session: false // 我们手动处理 session，保持与其他 OAuth 登录一致
+  }),
+  (req, res) => {
+    // Passport 验证成功，用户信息在 req.user 中
+    const user = req.user;
+    
+    if (!user) {
+      console.error('微信登录失败 - 用户信息为空');
+      const frontendUrl = process.env.FRONTEND_URL ||
+        (process.env.NODE_ENV === 'production'
+          ? 'https://share.agitao.net'
+          : 'http://localhost:5173');
+      return res.redirect(`${frontendUrl}/login?error=auth_failed&message=${encodeURIComponent('登录失败')}`);
+    }
+
+    // 手动登录用户（与其他 OAuth 登录保持一致）
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        console.error('微信登录 - Session登录失败:', loginErr);
+        const frontendUrl = process.env.FRONTEND_URL ||
+          (process.env.NODE_ENV === 'production'
+            ? 'https://share.agitao.net'
+            : 'http://localhost:5173');
+
+        return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
+      }
+
+      // 手动保存session（与其他 OAuth 登录保持一致）
       req.session.save((saveErr) => {
         if (saveErr) {
           console.error('Session保存失败:', saveErr);
-          return res.status(500).send('Session保存失败');
+          const frontendUrl = process.env.FRONTEND_URL ||
+            (process.env.NODE_ENV === 'production'
+              ? 'https://share.agitao.net'
+              : 'http://localhost:5173');
+
+          return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
         }
 
-        // 手动设置Cookie
+        // 手动设置Cookie（与其他 OAuth 登录保持一致）
         setManualSessionCookie(req, res);
 
-        // 登录成功，重定向到前端
+        // 根据用户角色决定重定向目标
         const frontendUrl = process.env.FRONTEND_URL ||
-            (process.env.NODE_ENV === 'production'
-                ? 'https://share.agitao.net'
-                : 'http://localhost:5173');
+          (process.env.NODE_ENV === 'production'
+            ? 'https://share.agitao.net'
+            : 'http://localhost:5173');
 
-        res.redirect(frontendUrl);
+        // 如果是管理员，重定向到管理页面，否则重定向到首页
+        const redirectUrl = user.role === 'admin' ? `${frontendUrl}/admin` : frontendUrl;
+
+        console.log(`微信登录成功 - 用户: ${user.username}, 角色: ${user.role}, 重定向到: ${redirectUrl}`);
+        res.redirect(redirectUrl);
       });
-    }
+    });
+  }
 );
 
 // 获取当前用户信息
@@ -142,7 +197,11 @@ router.get('/user', (req, res) => {
         email: req.user.email,
         avatar_url: req.user.avatar_url,
         display_name: req.user.display_name,
-        is_admin: req.user.is_admin
+        is_admin: req.user.is_admin,
+        role: req.user.role || (req.user.is_admin ? 'admin' : 'viewer'), // 向后兼容
+        login_type: req.user.wechat_id ? 'wechat' :
+                   (req.user.github_id ? 'github' :
+                   (req.user.google_id ? 'google' : 'local'))
       }
     });
   } else {
@@ -186,7 +245,11 @@ router.post('/login', (req, res, next) => {
             email: user.email,
             avatar_url: user.avatar_url,
             display_name: user.display_name,
-            is_admin: user.is_admin
+            is_admin: user.is_admin,
+            role: user.role || (user.is_admin ? 'admin' : 'viewer'), // 向后兼容
+            login_type: user.wechat_id ? 'wechat' :
+                       (user.github_id ? 'github' :
+                       (user.google_id ? 'google' : 'local'))
           }
         });
       });
@@ -273,7 +336,9 @@ router.post('/register', (req, res) => {
               email: newUser.email,
               avatar_url: newUser.avatar_url,
               display_name: newUser.display_name,
-              is_admin: newUser.is_admin
+              is_admin: newUser.is_admin,
+              role: newUser.role || (newUser.is_admin ? 'admin' : 'viewer'), // 向后兼容
+              login_type: 'local'
             }
           });
         });
@@ -471,7 +536,11 @@ router.put('/profile', (req, res) => {
               email: updatedUser.email,
               avatar_url: updatedUser.avatar_url,
               display_name: updatedUser.display_name,
-              is_admin: updatedUser.is_admin
+              is_admin: updatedUser.is_admin,
+              role: updatedUser.role || (updatedUser.is_admin ? 'admin' : 'viewer'), // 向后兼容
+              login_type: updatedUser.wechat_id ? 'wechat' :
+                         (updatedUser.github_id ? 'github' :
+                         (updatedUser.google_id ? 'google' : 'local'))
             }
           });
         });
@@ -506,7 +575,11 @@ router.get('/status', (req, res) => {
       email: req.user.email,
       avatar_url: req.user.avatar_url,
       display_name: req.user.display_name,
-      is_admin: req.user.is_admin
+      is_admin: req.user.is_admin,
+      role: req.user.role || (req.user.is_admin ? 'admin' : 'viewer'), // 向后兼容
+      login_type: req.user.wechat_id ? 'wechat' :
+                 (req.user.github_id ? 'github' :
+                 (req.user.google_id ? 'google' : 'local'))
     } : null
   });
 });

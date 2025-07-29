@@ -204,14 +204,14 @@
         </el-result>
       </div>
     </div>
-  </div>
 
-  <!-- 项目编辑对话框 -->
-  <ProjectEditDialog
-    v-model="showEditDialog"
-    :project="project"
-    @saved="handleProjectSaved"
-  />
+    <!-- 项目编辑对话框 -->
+    <ProjectEditDialog
+      v-model="showEditDialog"
+      :project="project"
+      @saved="handleProjectSaved"
+    />
+  </div>
 </template>
 
 <script setup>
