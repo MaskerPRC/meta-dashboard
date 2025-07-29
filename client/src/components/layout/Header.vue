@@ -35,23 +35,48 @@
           </router-link>
         </nav>
         
-        <!-- 移动端菜单按钮 -->
-        <div class="mobile-menu-btn" @click="toggleMobileMenu">
-          <el-button circle>
-            <el-icon><Menu /></el-icon>
-          </el-button>
-        </div>
-        
         <!-- 用户区域 -->
         <div class="header-right">
-          <!-- 语言切换 -->
+          <!-- 语言切换 - 仅桌面端显示 -->
           <LanguageSwitcher />
           
-          <!-- 主题切换 -->
+          <!-- 移动端操作区域 -->
+          <div class="mobile-actions">
+            <!-- 移动端菜单按钮 -->
+            <div class="mobile-menu-btn" @click="toggleMobileMenu">
+              <el-button class="mobile-menu-toggle">
+                <el-icon><Menu /></el-icon>
+                <span>菜单</span>
+              </el-button>
+            </div>
+            
+            <!-- 移动端登录按钮 -->
+            <div v-if="!authStore.isAuthenticated" class="mobile-login-btn">
+              <router-link to="/login">
+                <el-button class="mobile-login-toggle">
+                  <el-icon><User /></el-icon>
+                  <span>登录</span>
+                </el-button>
+              </router-link>
+            </div>
+            
+            <!-- 移动端主题切换 -->
+            <el-button 
+              @click="toggleTheme"
+              class="mobile-theme-toggle"
+            >
+              <el-icon>
+                <component :is="isDark ? 'Sunny' : 'Moon'" />
+              </el-icon>
+              <span>{{ isDark ? '浅色' : '深色' }}</span>
+            </el-button>
+          </div>
+          
+          <!-- 桌面端主题切换 -->
           <el-button 
             circle 
             @click="toggleTheme"
-            class="theme-toggle"
+            class="desktop-theme-toggle"
           >
             <el-icon>
               <component :is="isDark ? 'Sunny' : 'Moon'" />
@@ -93,10 +118,10 @@
             </el-dropdown>
           </div>
           
-          <!-- 登录按钮 -->
-          <div v-else class="login-buttons">
+          <!-- 桌面端登录按钮 -->
+          <div v-else class="desktop-login-buttons">
             <router-link to="/login">
-              <el-button type="primary">
+              <el-button type="primary" class="desktop-login-btn">
                 <el-icon><User /></el-icon>
                 {{ $t('nav.login') }}
               </el-button>
@@ -107,63 +132,129 @@
     </div>
     
     <!-- 移动端菜单抽屉 -->
-    <div 
-      v-if="showMobileMenu" 
-      class="mobile-menu-overlay"
-      @click="toggleMobileMenu"
-    >
-      <nav 
-        class="mobile-menu"
-        @click.stop
+    <Transition name="mobile-overlay" appear>
+      <div 
+        v-if="showMobileMenu" 
+        class="mobile-menu-overlay"
+        @click="toggleMobileMenu"
+        @touchstart="handleTouchStart"
+        @touchend="handleTouchEnd"
       >
-        <div class="mobile-menu-header">
-          <h3>{{ $t('nav.title') }}</h3>
-          <el-button 
-            circle 
-            text 
-            @click="toggleMobileMenu"
+        <Transition name="mobile-drawer" appear>
+          <nav 
+            v-if="showMobileMenu"
+            class="mobile-menu"
+            @click.stop
+            ref="mobileMenuRef"
           >
-            <el-icon><Close /></el-icon>
-          </el-button>
-        </div>
-                 <div class="mobile-menu-items">
-           <router-link 
-             to="/" 
-             class="mobile-nav-item"
-             @click="handleMobileNavClick('/')"
-           >
-             <el-icon><House /></el-icon>
-             <span>{{ $t('nav.home') }}</span>
-           </router-link>
-           <router-link 
-             to="/projects" 
-             class="mobile-nav-item"
-             @click="handleMobileNavClick('/projects')"
-           >
-             <el-icon><List /></el-icon>
-             <span>{{ $t('nav.projects') }}</span>
-           </router-link>
-           <router-link 
-             to="/global-history" 
-             class="mobile-nav-item"
-             @click="handleMobileNavClick('/global-history')"
-           >
-             <el-icon><Clock /></el-icon>
-             <span>{{ $t('nav.global_history') }}</span>
-           </router-link>
-           <router-link 
-             to="/about" 
-             class="mobile-nav-item"
-             @click="handleMobileNavClick('/about')"
-           >
-             <el-icon><InfoFilled /></el-icon>
-             <span>{{ $t('nav.about') }}</span>
-           </router-link>
-         </div>
-      </nav>
-    </div>
+            <div class="mobile-menu-header">
+              <h3>{{ $t('nav.title') }}</h3>
+              <el-button 
+                circle 
+                text 
+                @click="toggleMobileMenu"
+                class="close-btn"
+              >
+                <el-icon><Close /></el-icon>
+              </el-button>
+            </div>
+            
+            <div class="mobile-menu-items">
+              <router-link 
+                to="/" 
+                class="mobile-nav-item"
+                :class="{ 'active': $route.path === '/' }"
+                @click="handleMobileNavClick('/')"
+              >
+                <el-icon><House /></el-icon>
+                <span>{{ $t('nav.home') }}</span>
+              </router-link>
+              <router-link 
+                to="/projects" 
+                class="mobile-nav-item"
+                :class="{ 'active': $route.path === '/projects' }"
+                @click="handleMobileNavClick('/projects')"
+              >
+                <el-icon><List /></el-icon>
+                <span>{{ $t('nav.projects') }}</span>
+              </router-link>
+              <router-link 
+                to="/global-history" 
+                class="mobile-nav-item"
+                :class="{ 'active': $route.path === '/global-history' }"
+                @click="handleMobileNavClick('/global-history')"
+              >
+                <el-icon><Clock /></el-icon>
+                <span>{{ $t('nav.global_history') }}</span>
+              </router-link>
+              <router-link 
+                to="/about" 
+                class="mobile-nav-item"
+                :class="{ 'active': $route.path === '/about' }"
+                @click="handleMobileNavClick('/about')"
+              >
+                <el-icon><InfoFilled /></el-icon>
+                <span>{{ $t('nav.about') }}</span>
+              </router-link>
+              
+              <!-- 移动端用户区域 -->
+              <div class="mobile-user-section">
+                <div v-if="authStore.isAuthenticated" class="mobile-user-info">
+                  <div class="user-profile">
+                    <el-avatar 
+                      :src="authStore.user?.avatar_url" 
+                      :size="32"
+                    >
+                      <el-icon><User /></el-icon>
+                    </el-avatar>
+                    <span class="username">{{ authStore.user?.display_name || authStore.user?.username }}</span>
+                  </div>
+                  <div class="mobile-user-actions">
+                    <el-button 
+                      text
+                      @click="handleMobileUserAction('profile')"
+                      class="mobile-action-btn"
+                    >
+                      <el-icon><User /></el-icon>
+                      {{ $t('auth.profile') }}
+                    </el-button>
+                    <el-button 
+                      v-if="authStore.isAdmin" 
+                      text
+                      @click="handleMobileUserAction('admin')"
+                      class="mobile-action-btn"
+                    >
+                      <el-icon><Setting /></el-icon>
+                      {{ $t('nav.admin') }}
+                    </el-button>
+                    <el-button 
+                      text
+                      @click="handleMobileUserAction('logout')"
+                      class="mobile-action-btn logout-btn"
+                    >
+                      <el-icon><SwitchButton /></el-icon>
+                      {{ $t('nav.logout') }}
+                    </el-button>
+                  </div>
+                </div>
+                <div v-else class="mobile-login">
+                  <el-button 
+                    type="primary" 
+                    @click="handleMobileNavClick('/login')"
+                    class="mobile-login-btn"
+                  >
+                    <el-icon><User /></el-icon>
+                    {{ $t('nav.login') }}
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </nav>
+        </Transition>
+      </div>
+    </Transition>
     
-                <!-- 个人资料弹窗 -->
+    <!-- 个人资料弹窗 -->
     <ProfileDialog v-model="showProfileDialog" />
   </header>
 </template>
@@ -187,6 +278,7 @@ const authStore = useAuthStore()
 const isDark = ref(false)
 const showMobileMenu = ref(false)
 const showProfileDialog = ref(false)
+const mobileMenuRef = ref(null)
 
 // 主题切换
 const toggleTheme = () => {
@@ -200,6 +292,22 @@ const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
 }
 
+// 触摸事件处理
+const handleTouchStart = (e) => {
+  // 记录触摸开始位置
+  e.currentTarget.touchStartX = e.touches[0].clientX
+}
+
+const handleTouchEnd = (e) => {
+  const touchEndX = e.changedTouches[0].clientX
+  const touchStartX = e.currentTarget.touchStartX
+  
+  // 右滑关闭菜单
+  if (touchEndX - touchStartX > 100) {
+    toggleMobileMenu()
+  }
+}
+
 // 导航点击处理
 const handleNavClick = (path) => {
   console.log('Navigation clicked:', path)
@@ -211,6 +319,12 @@ const handleMobileNavClick = (path) => {
   console.log('Mobile navigation clicked:', path)
   toggleMobileMenu()
   router.push(path)
+}
+
+// 移动端用户操作处理
+const handleMobileUserAction = (action) => {
+  toggleMobileMenu()
+  handleUserCommand(action)
 }
 
 // 用户菜单命令处理
@@ -256,20 +370,25 @@ onMounted(() => {
     padding: 0 20px;
   }
   
-  .header-content {
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+     .header-content {
+     height: 70px;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     min-width: 0;
+   }
   
-  .header-left {
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
+     .header-left {
+     flex: 1;
+     min-width: 0;
+     
+     .logo-section {
+       display: flex;
+       align-items: center;
+       gap: 12px;
+       text-decoration: none;
+       color: inherit;
+       min-width: 0;
       
       .logo-icon {
         display: flex;
@@ -287,16 +406,23 @@ onMounted(() => {
         }
       }
       
-      .logo-text {
-        .title {
-          font-size: 20px;
-          font-weight: 700;
-          margin: 0;
-          background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
+             .logo-text {
+         min-width: 0;
+         flex: 1;
+         
+         .title {
+           font-size: 20px;
+           font-weight: 700;
+           margin: 0;
+           line-height: 1.2;
+           white-space: nowrap;
+           overflow: hidden;
+           text-overflow: ellipsis;
+           background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           background-clip: text;
+         }
         
         .subtitle {
           font-size: 12px;
@@ -333,10 +459,64 @@ onMounted(() => {
     }
   }
   
-  // 移动端菜单按钮 - 默认隐藏
-  .mobile-menu-btn {
-    display: none;
-  }
+     // 移动端操作区域
+   .mobile-actions {
+     display: none;
+     gap: 8px;
+     align-items: center;
+   }
+   
+   // 统一的移动端按钮样式
+   .mobile-menu-toggle,
+   .mobile-login-toggle,
+   .mobile-theme-toggle {
+     display: flex;
+     align-items: center;
+     gap: 6px;
+     padding: 8px 16px;
+     border-radius: 20px;
+     background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
+     color: white;
+     border: none;
+     font-size: 14px;
+     font-weight: 500;
+     min-width: 80px;
+     height: 36px;
+     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+     
+     &:hover {
+       transform: translateY(-1px);
+       box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+       background: linear-gradient(135deg, var(--ai-primary-dark, #5b21b6), var(--ai-secondary-dark, #7c3aed));
+     }
+     
+     &:active {
+       transform: translateY(0);
+       box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+     }
+     
+     .el-icon {
+       font-size: 16px;
+     }
+     
+     span {
+       font-size: 13px;
+       font-weight: 500;
+     }
+   }
+   
+   // 桌面端主题切换按钮
+   .desktop-theme-toggle {
+     width: 40px;
+     height: 40px;
+     border: 1px solid var(--ai-border);
+     
+     &:hover {
+       color: var(--ai-primary);
+       border-color: var(--ai-primary);
+     }
+   }
   
   // 移动端菜单覆盖层
   .mobile-menu-overlay {
@@ -376,6 +556,15 @@ onMounted(() => {
         font-weight: 600;
         color: var(--ai-text-primary);
       }
+      
+      .close-btn {
+        width: 32px;
+        height: 32px;
+        
+        &:hover {
+          color: var(--ai-primary);
+        }
+      }
     }
     
     .mobile-menu-items {
@@ -394,7 +583,7 @@ onMounted(() => {
         font-weight: 500;
         margin-bottom: 8px;
         
-        &:hover, &.router-link-active {
+        &:hover, &.router-link-active, &.active {
           color: var(--ai-primary);
           background: rgba(99, 102, 241, 0.1);
         }
@@ -403,24 +592,74 @@ onMounted(() => {
           margin-bottom: 0;
         }
       }
+      
+      .mobile-user-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--ai-border);
+        
+        .mobile-user-info {
+          .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 8px;
+            
+            .username {
+              font-size: 14px;
+              font-weight: 500;
+              color: var(--ai-text-primary);
+            }
+          }
+          
+          .mobile-user-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            
+            .mobile-action-btn {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding: 12px 16px;
+              text-align: left;
+              justify-content: flex-start;
+              color: var(--ai-text-secondary);
+              border-radius: 8px;
+              transition: all 0.3s ease;
+              
+              &:hover {
+                color: var(--ai-primary);
+                background: rgba(99, 102, 241, 0.1);
+              }
+              
+              &.logout-btn:hover {
+                color: #ef4444;
+                background: rgba(239, 68, 68, 0.1);
+              }
+            }
+          }
+        }
+        
+        .mobile-login {
+          .mobile-login-btn {
+            width: 100%;
+            height: 44px;
+            border-radius: 8px;
+          }
+        }
+      }
     }
   }
   
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    
-    .theme-toggle {
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--ai-border);
-      
-      &:hover {
-        color: var(--ai-primary);
-        border-color: var(--ai-primary);
-      }
-    }
+     .header-right {
+     display: flex;
+     align-items: center;
+     gap: 16px;
+     flex-shrink: 0;
     
     .user-menu {
       .user-avatar {
@@ -451,6 +690,27 @@ onMounted(() => {
   }
 }
 
+// 抽屉动画过渡效果
+.mobile-overlay-enter-active,
+.mobile-overlay-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.mobile-overlay-enter-from,
+.mobile-overlay-leave-to {
+  opacity: 0;
+}
+
+.mobile-drawer-enter-active,
+.mobile-drawer-leave-active {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-drawer-enter-from,
+.mobile-drawer-leave-to {
+  transform: translateX(100%);
+}
+
 // 响应式设计
 @media (max-width: 768px) {
   .ai-header {
@@ -459,22 +719,145 @@ onMounted(() => {
       display: none;
     }
     
-    // 显示移动端菜单按钮
-    .mobile-menu-btn {
-      display: block;
+    .header-content {
+      gap: 16px;
     }
     
-    .logo-text .title {
-      font-size: 16px;
-    }
-    
-    .logo-text .subtitle {
-      display: none;
-    }
-    
-    // 调整header右侧间距
     .header-right {
-      gap: 12px;
+      // 隐藏桌面端元素
+      .desktop-theme-toggle,
+      .desktop-login-buttons {
+        display: none;
+      }
+      
+            // 显示移动端操作区域
+      .mobile-actions {
+        display: flex;
+      }
+      
+      // 在移动端隐藏语言切换器，节省空间
+      :deep(.language-switcher) {
+        display: none;
+      }
+      
+      // 简化用户菜单显示
+      .user-menu .user-avatar {
+        padding: 4px 6px;
+        
+        .username {
+          display: none;
+        }
+        
+        .el-avatar {
+          width: 28px !important;
+          height: 28px !important;
+        }
+      }
+    }
+    
+    .header-left {
+      flex-shrink: 1;
+      min-width: 0;
+      
+      .logo-section {
+        gap: 8px;
+      }
+      
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .logo-text {
+        min-width: 0;
+        flex: 1;
+        
+        .title {
+          font-size: 16px;
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        
+        .subtitle {
+          display: none;
+        }
+      }
+    }
+    
+    // 调整容器padding
+    .container {
+      padding: 0 16px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-header {
+    .header-left {
+      .logo-section {
+        gap: 6px;
+      }
+      
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .logo-text {
+        .title {
+          font-size: 14px;
+        }
+      }
+    }
+    
+    .header-right {
+      gap: 4px;
+      
+      // 调整移动端按钮大小
+      .mobile-actions {
+        gap: 4px;
+        
+        .mobile-menu-toggle,
+        .mobile-login-toggle,
+        .mobile-theme-toggle {
+          min-width: 60px;
+          padding: 4px 8px;
+          height: 28px;
+          
+          span {
+            font-size: 11px;
+          }
+          
+          .el-icon {
+            font-size: 12px;
+          }
+        }
+      }
+      
+      // 进一步简化用户头像
+      .user-menu .user-avatar {
+        padding: 2px 4px;
+        
+        .el-avatar {
+          width: 24px !important;
+          height: 24px !important;
+        }
+      }
+    }
+    
+    .container {
+      padding: 0 8px;
+    }
+    
+    .header-content {
+      gap: 8px;
+    }
+    
+    .mobile-menu {
+      width: 90vw;
+      max-width: 320px;
     }
   }
 }
@@ -484,4 +867,4 @@ html.dark .ai-header {
   background: rgba(15, 23, 42, 0.95);
   border-bottom-color: var(--ai-border);
 }
-</style> 
+</style>

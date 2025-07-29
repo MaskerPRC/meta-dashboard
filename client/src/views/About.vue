@@ -4,7 +4,7 @@
       <!-- 英雄区域 -->
       <section class="hero-section">
         <div class="hero-content">
-                     <h1 class="hero-title">{{ $t('about.title') }}</h1>
+          <h1 class="hero-title">{{ $t('about.title') }}</h1>
           <p class="hero-subtitle">{{ $t('about.subtitle') }}</p>
           <div class="hero-stats">
             <div class="stat-card">
@@ -287,12 +287,12 @@
           <p class="wechat-group-description">
             {{ wechatGroupConfig.description }}
           </p>
-          
+
           <div class="qr-container">
             <div class="qr-image-wrapper">
-              <img 
-                :src="wechatGroupConfig.qr" 
-                alt="微信群二维码" 
+              <img
+                :src="wechatGroupConfig.qr"
+                alt="微信群二维码"
                 class="qr-image"
               />
               <div class="qr-overlay">
@@ -301,7 +301,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="wechat-group-tips">
             <p class="tip-text">
               <el-icon><ChatDotSquare /></el-icon>
@@ -341,7 +341,7 @@ const projectsStore = useProjectsStore()
 // 计算技术栈数据
 const techStack = computed(() => {
   const { locale } = useI18n()
-  
+
   // 定义工具数组 - 避免i18n问题
   const toolsData = {
     ai_tools: ['Cursor', 'Claude', 'ChatGPT', 'GitHub Copilot', 'v0.dev', 'Bolt.new'],
@@ -349,7 +349,7 @@ const techStack = computed(() => {
     backend: ['Node.js', 'Python', 'FastAPI', 'Express', 'NestJS', 'Supabase', 'Firebase'],
     deployment: ['Vercel', 'Netlify', 'Railway', 'Render', 'Cloudflare', 'AWS', 'Zeabur']
   }
-  
+
   return toolsData
 })
 
@@ -402,7 +402,7 @@ const loadWechatGroupConfig = async () => {
   try {
     const response = await axios.get('/api/config')
     const configs = response.data.configs
-    
+
     if (configs.wechat_group_qr?.value) {
       wechatGroupConfig.value.qr = configs.wechat_group_qr.value
     }
@@ -464,13 +464,13 @@ onMounted(() => {
 
   .hero-section {
     text-align: center;
-    padding: 80px 0;
+    padding: 80px 36px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-radius: 20px;
     margin-bottom: 80px;
 
-         .hero-title {
+    .hero-title {
        font-size: 3.5rem;
        font-weight: 800;
        margin: 0 0 24px;
@@ -502,17 +502,20 @@ onMounted(() => {
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 16px;
-        padding: 24px;
+        padding: 32px 24px;
+        text-align: center;
 
         .stat-number {
           font-size: 2.5rem;
           font-weight: 700;
           margin-bottom: 8px;
+          color: white;
         }
 
         .stat-label {
           font-size: 0.875rem;
           opacity: 0.8;
+          color: rgba(255, 255, 255, 0.9);
         }
       }
     }
@@ -696,6 +699,14 @@ onMounted(() => {
           padding: 12px 16px;
           border-radius: 8px;
           transition: all 0.3s ease;
+          min-width: 0;
+
+          span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+          }
 
           .el-icon {
             color: var(--ai-primary);
@@ -710,7 +721,7 @@ onMounted(() => {
 
           &.interactive {
             cursor: pointer;
-            
+
             &:hover {
               background: var(--ai-bg-secondary);
               transform: translateY(-2px);
@@ -832,6 +843,114 @@ onMounted(() => {
 
           .el-icon {
             color: #07c160;
+          }
+        }
+      }
+    }
+  }
+
+  // 响应式设计
+  @media (max-width: 768px) {
+    .hero-section {
+      .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+
+        .stat-card {
+          padding: 24px 16px;
+
+          .stat-number {
+            font-size: 2rem;
+          }
+        }
+      }
+    }
+
+    .contact-section {
+      .contact-card {
+        padding: 32px 20px;
+
+        .contact-methods {
+          .contact-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 8px;
+            padding: 16px;
+
+            span {
+              white-space: normal;
+              word-break: break-all;
+              max-width: none;
+            }
+
+            .action-hint {
+              margin-left: 0;
+              margin-top: 4px;
+            }
+          }
+        }
+      }
+    }
+
+    .introduction-section {
+      .intro-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+
+        .intro-card {
+          padding: 24px;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-section {
+      .hero-stats {
+        grid-template-columns: 1fr;
+
+        .stat-card {
+          padding: 20px 16px;
+
+          .stat-number {
+            font-size: 1.75rem;
+          }
+
+          .stat-label {
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
+    .contact-section {
+      .contact-card {
+        padding: 24px 16px;
+
+        .contact-title {
+          font-size: 1.5rem;
+        }
+
+        .contact-description {
+          font-size: 1rem;
+        }
+
+        .contact-methods {
+          .contact-item {
+            padding: 12px;
+
+            .el-icon {
+              font-size: 20px;
+            }
+
+            span {
+              font-size: 0.875rem;
+              line-height: 1.4;
+            }
+
+            .action-hint {
+              font-size: 0.75rem;
+            }
           }
         }
       }
