@@ -428,7 +428,7 @@ export default {
     },
     
     goBack() {
-      this.$router.push(`/projects/${this.projectId}`);
+      this.$router.push(`/project/${this.projectId}`);
     },
     
     getTypeIcon(type) {
@@ -485,7 +485,7 @@ export default {
   align-items: flex-start;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e1e5e9;
+  border-bottom: 1px solid var(--ai-border);
 }
 
 .header-left {
@@ -498,25 +498,25 @@ export default {
   gap: 8px;
   padding: 8px 16px;
   margin-bottom: 16px;
-  border: 1px solid #e1e5e9;
-  background: white;
+  border: 1px solid var(--ai-border);
+  background: var(--ai-bg-primary);
   border-radius: 6px;
-  color: #495057;
+  color: var(--ai-text-secondary);
   text-decoration: none;
   transition: all 0.2s;
 }
 
 .back-btn:hover {
-  background: #f8f9fa;
-  border-color: #007bff;
-  color: #007bff;
+  background: var(--ai-bg-secondary);
+  border-color: var(--ai-primary);
+  color: var(--ai-primary);
 }
 
 .project-info h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
   font-weight: 600;
-  color: #212529;
+  color: var(--ai-text-primary);
 }
 
 .project-status {
@@ -524,20 +524,20 @@ export default {
   align-items: center;
   gap: 16px;
   margin: 0;
-  color: #6c757d;
+  color: var(--ai-text-secondary);
 }
 
-.status-idea { color: #6c757d; }
-.status-planning { color: #fd7e14; }
-.status-development { color: #007bff; }
-.status-testing { color: #ffc107; color: #000; }
-.status-deployed { color: #198754; }
-.status-paused { color: #6c757d; }
-.status-completed { color: #198754; }
+.status-idea { color: var(--ai-text-secondary); }
+.status-planning { color: var(--ai-warning); }
+.status-development { color: var(--ai-primary); }
+.status-testing { color: var(--ai-warning); }
+.status-deployed { color: var(--ai-success); }
+.status-paused { color: var(--ai-text-secondary); }
+.status-completed { color: var(--ai-success); }
 
 .progress {
   font-weight: 600;
-  color: #007bff;
+  color: var(--ai-primary);
 }
 
 .header-actions .btn {
@@ -553,12 +553,12 @@ export default {
 }
 
 .btn-primary {
-  background: #007bff;
+  background: var(--ai-primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #0056b3;
+  background: var(--el-color-primary-dark-2);
 }
 
 .filter-section {
@@ -567,19 +567,21 @@ export default {
   align-items: center;
   margin-bottom: 24px;
   padding: 16px;
-  background: #f8f9fa;
+  background: var(--ai-bg-secondary);
   border-radius: 8px;
+  border: 1px solid var(--ai-border);
 }
 
 .filter-left select {
   padding: 8px 12px;
-  border: 1px solid #e1e5e9;
+  border: 1px solid var(--ai-border);
   border-radius: 4px;
-  background: white;
+  background: var(--ai-bg-primary);
+  color: var(--ai-text-primary);
 }
 
 .total-count {
-  color: #6c757d;
+  color: var(--ai-text-secondary);
   font-size: 14px;
 }
 
@@ -591,16 +593,18 @@ export default {
   display: flex;
   gap: 16px;
   padding: 20px;
-  background: white;
-  border: 1px solid #e1e5e9;
+  background: var(--ai-bg-primary);
+  border: 1px solid var(--ai-border);
   border-radius: 8px;
   margin-bottom: 16px;
   transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .history-item:hover {
-  border-color: #007bff;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+  border-color: var(--ai-primary);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
 }
 
 .history-icon {
@@ -615,23 +619,23 @@ export default {
 }
 
 .type-progress_update .history-icon {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--ai-success);
 }
 
 .type-status_change .history-icon {
-  background: #fff3e0;
-  color: #f57c00;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--ai-warning);
 }
 
 .type-manual_note .history-icon {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--ai-primary);
 }
 
 .type-milestone .history-icon {
-  background: #e8f5e8;
-  color: #388e3c;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--ai-error);
 }
 
 .history-content {
@@ -646,7 +650,7 @@ export default {
   margin: 0 0 8px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #212529;
+  color: var(--ai-text-primary);
 }
 
 .history-meta {
@@ -654,22 +658,24 @@ export default {
   align-items: center;
   gap: 12px;
   font-size: 14px;
-  color: #6c757d;
+  color: var(--ai-text-secondary);
 }
 
 .history-type {
   padding: 2px 8px;
-  background: #e9ecef;
+  background: var(--ai-bg-secondary);
   border-radius: 12px;
   font-size: 12px;
+  color: var(--ai-text-secondary);
 }
 
 .progress-change,
 .status-change {
   margin-bottom: 16px;
   padding: 12px;
-  background: #f8f9fa;
+  background: var(--ai-bg-secondary);
   border-radius: 6px;
+  border: 1px solid var(--ai-border);
 }
 
 .progress-comparison {
@@ -689,20 +695,20 @@ export default {
 .mini-progress-bar {
   width: 60px;
   height: 6px;
-  background: #e9ecef;
+  background: var(--ai-border);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: #007bff;
+  background: var(--ai-primary);
   transition: width 0.3s ease;
 }
 
 .progress-arrow,
 .status-arrow {
-  color: #6c757d;
+  color: var(--ai-text-secondary);
 }
 
 .status-comparison {
@@ -718,17 +724,46 @@ export default {
   font-weight: 500;
 }
 
-.status-badge.status-idea { background: #f8f9fa; color: #6c757d; }
-.status-badge.status-planning { background: #fff3cd; color: #856404; }
-.status-badge.status-development { background: #cce5ff; color: #004085; }
-.status-badge.status-testing { background: #fff3cd; color: #856404; }
-.status-badge.status-deployed { background: #d4edda; color: #155724; }
-.status-badge.status-paused { background: #f8f9fa; color: #6c757d; }
-.status-badge.status-completed { background: #d4edda; color: #155724; }
+.status-badge.status-idea { 
+  background: var(--ai-bg-secondary); 
+  color: var(--ai-text-secondary); 
+  border: 1px solid var(--ai-border);
+}
+.status-badge.status-planning { 
+  background: rgba(245, 158, 11, 0.1); 
+  color: var(--ai-warning); 
+  border: 1px solid var(--ai-warning);
+}
+.status-badge.status-development { 
+  background: rgba(99, 102, 241, 0.1); 
+  color: var(--ai-primary); 
+  border: 1px solid var(--ai-primary);
+}
+.status-badge.status-testing { 
+  background: rgba(245, 158, 11, 0.1); 
+  color: var(--ai-warning); 
+  border: 1px solid var(--ai-warning);
+}
+.status-badge.status-deployed { 
+  background: rgba(16, 185, 129, 0.1); 
+  color: var(--ai-success); 
+  border: 1px solid var(--ai-success);
+}
+.status-badge.status-paused { 
+  background: var(--ai-bg-secondary); 
+  color: var(--ai-text-secondary); 
+  border: 1px solid var(--ai-border);
+}
+.status-badge.status-completed { 
+  background: rgba(16, 185, 129, 0.1); 
+  color: var(--ai-success); 
+  border: 1px solid var(--ai-success);
+}
 
 .content-text {
   margin-bottom: 16px;
   line-height: 1.6;
+  color: var(--ai-text-primary);
 }
 
 .content-text :deep(p) {
@@ -756,7 +791,7 @@ export default {
 .attachments h4 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #495057;
+  color: var(--ai-text-primary);
 }
 
 .attachment-list {
@@ -793,39 +828,41 @@ export default {
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  border: 1px solid #e1e5e9;
-  background: white;
+  border: 1px solid var(--ai-border);
+  background: var(--ai-bg-primary);
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  color: var(--ai-text-secondary);
 }
 
 .edit-btn:hover {
-  border-color: #007bff;
-  color: #007bff;
+  border-color: var(--ai-primary);
+  color: var(--ai-primary);
 }
 
 .delete-btn:hover {
-  border-color: #dc3545;
-  color: #dc3545;
+  border-color: var(--ai-error);
+  color: var(--ai-error);
 }
 
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #6c757d;
+  color: var(--ai-text-secondary);
 }
 
 .empty-icon {
   font-size: 48px;
   margin-bottom: 16px;
-  color: #dee2e6;
+  color: var(--ai-border);
 }
 
 .empty-state h3 {
   margin: 0 0 8px 0;
   font-size: 20px;
+  color: var(--ai-text-primary);
 }
 
 .empty-state p {
@@ -850,16 +887,17 @@ export default {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid #e1e5e9;
-  background: white;
+  border: 1px solid var(--ai-border);
+  background: var(--ai-bg-primary);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
+  color: var(--ai-text-secondary);
 }
 
 .page-btn:hover:not(:disabled) {
-  border-color: #007bff;
-  color: #007bff;
+  border-color: var(--ai-primary);
+  color: var(--ai-primary);
 }
 
 .page-btn:disabled {
@@ -870,7 +908,7 @@ export default {
 .page-info {
   padding: 0 16px;
   font-size: 14px;
-  color: #6c757d;
+  color: var(--ai-text-secondary);
 }
 
 /* 对话框样式 */
@@ -889,12 +927,13 @@ export default {
 }
 
 .dialog {
-  background: white;
+  background: var(--ai-bg-primary);
   border-radius: 8px;
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid var(--ai-border);
 }
 
 .dialog-header {
@@ -902,12 +941,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #e1e5e9;
+  border-bottom: 1px solid var(--ai-border);
 }
 
 .dialog-header h3 {
   margin: 0;
   font-size: 18px;
+  color: var(--ai-text-primary);
 }
 
 .close-btn {
@@ -917,13 +957,13 @@ export default {
   background: transparent;
   border-radius: 4px;
   cursor: pointer;
-  color: #6c757d;
+  color: var(--ai-text-secondary);
   transition: all 0.2s;
 }
 
 .close-btn:hover {
-  background: #f8f9fa;
-  color: #212529;
+  background: var(--ai-bg-secondary);
+  color: var(--ai-text-primary);
 }
 
 .dialog-body {
@@ -938,16 +978,24 @@ export default {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #495057;
+  color: var(--ai-text-primary);
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #e1e5e9;
+  border: 1px solid var(--ai-border);
   border-radius: 4px;
   font-size: 14px;
+  background: var(--ai-bg-primary);
+  color: var(--ai-text-primary);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--ai-primary);
 }
 
 .form-actions {
@@ -958,16 +1006,17 @@ export default {
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background: var(--ai-text-secondary);
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-secondary:hover {
-  background: #545862;
+  background: var(--ai-text-primary);
 }
 
 /* 图片预览 */

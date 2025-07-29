@@ -3,7 +3,7 @@
     <div class="container">
       <!-- 返回按钮 -->
       <div class="back-navigation">
-        <el-button @click="$router.back()" text>
+        <el-button @click="$router.push('/projects')" text>
           <el-icon><ArrowLeft /></el-icon>
           {{ t('project.back_to_list') }}
         </el-button>
@@ -519,43 +519,89 @@ onMounted(async () => {
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        &.github-link {
-          background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
-          border-color: #e1e4e8;
+        &.history-link {
+          background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, var(--ai-bg-primary) 100%);
+          border-color: rgba(99, 102, 241, 0.2);
 
           &::before {
-            background: linear-gradient(135deg, #24292e, #6f42c1);
+            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
           }
 
           .link-icon {
-            background: linear-gradient(135deg, #24292e, #6f42c1);
+            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
             color: white;
           }
 
           .link-title {
-            color: #24292e;
+            color: var(--ai-primary);
           }
 
           .link-desc {
-            color: #586069;
+            color: var(--ai-text-secondary);
           }
 
           .link-arrow {
-            color: #24292e;
+            color: var(--ai-primary);
           }
 
           &:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(36, 41, 46, 0.15);
-            border-color: #24292e;
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
+            border-color: var(--ai-primary);
 
             &::before {
-              background: linear-gradient(135deg, #24292e, #6f42c1);
+              background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
             }
 
             .link-icon {
               transform: scale(1.1);
-              box-shadow: 0 8px 24px rgba(36, 41, 46, 0.3);
+              box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+            }
+
+            .link-arrow {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+        }
+
+        &.github-link {
+          background: linear-gradient(135deg, rgba(107, 114, 126, 0.05) 0%, var(--ai-bg-primary) 100%);
+          border-color: rgba(107, 114, 126, 0.2);
+
+          &::before {
+            background: linear-gradient(135deg, var(--ai-text-primary), var(--ai-text-secondary));
+          }
+
+          .link-icon {
+            background: linear-gradient(135deg, var(--ai-text-primary), var(--ai-text-secondary));
+            color: white;
+          }
+
+          .link-title {
+            color: var(--ai-text-primary);
+          }
+
+          .link-desc {
+            color: var(--ai-text-secondary);
+          }
+
+          .link-arrow {
+            color: var(--ai-text-primary);
+          }
+
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(107, 114, 126, 0.15);
+            border-color: var(--ai-text-primary);
+
+            &::before {
+              background: linear-gradient(135deg, var(--ai-text-primary), var(--ai-text-secondary));
+            }
+
+            .link-icon {
+              transform: scale(1.1);
+              box-shadow: 0 8px 24px rgba(107, 114, 126, 0.3);
             }
 
             .link-arrow {
@@ -566,42 +612,42 @@ onMounted(async () => {
         }
 
         &.demo-link {
-          background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
-          border-color: #fed7d7;
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, var(--ai-bg-primary) 100%);
+          border-color: rgba(16, 185, 129, 0.2);
 
           &::before {
-            background: linear-gradient(135deg, #e53e3e, #d69e2e);
+            background: linear-gradient(135deg, var(--ai-success), var(--ai-accent));
           }
 
           .link-icon {
-            background: linear-gradient(135deg, #e53e3e, #d69e2e);
+            background: linear-gradient(135deg, var(--ai-success), var(--ai-accent));
             color: white;
           }
 
           .link-title {
-            color: #c53030;
+            color: var(--ai-success);
           }
 
           .link-desc {
-            color: #a0aec0;
+            color: var(--ai-text-secondary);
           }
 
           .link-arrow {
-            color: #c53030;
+            color: var(--ai-success);
           }
 
           &:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(229, 62, 62, 0.15);
-            border-color: #e53e3e;
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.15);
+            border-color: var(--ai-success);
 
             &::before {
-              background: linear-gradient(135deg, #e53e3e, #d69e2e);
+              background: linear-gradient(135deg, var(--ai-success), var(--ai-accent));
             }
 
             .link-icon {
               transform: scale(1.1);
-              box-shadow: 0 8px 24px rgba(229, 62, 62, 0.3);
+              box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
             }
 
             .link-arrow {

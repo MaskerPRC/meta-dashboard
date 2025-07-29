@@ -22,7 +22,7 @@
           <el-tabs v-model="activeTab" class="login-tabs">
             <!-- 账号密码登录 -->
             <el-tab-pane label="账号登录" name="local">
-              <el-form 
+              <el-form
                 ref="loginFormRef"
                 :model="loginForm"
                 :rules="loginRules"
@@ -40,7 +40,7 @@
                     </template>
                   </el-input>
                 </el-form-item>
-                
+
                 <el-form-item prop="password">
                   <el-input
                     v-model="loginForm.password"
@@ -55,11 +55,11 @@
                     </template>
                   </el-input>
                 </el-form-item>
-                
+
                 <el-form-item>
-                  <el-button 
-                    type="primary" 
-                    size="large" 
+                  <el-button
+                    type="primary"
+                    size="large"
                     style="width: 100%"
                     @click="handleLocalLogin"
                     :loading="loading"
@@ -67,7 +67,7 @@
                     登录
                   </el-button>
                 </el-form-item>
-                
+
                 <div class="form-links">
                   <el-button text type="primary" @click="activeTab = 'register'">
                     还没有账号？立即注册
@@ -78,7 +78,7 @@
 
             <!-- 注册 -->
             <el-tab-pane label="注册账号" name="register">
-              <el-form 
+              <el-form
                 ref="registerFormRef"
                 :model="registerForm"
                 :rules="registerRules"
@@ -96,7 +96,7 @@
                     </template>
                   </el-input>
                 </el-form-item>
-                
+
                 <el-form-item prop="email">
                   <el-input
                     v-model="registerForm.email"
@@ -109,7 +109,7 @@
                     </template>
                   </el-input>
                 </el-form-item>
-                
+
                 <el-form-item prop="phone">
                   <el-input
                     v-model="registerForm.phone"
@@ -122,7 +122,7 @@
                     </template>
                   </el-input>
                 </el-form-item>
-                
+
                 <el-form-item prop="password">
                   <el-input
                     v-model="registerForm.password"
@@ -137,7 +137,7 @@
                     </template>
                   </el-input>
                 </el-form-item>
-                
+
                 <el-form-item prop="confirmPassword">
                   <el-input
                     v-model="registerForm.confirmPassword"
@@ -152,11 +152,11 @@
                     </template>
                   </el-input>
                 </el-form-item>
-                
+
                 <el-form-item>
-                  <el-button 
-                    type="primary" 
-                    size="large" 
+                  <el-button
+                    type="primary"
+                    size="large"
                     style="width: 100%"
                     @click="handleRegister"
                     :loading="loading"
@@ -164,7 +164,7 @@
                     注册
                   </el-button>
                 </el-form-item>
-                
+
                 <div class="form-links">
                   <el-button text type="primary" @click="activeTab = 'local'">
                     已有账号？立即登录
@@ -177,8 +177,8 @@
             <el-tab-pane label="第三方登录" name="oauth">
               <div class="oauth-buttons">
                 <!-- GitHub登录 -->
-                <el-button 
-                  size="large" 
+                <el-button
+                  size="large"
                   class="login-btn github-btn"
                   @click="loginWithGitHub"
                   :loading="loading"
@@ -190,8 +190,8 @@
                 </el-button>
 
                                  <!-- Google登录 -->
-                 <el-button 
-                   size="large" 
+                 <el-button
+                   size="large"
                    class="login-btn google-btn"
                    @click="loginWithGoogle"
                    :loading="loading"
@@ -203,8 +203,8 @@
                  </el-button>
 
                  <!-- 微信登录 -->
-                 <el-button 
-                   size="large" 
+                 <el-button
+                   size="large"
                    class="login-btn wechat-btn"
                    @click="loginWithWechat"
                    :loading="loading"
@@ -352,24 +352,24 @@ const registerRules = {
 // 本地登录处理
 const handleLocalLogin = async () => {
   if (!loginFormRef.value) return
-  
+
   try {
     const valid = await loginFormRef.value.validate()
     if (!valid) return
-    
+
     loading.value = true
-    
+
     const response = await axios.post('/api/auth/login', {
       username: loginForm.value.username,
       password: loginForm.value.password
     })
-    
+
     if (response.data.success) {
       ElMessage.success('登录成功！')
-      
+
       // 更新认证状态
       authStore.user = response.data.user
-      
+
       // 跳转到首页或目标页面
       const redirect = route.query.redirect || '/'
       router.push(redirect)
@@ -391,13 +391,13 @@ const handleLocalLogin = async () => {
 // 注册处理
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-  
+
   try {
     const valid = await registerFormRef.value.validate()
     if (!valid) return
-    
+
     loading.value = true
-    
+
     const response = await axios.post('/api/auth/register', {
       username: registerForm.value.username,
       email: registerForm.value.email,
@@ -405,13 +405,13 @@ const handleRegister = async () => {
       password: registerForm.value.password,
       confirmPassword: registerForm.value.confirmPassword
     })
-    
+
     if (response.data.success) {
       ElMessage.success('注册成功！已自动登录')
-      
+
       // 更新认证状态
       authStore.user = response.data.user
-      
+
       // 跳转到首页或目标页面
       const redirect = route.query.redirect || '/'
       router.push(redirect)
@@ -471,7 +471,7 @@ onMounted(async () => {
   if (route.query.error) {
     const errorType = route.query.error
     const errorMessage = route.query.message
-    
+
     if (errorType === 'github') {
       ElMessage.error('GitHub登录失败，请重试')
     } else if (errorType === 'google') {
@@ -504,28 +504,28 @@ onMounted(async () => {
   padding: 20px;
   position: relative;
   overflow: hidden;
-  
+
   .login-container {
     position: relative;
     z-index: 10;
     width: 100%;
     max-width: 400px;
-    
+
     .login-card {
       padding: 40px;
       text-align: center;
       backdrop-filter: blur(20px);
       background: rgba(255, 255, 255, 0.95);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      
+
       @media (max-width: 480px) {
         padding: 30px 20px;
       }
     }
-    
+
     .login-header {
       margin-bottom: 32px;
-      
+
       .logo-section {
         .logo-icon {
           display: inline-flex;
@@ -538,13 +538,13 @@ onMounted(async () => {
           color: white;
           margin: 0 auto 16px;
         }
-        
+
         .title {
           font-size: 2rem;
           font-weight: 800;
           margin: 0 0 8px;
         }
-        
+
         .subtitle {
           font-size: 0.875rem;
           color: var(--ai-text-secondary);
@@ -552,7 +552,7 @@ onMounted(async () => {
         }
       }
     }
-    
+
     .login-form {
       .form-title {
         font-size: 1.5rem;
@@ -560,55 +560,55 @@ onMounted(async () => {
         color: var(--ai-text-primary);
         margin: 0 0 8px;
       }
-      
+
       .form-subtitle {
         font-size: 0.875rem;
         color: var(--ai-text-secondary);
         margin: 0 0 32px;
         line-height: 1.5;
       }
-      
+
       .login-tabs {
         .el-tabs__header {
           margin-bottom: 24px;
         }
-        
+
         .el-tabs__nav-wrap::after {
           display: none;
         }
-        
+
         .el-tabs__item {
           font-weight: 500;
           color: var(--ai-text-secondary);
-          
+
           &.is-active {
             color: var(--ai-primary);
           }
         }
-        
+
         .el-tabs__active-bar {
           background-color: var(--ai-primary);
         }
-        
+
         .el-tab-pane {
           .el-form {
             .el-form-item {
               margin-bottom: 20px;
-              
+
               .el-input__wrapper {
                 border-radius: 8px;
                 box-shadow: 0 0 0 1px var(--ai-border) inset;
-                
+
                 &:hover {
                   box-shadow: 0 0 0 1px var(--ai-primary) inset;
                 }
-                
+
                 &.is-focus {
                   box-shadow: 0 0 0 1px var(--ai-primary) inset;
                 }
               }
             }
-            
+
             .form-links {
               text-align: center;
               margin-top: 16px;
@@ -616,13 +616,13 @@ onMounted(async () => {
           }
         }
       }
-      
+
       .oauth-buttons {
         display: flex;
         flex-direction: column;
         gap: 16px;
         margin-bottom: 24px;
-        
+
         .login-btn {
           height: 48px;
           width: 100%;
@@ -630,12 +630,12 @@ onMounted(async () => {
           font-size: 0.875rem;
           font-weight: 500;
           transition: all 0.3s ease;
-          
+
           &.github-btn {
             background: #24292e;
             border-color: #24292e;
             color: white;
-            
+
             &:hover {
               background: #1a1e22;
               border-color: #1a1e22;
@@ -643,25 +643,27 @@ onMounted(async () => {
               box-shadow: 0 8px 25px rgba(36, 41, 46, 0.3);
             }
           }
-          
+
                      &.google-btn {
              background: white;
              border-color: #dadce0;
              color: #3c4043;
-             
-             &:hover {
+             margin: 0;
+
+                       &:hover {
                background: #f8f9fa;
                border-color: #dadce0;
                transform: translateY(-2px);
                box-shadow: 0 8px 25px rgba(60, 64, 67, 0.15);
              }
            }
-           
+
            &.wechat-btn {
              background: #1AAD16;
              border-color: #1AAD16;
              color: white;
-             
+             margin: 0;
+
              &:hover {
                background: #16941F;
                border-color: #16941F;
@@ -669,25 +671,25 @@ onMounted(async () => {
                box-shadow: 0 8px 25px rgba(26, 173, 22, 0.3);
              }
            }
-          
+
           .el-icon {
             margin-right: 8px;
           }
         }
       }
-      
+
       .login-tips {
         text-align: left;
-        
+
         .tips-list {
           margin: 0;
           padding-left: 16px;
           color: var(--ai-text-secondary);
           font-size: 0.875rem;
-          
+
           li {
             margin-bottom: 4px;
-            
+
             &:last-child {
               margin-bottom: 0;
             }
@@ -695,25 +697,25 @@ onMounted(async () => {
         }
       }
     }
-    
+
     .login-footer {
       margin-top: 32px;
       padding-top: 24px;
       border-top: 1px solid var(--ai-border);
-      
+
       .footer-text {
         font-size: 0.75rem;
         color: var(--ai-text-secondary);
         margin: 0 0 16px;
         line-height: 1.4;
       }
-      
+
       .back-home {
         text-decoration: none;
       }
     }
   }
-  
+
   .background-decoration {
     position: absolute;
     top: 0;
@@ -721,12 +723,12 @@ onMounted(async () => {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    
+
     .decoration-circle {
       position: absolute;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.1);
-      
+
       &.circle-1 {
         width: 200px;
         height: 200px;
@@ -734,7 +736,7 @@ onMounted(async () => {
         left: -5%;
         animation: float 6s ease-in-out infinite;
       }
-      
+
       &.circle-2 {
         width: 150px;
         height: 150px;
@@ -742,7 +744,7 @@ onMounted(async () => {
         right: -5%;
         animation: float 4s ease-in-out infinite reverse;
       }
-      
+
       &.circle-3 {
         width: 100px;
         height: 100px;
@@ -770,4 +772,4 @@ html.dark .login-page {
     border-color: rgba(255, 255, 255, 0.1);
   }
 }
-</style> 
+</style>
