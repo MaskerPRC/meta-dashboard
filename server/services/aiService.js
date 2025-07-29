@@ -15,9 +15,9 @@ class AIService {
   async generateProjectWithOpenAI(userInput, language = 'zh') {
     try {
       const prompt = createProjectPrompt(userInput, language);
-      
+
       console.log('🤖 调用OpenAI API生成项目...');
-      
+
       const completion = await openai.chat.completions.create({
         model: defaultConfig.model,
         messages: [
@@ -42,7 +42,7 @@ class AIService {
 
       // 解析JSON响应
       const projectData = this.parseAIResponse(response);
-      
+
       console.log('✅ OpenAI项目生成成功');
       return projectData;
 
@@ -65,15 +65,15 @@ class AIService {
       }
 
       const prompt = this.createCommentValidationPrompt(content, language);
-      
+
       console.log('🤖 调用OpenAI API检测评论有效性...');
-      
+
       const completion = await openai.chat.completions.create({
         model: defaultConfig.model,
         messages: [
           {
             role: "system",
-            content: language === 'zh' 
+            content: language === 'zh'
               ? "你是一个专业的内容审核助手，能够判断评论的价值和有效性。你需要评估评论是否有建设性、是否与项目相关、是否包含有价值的信息。"
               : "You are a professional content moderation assistant who can judge the value and validity of comments. You need to assess whether comments are constructive, project-related, and contain valuable information."
           },
@@ -94,7 +94,7 @@ class AIService {
 
       // 解析评论检测结果
       const validationResult = this.parseCommentValidationResponse(response);
-      
+
       console.log('✅ 评论有效性检测完成');
       return validationResult;
 
@@ -131,9 +131,9 @@ class AIService {
 
 请返回JSON格式的结果，包含以下字段：
 {
-  "isValid": true/false,
-  "score": 0-100的分数,
   "reason": "详细的评估原因",
+  "score": 0-100的分数,
+  "isValid": true/false,
   "status": "valid/invalid"
 }`;
     } else {
@@ -289,7 +289,7 @@ Please return the result in JSON format with the following fields:
     // 简单的关键词提取和项目结构生成
     const keywords = this.extractKeywords(text);
     const projectType = this.detectProjectType(text);
-    
+
     return new Promise((resolve) => {
       setTimeout(() => {
         const result = {
@@ -322,39 +322,39 @@ Please return the result in JSON format with the following fields:
     const appKeywords = ['应用', 'app', '移动', '手机', 'android', 'ios'];
     const aiKeywords = ['AI', '人工智能', '机器学习', '深度学习', '算法'];
     const gameKeywords = ['游戏', '娱乐', 'game'];
-    
+
     const lowerText = text.toLowerCase();
-    
+
     if (webKeywords.some(keyword => lowerText.includes(keyword))) return 'web';
     if (appKeywords.some(keyword => lowerText.includes(keyword))) return 'mobile';
     if (aiKeywords.some(keyword => lowerText.includes(keyword))) return 'ai';
     if (gameKeywords.some(keyword => lowerText.includes(keyword))) return 'game';
-    
+
     return 'general';
   }
 
   generateTitle(text, keywords) {
     const sentences = text.split(/[。！？.!?]/);
     const firstSentence = sentences[0]?.trim();
-    
+
     if (firstSentence && firstSentence.length < 30) {
       return firstSentence;
     }
-    
+
     if (keywords.length > 0) {
       return `${keywords[0]}项目`;
     }
-    
+
     return '智能生成项目';
   }
 
   generateDescription(text, keywords) {
     const sentences = text.split(/[。！？.!?]/).filter(s => s.trim().length > 0);
-    
+
     if (sentences.length > 1) {
       return sentences.slice(0, 2).join('。') + '。';
     }
-    
+
     return text.slice(0, 100) + (text.length > 100 ? '...' : '');
   }
 
@@ -366,25 +366,25 @@ Please return the result in JSON format with the following fields:
       game: '这是一个游戏项目，包含游戏设计和开发。\n\n',
       general: '这是一个综合性项目。\n\n'
     };
-    
-    return (typeTemplates[projectType] || typeTemplates.general) + 
+
+    return (typeTemplates[projectType] || typeTemplates.general) +
            '原始需求描述：\n' + text;
   }
 
   detectPriority(text) {
     const highPriorityWords = ['紧急', '重要', '立即', '马上', '优先'];
     const lowPriorityWords = ['以后', '有空', '不急'];
-    
+
     if (highPriorityWords.some(word => text.includes(word))) return 'high';
     if (lowPriorityWords.some(word => text.includes(word))) return 'low';
-    
+
     return 'medium';
   }
 
   detectTechStack(text) {
     const techMap = {
       'javascript': 'JavaScript',
-      'js': 'JavaScript', 
+      'js': 'JavaScript',
       'react': 'React',
       'vue': 'Vue.js',
       'angular': 'Angular',
@@ -398,16 +398,16 @@ Please return the result in JSON format with the following fields:
       'redis': 'Redis',
       'docker': 'Docker'
     };
-    
+
     const lowerText = text.toLowerCase();
     const detectedTech = [];
-    
+
     Object.keys(techMap).forEach(key => {
       if (lowerText.includes(key)) {
         detectedTech.push(techMap[key]);
       }
     });
-    
+
     return [...new Set(detectedTech)]; // 去重
   }
 
@@ -420,4 +420,4 @@ Please return the result in JSON format with the following fields:
   }
 }
 
-module.exports = new AIService(); 
+module.exports = new AIService();
