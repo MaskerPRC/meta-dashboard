@@ -212,7 +212,7 @@
                    <svg viewBox="0 0 1024 1024" width="16" height="16" style="margin-right: 8px;">
                      <path d="M664.576 346.496c-8.96 0-17.92 0.768-26.88 1.536 23.808-110.08 128.768-189.696 252.672-189.696 124.16 0 219.904 79.616 219.904 189.696 0 65.024-34.816 119.808-89.856 152.064l17.92 59.648-69.632-34.816c-26.88 5.376-44.8 10.752-71.68 10.752-7.424 0-14.848-0.256-22.272-0.768-16.896 111.36-132.096 194.56-268.8 194.56-35.84 0-71.68-8.96-103.424-18.176l-89.856 44.8 26.88-89.856c-62.208-44.8-98.048-110.08-98.048-184.32 0-131.072 116.224-224 268.8-224 7.424 0 14.848 0.256 22.272 0.768zM498.432 269.568c17.92 0 26.88-8.96 26.88-26.88s-8.96-26.88-26.88-26.88-26.88 8.96-26.88 26.88 8.96 26.88 26.88 26.88z m179.2 0c17.92 0 26.88-8.96 26.88-26.88s-8.96-26.88-26.88-26.88-26.88 8.96-26.88 26.88 8.96 26.88 26.88 26.88z m-134.4 179.2c-17.92 0-26.88 8.96-26.88 26.88s8.96 26.88 26.88 26.88 26.88-8.96 26.88-26.88-8.96-26.88-26.88-26.88z m89.856 0c-17.92 0-26.88 8.96-26.88 26.88s8.96 26.88 26.88 26.88 26.88-8.96 26.88-26.88-8.96-26.88-26.88-26.88z" fill="#1AAD16"></path>
                    </svg>
-                   <span>使用微信登录</span>
+                   <span>{{ wechatLoginText }}</span>
                  </el-button>
               </div>
 
@@ -224,13 +224,15 @@
                   :closable="false"
                   show-icon
                 >
-                                     <template #default>
-                     <ul class="tips-list">
-                       <li>首次登录将自动创建账户</li>
-                       <li>支持GitHub、Google和微信账号登录</li>
-                       <li>安全快捷，无需记住密码</li>
-                     </ul>
-                   </template>
+                  <template #default>
+                    <ul class="tips-list">
+                      <li>首次登录将自动创建账户</li>
+                      <li v-if="isInWechat">支持微信网页授权登录，安全便捷</li>
+                      <li v-else>支持GitHub、Google和微信扫码登录</li>
+                      <li>安全快捷，无需记住密码</li>
+                      <li v-if="isInWechat">如需使用其他方式登录，请在非微信浏览器中打开</li>
+                    </ul>
+                  </template>
                 </el-alert>
               </div>
             </el-tab-pane>
@@ -262,12 +264,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { ElMessage } from 'element-plus'
 import { Cpu, ArrowLeft, User, Lock, Message, Phone } from '@element-plus/icons-vue'
 import axios from '../utils/axios'
+import { isWechatBrowser } from '../utils/wechatDetector'
 
 const router = useRouter()
 const route = useRoute()
@@ -275,6 +278,12 @@ const authStore = useAuthStore()
 
 const loading = ref(false)
 const activeTab = ref('local')
+
+// 微信登录相关
+const isInWechat = ref(false)
+const wechatLoginText = computed(() => {
+  return isInWechat.value ? '使用微信登录' : '使用微信扫码登录'
+})
 
 // 登录表单数据
 const loginForm = ref({
@@ -454,16 +463,27 @@ const loginWithWechat = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // 检测是否在微信浏览器中
+  isInWechat.value = isWechatBrowser()
+
   // 检查是否有登录错误
   if (route.query.error) {
     const errorType = route.query.error
+    const errorMessage = route.query.message
+    
     if (errorType === 'github') {
       ElMessage.error('GitHub登录失败，请重试')
     } else if (errorType === 'google') {
       ElMessage.error('Google登录失败，请重试')
     } else if (errorType === 'wechat') {
-      ElMessage.error('微信登录失败，请重试')
+      ElMessage.error('微信扫码登录失败，请重试')
+    } else if (errorType === 'wechat_mp') {
+      ElMessage.error(errorMessage ? decodeURIComponent(errorMessage) : '微信登录失败，请重试')
+    } else if (errorType === 'auth_failed') {
+      ElMessage.error(errorMessage ? decodeURIComponent(errorMessage) : '登录失败')
+    } else if (errorType === 'session_error') {
+      ElMessage.error(errorMessage ? decodeURIComponent(errorMessage) : '登录状态保存失败')
     }
   }
 

@@ -186,6 +186,298 @@ router.get('/wechat/callback', oauthLoginRateLimit,
   }
 );
 
+// 微信公众号网页授权登录入口
+router.get('/wechat-mp', oauthLoginRateLimit, (req, res) => {
+  const appid = process.env.WECHAT_MP_APP_ID;
+  if (!appid) {
+    return res.status(400).json({
+      success: false,
+      message: '微信公众号未配置'
+    });
+  }
+
+  // 获取前端URL
+  const frontendUrl = process.env.FRONTEND_URL ||
+    (process.env.NODE_ENV === 'production'
+      ? 'https://share.agitao.net'
+      : 'http://localhost:5173');
+
+  // 构建回调URL
+  const callbackUrl = process.env.WECHAT_MP_CALLBACK_URL || 
+    `${getCallbackBaseURL()}/api/auth/wechat-mp/callback`;
+
+  // 生成state参数用于防CSRF攻击
+  const state = crypto.randomBytes(16).toString('hex');
+  
+  // 保存state到session
+  req.session.wechat_mp_state = state;
+  req.session.wechat_mp_redirect = req.query.redirect || frontendUrl;
+
+  // 构建微信授权URL
+  const scope = 'snsapi_userinfo'; // 获取用户基本信息
+  const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${encodeURIComponent(callbackUrl)}&response_type=code&scope=${scope}&state=${state}#wechat_redirect`;
+
+  res.redirect(authUrl);
+});
+
+// 微信公众号网页授权回调处理
+router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
+  const { code, state } = req.query;
+  
+  // 验证state参数
+  if (!state || state !== req.session.wechat_mp_state) {
+    console.error('微信公众号登录 - State参数验证失败');
+    const frontendUrl = process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://share.agitao.net'
+        : 'http://localhost:5173');
+    return res.redirect(`${frontendUrl}/login?error=wechat_mp&message=${encodeURIComponent('授权验证失败')}`);
+  }
+
+  if (!code) {
+    console.error('微信公众号登录 - 未获取到授权码');
+    const frontendUrl = process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://share.agitao.net'
+        : 'http://localhost:5173');
+    return res.redirect(`${frontendUrl}/login?error=wechat_mp&message=${encodeURIComponent('授权失败')}`);
+  }
+
+  try {
+    const appid = process.env.WECHAT_MP_APP_ID;
+    const secret = process.env.WECHAT_MP_APP_SECRET;
+
+    if (!appid || !secret) {
+      throw new Error('微信公众号配置不完整');
+    }
+
+    // 使用code换取access_token
+    const tokenResponse = await axios.get('https://api.weixin.qq.com/sns/oauth2/access_token', {
+      params: {
+        appid,
+        secret,
+        code,
+        grant_type: 'authorization_code'
+      }
+    });
+
+    const tokenData = tokenResponse.data;
+    if (tokenData.errcode) {
+      throw new Error(`微信授权失败: ${tokenData.errmsg}`);
+    }
+
+    const { access_token, openid, refresh_token, expires_in, scope: tokenScope, unionid } = tokenData;
+
+    // 如果scope包含userinfo，获取用户信息
+    let userInfo = { openid, unionid };
+    if (tokenScope && tokenScope.includes('snsapi_userinfo')) {
+      const userInfoResponse = await axios.get('https://api.weixin.qq.com/sns/userinfo', {
+        params: {
+          access_token,
+          openid,
+          lang: 'zh_CN'
+        }
+      });
+
+      const userInfoData = userInfoResponse.data;
+      if (!userInfoData.errcode) {
+        userInfo = {
+          openid: userInfoData.openid,
+          nickname: userInfoData.nickname,
+          sex: userInfoData.sex,
+          province: userInfoData.province,
+          city: userInfoData.city,
+          country: userInfoData.country,
+          headimgurl: userInfoData.headimgurl,
+          unionid: userInfoData.unionid || unionid
+        };
+      }
+    }
+
+    // 处理用户登录逻辑
+    const user = await handleWechatMpUser(userInfo);
+    
+    if (!user) {
+      throw new Error('用户处理失败');
+    }
+
+    // 手动登录用户
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        console.error('微信公众号登录 - Session登录失败:', loginErr);
+        const frontendUrl = process.env.FRONTEND_URL ||
+          (process.env.NODE_ENV === 'production'
+            ? 'https://share.agitao.net'
+            : 'http://localhost:5173');
+        return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
+      }
+
+      // 手动保存session
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error('Session保存失败:', saveErr);
+          const frontendUrl = process.env.FRONTEND_URL ||
+            (process.env.NODE_ENV === 'production'
+              ? 'https://share.agitao.net'
+              : 'http://localhost:5173');
+          return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
+        }
+
+        // 手动设置Cookie
+        setManualSessionCookie(req, res);
+
+        // 清除临时session数据
+        delete req.session.wechat_mp_state;
+        const redirectUrl = req.session.wechat_mp_redirect || 
+          (process.env.FRONTEND_URL ||
+            (process.env.NODE_ENV === 'production'
+              ? 'https://share.agitao.net'
+              : 'http://localhost:5173'));
+        delete req.session.wechat_mp_redirect;
+
+        console.log(`微信公众号登录成功 - 用户: ${user.username}, 角色: ${user.role}, 重定向到: ${redirectUrl}`);
+        res.redirect(redirectUrl);
+      });
+    });
+
+  } catch (error) {
+    console.error('微信公众号登录错误:', error);
+    const frontendUrl = process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://share.agitao.net'
+        : 'http://localhost:5173');
+    return res.redirect(`${frontendUrl}/login?error=wechat_mp&message=${encodeURIComponent('登录失败')}`);
+  }
+});
+
+// 处理微信公众号用户信息的函数
+async function handleWechatMpUser(userInfo) {
+  return new Promise((resolve, reject) => {
+    const { openid, unionid, nickname, headimgurl } = userInfo;
+    
+    // 获取管理员微信昵称列表
+    const adminWechatNicknames = process.env.ADMIN_WECHAT_NICKNAMES ?
+      process.env.ADMIN_WECHAT_NICKNAMES.split(',').map(name => name.trim()) : [];
+
+    // 判断用户角色
+    const isAdmin = adminWechatNicknames.length > 0 && nickname &&
+      adminWechatNicknames.includes(nickname);
+    const userRole = isAdmin ? 'admin' : 'viewer';
+
+    // 查找用户逻辑：优先通过unionid查找，然后通过wechat_id（openid）查找
+    let findUserQuery = 'SELECT * FROM users WHERE ';
+    let findUserParams = [];
+
+    if (unionid) {
+      // 如果有unionid，优先通过unionid查找，这样可以统一不同平台的用户
+      findUserQuery += 'wechat_unionid = ? OR wechat_id = ?';
+      findUserParams = [unionid, openid];
+    } else {
+      // 如果没有unionid，只能通过openid查找
+      findUserQuery += 'wechat_id = ?';
+      findUserParams = [openid];
+    }
+
+    db.get(findUserQuery, findUserParams, (err, existingUser) => {
+      if (err) {
+        console.error('查找用户失败:', err);
+        return reject(err);
+      }
+
+      if (existingUser) {
+        // 用户已存在，更新用户信息
+        const updateFields = [];
+        const updateParams = [];
+
+        // 更新基本信息
+        if (nickname) {
+          updateFields.push('username = ?', 'display_name = ?');
+          updateParams.push(nickname, nickname);
+        }
+        if (headimgurl) {
+          updateFields.push('avatar_url = ?');
+          updateParams.push(headimgurl);
+        }
+        
+        // 更新角色信息
+        updateFields.push('role = ?', 'is_admin = ?');
+        updateParams.push(userRole, isAdmin ? 1 : 0);
+
+        // 更新微信相关字段
+        if (unionid && !existingUser.wechat_unionid) {
+          updateFields.push('wechat_unionid = ?');
+          updateParams.push(unionid);
+        }
+        if (!existingUser.wechat_id) {
+          updateFields.push('wechat_id = ?');
+          updateParams.push(openid);
+        }
+
+        updateFields.push('last_login = CURRENT_TIMESTAMP');
+        updateParams.push(existingUser.id);
+
+        const updateQuery = `UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`;
+        
+        db.run(updateQuery, updateParams, function(updateErr) {
+          if (updateErr) {
+            console.error('更新用户失败:', updateErr);
+            return reject(updateErr);
+          }
+
+          // 返回更新后的用户信息
+          db.get('SELECT * FROM users WHERE id = ?', [existingUser.id], (selectErr, updatedUser) => {
+            if (selectErr) {
+              return reject(selectErr);
+            }
+            console.log(`微信公众号登录成功 - 更新用户: ${updatedUser.username}, 角色: ${updatedUser.role}`);
+            resolve(updatedUser);
+          });
+        });
+      } else {
+        // 新用户，创建账户
+        const createParams = [
+          nickname || `微信用户_${openid.slice(-8)}`, // username
+          nickname || `微信用户_${openid.slice(-8)}`, // display_name
+          headimgurl || null, // avatar_url
+          openid, // wechat_id
+          unionid || null, // wechat_unionid
+          userRole, // role
+          isAdmin ? 1 : 0 // is_admin
+        ];
+
+        db.run(`INSERT INTO users 
+          (username, display_name, avatar_url, wechat_id, wechat_unionid, role, is_admin, created_at, last_login) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`, 
+          createParams, 
+          function(insertErr) {
+            if (insertErr) {
+              console.error('创建用户失败:', insertErr);
+              return reject(insertErr);
+            }
+
+            // 返回新创建的用户
+            db.get('SELECT * FROM users WHERE id = ?', [this.lastID], (selectErr, newUser) => {
+              if (selectErr) {
+                return reject(selectErr);
+              }
+              console.log(`微信公众号登录成功 - 创建新用户: ${newUser.username}, 角色: ${newUser.role}`);
+              resolve(newUser);
+            });
+          }
+        );
+      }
+    });
+  });
+}
+
+// 获取OAuth回调URL基础路径
+const getCallbackBaseURL = () => {
+  return process.env.OAUTH_CALLBACK_BASE_URL || 
+    (process.env.NODE_ENV === 'production' 
+      ? 'https://shareapi.agitao.net' 
+      : `http://localhost:${process.env.PORT || 3015}`)
+}
+
 // 获取当前用户信息
 router.get('/user', (req, res) => {
   if (req.isAuthenticated()) {

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from '../utils/axios'
 import { ElMessage } from 'element-plus'
+import { isWechatBrowser } from '../utils/wechatDetector'
 
 export const useAuthStore = defineStore('auth', () => {
   // 状态
@@ -93,9 +94,31 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = loginUrl;
   }
 
-  // 微信登录
+  // 微信登录 - 智能选择登录方式
   const loginWithWechat = (redirectTo = null) => {
+    // 检测是否在微信浏览器中
+    if (isWechatBrowser()) {
+      // 在微信浏览器中，使用公众号网页授权
+      loginWithWechatMp(redirectTo);
+    } else {
+      // 不在微信浏览器中，使用开放平台扫码登录
+      loginWithWechatQr(redirectTo);
+    }
+  }
+
+  // 微信开放平台扫码登录（原有的微信登录）
+  const loginWithWechatQr = (redirectTo = null) => {
     const baseUrl = (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/wechat';
+    const currentPath = redirectTo || window.location.pathname + window.location.search;
+    const loginUrl = currentPath !== '/login' ? 
+      `${baseUrl}?redirect=${encodeURIComponent(currentPath)}` : 
+      baseUrl;
+    window.location.href = loginUrl;
+  }
+
+  // 微信公众号网页授权登录
+  const loginWithWechatMp = (redirectTo = null) => {
+    const baseUrl = (import.meta.env.NODE_ENV==='development' ? '': import.meta.env.VITE_API_BASE_URL) + '/api/auth/wechat-mp';
     const currentPath = redirectTo || window.location.pathname + window.location.search;
     const loginUrl = currentPath !== '/login' ? 
       `${baseUrl}?redirect=${encodeURIComponent(currentPath)}` : 
@@ -168,6 +191,8 @@ export const useAuthStore = defineStore('auth', () => {
     loginWithGitHub,
     loginWithGoogle,
     loginWithWechat,
+    loginWithWechatQr,
+    loginWithWechatMp,
     updateProfile,
     changePassword
   }
