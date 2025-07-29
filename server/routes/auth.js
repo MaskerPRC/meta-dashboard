@@ -32,6 +32,7 @@ const setManualSessionCookie = (req, res) => {
       .createHmac('sha256', sessionSecret)
       .update(req.sessionID)
       .digest('base64')
+      .replace(/\=+$/, '');
 
   const signedSessionId = `s:${req.sessionID}.${signature}`;
 
