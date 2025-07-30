@@ -60,6 +60,39 @@ const setManualSessionCookie = (req, res) => {
   res.cookie('connect.sid', signedSessionId, cookieOptions);
 };
 
+// 微信环境专用的Session Cookie设置函数
+const setWechatSessionCookie = (req, res) => {
+  const sessionSecret = process.env.SESSION_SECRET || 'ai-dashboard-secret-key-change-in-production';
+
+  // 使用express-session的签名机制
+  const crypto = require('crypto');
+  const signature = crypto
+      .createHmac('sha256', sessionSecret)
+      .update(req.sessionID)
+      .digest('base64')
+      .replace(/\=+$/, '');
+
+  const signedSessionId = `s:${req.sessionID}.${signature}`;
+
+  // 微信环境专用Cookie配置 - 更宽松的设置以确保Cookie能够正确传递
+  const cookieOptions = {
+    path: '/',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    secure: true,
+    sameSite: 'none'  // 微信环境必须使用none
+  };
+
+  // 不设置domain，让浏览器自动处理
+  if (process.env.COOKIE_DOMAIN) {
+    cookieOptions.domain = process.env.COOKIE_DOMAIN;
+  }
+
+  // 设置Cookie
+  res.cookie('connect.sid', signedSessionId, cookieOptions);
+};
+
 // GitHub登录
 router.get('/github', passport.authenticate('github', {
   scope: ['user:email']
@@ -214,11 +247,25 @@ router.get('/wechat-mp', oauthLoginRateLimit, (req, res) => {
   req.session.wechat_mp_state = state;
   req.session.wechat_mp_redirect = req.query.redirect || frontendUrl;
 
-  // 构建微信授权URL
-  const scope = 'snsapi_userinfo'; // 获取用户基本信息
-  const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${encodeURIComponent(callbackUrl)}&response_type=code&scope=${scope}&state=${state}#wechat_redirect`;
-
-  res.redirect(authUrl);
+  // 手动保存session以确保state被正确保存
+  req.session.save((saveErr) => {
+    if (saveErr) {
+      console.error('微信登录 - Session保存失败:', saveErr);
+      return res.status(500).json({
+        success: false,
+        message: 'Session保存失败'
+      });
+    }
+    
+    // 在重定向到微信前强制设置Session Cookie，确保微信回调时能找到
+    setWechatSessionCookie(req, res);
+    
+    // 构建微信授权URL
+    const scope = 'snsapi_userinfo'; // 获取用户基本信息
+    const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${encodeURIComponent(callbackUrl)}&response_type=code&scope=${scope}&state=${state}#wechat_redirect`;
+    
+    res.redirect(authUrl);
+  });
 });
 
 // 微信公众号网页授权回调处理
@@ -324,8 +371,8 @@ router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
           return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
         }
 
-        // 手动设置Cookie
-        setManualSessionCookie(req, res);
+        // 手动设置微信环境专用Cookie
+        setWechatSessionCookie(req, res);
 
         // 清除临时session数据
         delete req.session.wechat_mp_state;
