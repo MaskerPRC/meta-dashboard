@@ -18,6 +18,111 @@ const requireAdmin = (req, res, next) => {
   res.status(403).json({ message: '需要管理员权限' });
 };
 
+// 获取公开简历（所有人都可以访问）
+router.get('/public', (req, res) => {
+  // 首先获取公开简历配置
+  db.get(
+    'SELECT value FROM site_config WHERE key = ?',
+    ['public_resume_config'],
+    (configErr, configRow) => {
+      if (configErr) {
+        console.error('获取公开简历配置失败:', configErr);
+        return res.status(500).json({ message: '获取公开简历配置失败' });
+      }
+      
+      // 如果没有配置，返回404
+      if (!configRow || !configRow.value) {
+        return res.status(404).json({ message: '未配置公开简历' });
+      }
+      
+      let config;
+      try {
+        config = JSON.parse(configRow.value);
+      } catch (parseErr) {
+        console.error('公开简历配置格式错误:', parseErr);
+        return res.status(500).json({ message: '公开简历配置格式错误' });
+      }
+      
+      const { user_id, version } = config;
+      
+      if (!user_id) {
+        return res.status(404).json({ message: '未配置公开简历用户' });
+      }
+      
+      // 如果指定了版本，获取历史版本
+      if (version && version !== 'latest') {
+        db.get(
+          `SELECT v.*, r.current_version, u.username, u.display_name, u.avatar_url
+           FROM resume_versions v
+           LEFT JOIN resumes r ON v.resume_id = r.id
+           LEFT JOIN users u ON r.user_id = u.id
+           WHERE r.user_id = ? AND v.version = ?`,
+          [user_id, version],
+          (versionErr, versionResume) => {
+            if (versionErr) {
+              console.error('获取历史版本简历失败:', versionErr);
+              return res.status(500).json({ message: '获取历史版本简历失败' });
+            }
+            
+            if (!versionResume) {
+              return res.status(404).json({ message: '指定版本简历不存在' });
+            }
+            
+            // 格式化返回数据，保持与当前版本一致的结构
+            const resume = {
+              id: versionResume.resume_id,
+              user_id: user_id,
+              title: versionResume.title,
+              content: versionResume.content,
+              current_version: versionResume.current_version,
+              display_version: versionResume.version,
+              status: 'published',
+              is_public: true,
+              created_at: versionResume.created_at,
+              updated_at: versionResume.created_at,
+              username: versionResume.username,
+              display_name: versionResume.display_name,
+              avatar_url: versionResume.avatar_url
+            };
+            
+            res.json({
+              message: '获取公开简历成功',
+              resume
+            });
+          }
+        );
+      } else {
+        // 获取最新版本
+        db.get(
+          `SELECT r.*, u.username, u.display_name, u.avatar_url 
+           FROM resumes r 
+           LEFT JOIN users u ON r.user_id = u.id 
+           WHERE r.user_id = ?`,
+          [user_id],
+          (resumeErr, resume) => {
+            if (resumeErr) {
+              console.error('获取公开简历失败:', resumeErr);
+              return res.status(500).json({ message: '获取公开简历失败' });
+            }
+            
+            if (!resume) {
+              return res.status(404).json({ message: '指定用户简历不存在' });
+            }
+            
+            // 添加显示版本标识
+            resume.display_version = resume.current_version;
+            
+            res.json({
+              message: '获取公开简历成功',
+              resume
+            });
+          }
+        );
+      }
+    }
+  );
+});
+
 // 获取当前用户的简历
 router.get('/my-resume', requireAuth, (req, res) => {
   const userId = req.user.id;
@@ -93,43 +198,63 @@ router.post('/my-resume', requireAuth, (req, res) => {
         // 更新现有简历
         const newVersion = existingResume.current_version + 1;
         
-        // 先保存当前版本到历史记录
-        db.run(
-          `INSERT INTO resume_versions (resume_id, version, title, content, created_by, created_at)
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [existingResume.id, existingResume.current_version, existingResume.title, existingResume.content, userId, now],
-          function(versionErr) {
-            if (versionErr) {
-              console.error('保存简历版本失败:', versionErr);
-              return res.status(500).json({ message: '保存简历版本失败' });
+        // 先检查当前版本是否已在历史记录中
+        db.get(
+          'SELECT version FROM resume_versions WHERE resume_id = ? AND version = ?',
+          [existingResume.id, existingResume.current_version],
+          (checkErr, existingVersion) => {
+            if (checkErr) {
+              console.error('检查版本记录失败:', checkErr);
+              return res.status(500).json({ message: '检查版本记录失败' });
             }
             
-            // 更新主简历
-            db.run(
-              `UPDATE resumes 
-               SET title = ?, content = ?, status = ?, is_public = ?, current_version = ?, updated_at = ?
-               WHERE id = ?`,
-              [title, content || '', status || existingResume.status, is_public !== undefined ? is_public : existingResume.is_public, newVersion, now, existingResume.id],
-              function(updateErr) {
-                if (updateErr) {
-                  console.error('更新简历失败:', updateErr);
-                  return res.status(500).json({ message: '更新简历失败' });
-                }
-                
-                // 返回更新后的简历
-                db.get('SELECT * FROM resumes WHERE id = ?', [existingResume.id], (getErr, updatedResume) => {
-                  if (getErr) {
-                    console.error('获取更新后简历失败:', getErr);
-                    return res.status(500).json({ message: '获取更新后简历失败' });
+            const saveVersionAndUpdate = () => {
+              // 更新主简历
+              db.run(
+                `UPDATE resumes 
+                 SET title = ?, content = ?, status = ?, is_public = ?, current_version = ?, updated_at = ?
+                 WHERE id = ?`,
+                [title, content || '', status || existingResume.status, is_public !== undefined ? is_public : existingResume.is_public, newVersion, now, existingResume.id],
+                function(updateErr) {
+                  if (updateErr) {
+                    console.error('更新简历失败:', updateErr);
+                    return res.status(500).json({ message: '更新简历失败' });
                   }
                   
-                  res.json({
-                    message: '简历更新成功',
-                    resume: updatedResume
+                  // 返回更新后的简历
+                  db.get('SELECT * FROM resumes WHERE id = ?', [existingResume.id], (getErr, updatedResume) => {
+                    if (getErr) {
+                      console.error('获取更新后简历失败:', getErr);
+                      return res.status(500).json({ message: '获取更新后简历失败' });
+                    }
+                    
+                    res.json({
+                      message: '简历更新成功',
+                      resume: updatedResume
+                    });
                   });
-                });
-              }
-            );
+                }
+              );
+            };
+            
+            if (!existingVersion) {
+              // 如果当前版本不在历史记录中，先保存到历史记录
+              db.run(
+                `INSERT INTO resume_versions (resume_id, version, title, content, created_by, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [existingResume.id, existingResume.current_version, existingResume.title, existingResume.content, userId, now],
+                function(versionErr) {
+                  if (versionErr) {
+                    console.error('保存简历版本失败:', versionErr);
+                    return res.status(500).json({ message: '保存简历版本失败' });
+                  }
+                  saveVersionAndUpdate();
+                }
+              );
+            } else {
+              // 如果已存在，直接更新
+              saveVersionAndUpdate();
+            }
           }
         );
       } else {
@@ -390,6 +515,75 @@ router.get('/admin/user/:userId', requireAdmin, (req, res) => {
         message: '获取用户简历成功',
         resume
       });
+    }
+  );
+});
+
+// 管理员接口：获取有简历的用户列表
+router.get('/admin/users-with-resumes', requireAdmin, (req, res) => {
+  db.all(
+    `SELECT DISTINCT u.id, u.username, u.email, u.display_name, u.avatar_url,
+            r.title as resume_title, r.current_version, r.status, r.updated_at
+     FROM users u 
+     INNER JOIN resumes r ON u.id = r.user_id 
+     ORDER BY r.updated_at DESC`,
+    [],
+    (err, users) => {
+      if (err) {
+        console.error('获取有简历的用户列表失败:', err);
+        return res.status(500).json({ message: '获取有简历的用户列表失败' });
+      }
+      
+      res.json({
+        message: '获取有简历的用户列表成功',
+        users
+      });
+    }
+  );
+});
+
+// 管理员接口：获取特定用户的简历版本历史
+router.get('/admin/user/:userId/versions', requireAdmin, (req, res) => {
+  const userId = parseInt(req.params.userId);
+  
+  if (isNaN(userId)) {
+    return res.status(400).json({ message: '无效的用户ID' });
+  }
+  
+  // 先获取用户的简历ID
+  db.get(
+    'SELECT id FROM resumes WHERE user_id = ?',
+    [userId],
+    (err, resume) => {
+      if (err) {
+        console.error('获取用户简历ID失败:', err);
+        return res.status(500).json({ message: '获取简历ID失败' });
+      }
+      
+      if (!resume) {
+        return res.status(404).json({ message: '用户暂无简历' });
+      }
+      
+      // 获取版本历史
+      db.all(
+        `SELECT v.*, u.username as created_by_name 
+         FROM resume_versions v 
+         LEFT JOIN users u ON v.created_by = u.id 
+         WHERE v.resume_id = ? 
+         ORDER BY v.version DESC`,
+        [resume.id],
+        (versionErr, versions) => {
+          if (versionErr) {
+            console.error('获取简历版本失败:', versionErr);
+            return res.status(500).json({ message: '获取简历版本失败' });
+          }
+          
+          res.json({
+            message: '获取简历版本成功',
+            versions
+          });
+        }
+      );
     }
   );
 });

@@ -30,15 +30,15 @@
             <span>{{ $t('nav.global_history') }}</span>
           </router-link>
           <router-link 
-            v-if="authStore.isAuthenticated" 
             to="/resume" 
             class="nav-item" 
             active-class="router-link-active" 
             @click="handleNavClick('/resume')"
           >
             <el-icon><Document /></el-icon>
-            <span>{{ $t('nav.resume') }}</span>
+            <span>简历</span>
           </router-link>
+
           <router-link to="/about" class="nav-item" active-class="router-link-active" @click="handleNavClick('/about')">
             <el-icon><InfoFilled /></el-icon>
             <span>{{ $t('nav.about') }}</span>
@@ -111,6 +111,10 @@
                   <el-dropdown-item command="profile">
                     <el-icon><User /></el-icon>
                     {{ $t('auth.profile') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="my-resume">
+                    <el-icon><Document /></el-icon>
+                    编辑简历
                   </el-dropdown-item>
                   <el-dropdown-item 
                     v-if="authStore.isAdmin" 
@@ -198,15 +202,15 @@
                 <span>{{ $t('nav.global_history') }}</span>
               </router-link>
               <router-link 
-                v-if="authStore.isAuthenticated"
                 to="/resume" 
                 class="mobile-nav-item"
                 :class="{ 'active': $route.path === '/resume' }"
                 @click="handleMobileNavClick('/resume')"
               >
                 <el-icon><Document /></el-icon>
-                <span>{{ $t('nav.resume') }}</span>
+                <span>简历</span>
               </router-link>
+
               <router-link 
                 to="/about" 
                 class="mobile-nav-item"
@@ -238,6 +242,7 @@
                       <el-icon><User /></el-icon>
                       {{ $t('auth.profile') }}
                     </el-button>
+
                     <el-button 
                       v-if="authStore.isAdmin" 
                       text
@@ -352,6 +357,9 @@ const handleUserCommand = (command) => {
   switch (command) {
     case 'profile':
       showProfileDialog.value = true
+      break
+    case 'my-resume':
+      router.push('/my-resume')
       break
     case 'admin':
       router.push('/admin')

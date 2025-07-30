@@ -47,39 +47,64 @@ router.get('/:key', (req, res) => {
   });
 });
 
-// 更新配置（需要管理员权限）
+// 更新或创建配置（需要管理员权限）- 支持 UPSERT
 router.put('/:key', requireAdmin, (req, res) => {
   const { key } = req.params;
-  const { value } = req.body;
+  const { value, description, type = 'text' } = req.body;
   
   if (value === undefined) {
     return res.status(400).json({ message: '配置值不能为空' });
   }
   
-  const sql = 'UPDATE site_config SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?';
+  // 先尝试更新
+  const updateSql = 'UPDATE site_config SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?';
   
-  db.run(sql, [value, key], function(err) {
+  db.run(updateSql, [value, key], function(err) {
     if (err) {
       console.error('更新配置错误:', err);
       return res.status(500).json({ message: '更新配置失败' });
     }
     
     if (this.changes === 0) {
-      return res.status(404).json({ message: '配置不存在' });
-    }
-    
-    // 返回更新后的配置
-    db.get('SELECT * FROM site_config WHERE key = ?', [key], (selectErr, updatedConfig) => {
-      if (selectErr) {
-        console.error('获取更新后配置错误:', selectErr);
-        return res.status(500).json({ message: '获取更新后配置失败' });
-      }
+      // 配置不存在，创建新配置
+      const insertSql = `
+        INSERT INTO site_config (key, value, description, type, updated_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `;
       
-      res.json({
-        message: '配置更新成功',
-        config: updatedConfig
+      db.run(insertSql, [key, value, description, type], function(insertErr) {
+        if (insertErr) {
+          console.error('创建配置错误:', insertErr);
+          return res.status(500).json({ message: '创建配置失败' });
+        }
+        
+        // 返回新创建的配置
+        db.get('SELECT * FROM site_config WHERE id = ?', [this.lastID], (selectErr, newConfig) => {
+          if (selectErr) {
+            console.error('获取新创建配置错误:', selectErr);
+            return res.status(500).json({ message: '获取新创建配置失败' });
+          }
+          
+          res.json({
+            message: '配置创建成功',
+            config: newConfig
+          });
+        });
       });
-    });
+    } else {
+      // 配置已存在，更新成功，返回更新后的配置
+      db.get('SELECT * FROM site_config WHERE key = ?', [key], (selectErr, updatedConfig) => {
+        if (selectErr) {
+          console.error('获取更新后配置错误:', selectErr);
+          return res.status(500).json({ message: '获取更新后配置失败' });
+        }
+        
+        res.json({
+          message: '配置更新成功',
+          config: updatedConfig
+        });
+      });
+    }
   });
 });
 

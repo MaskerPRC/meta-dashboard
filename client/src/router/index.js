@@ -35,10 +35,16 @@ const routes = [
   },
   {
     path: '/resume',
-    name: 'Resume',
+    name: 'PublicResume',
+    component: () => import('../views/PublicResume.vue'),
+    meta: { title: '简历' }
+  },
+  {
+    path: '/my-resume',
+    name: 'MyResume',
     component: () => import('../views/Resume.vue'),
     meta: { 
-      title: '我的简历',
+      title: '编辑简历',
       requiresAuth: true
     }
   },

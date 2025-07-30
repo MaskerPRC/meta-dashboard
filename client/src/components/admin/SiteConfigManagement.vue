@@ -56,6 +56,93 @@
         </el-form>
       </div>
     </div>
+
+    <!-- 公开简历配置 -->
+    <div class="config-section">
+      <h3 class="config-title">公开简历配置</h3>
+      <div class="config-form">
+        <el-form label-width="120px">
+          <el-form-item label="选择用户">
+            <el-select
+              v-model="publicResumeConfig.user_id"
+              placeholder="选择要公开简历的用户"
+              style="width: 400px"
+              @change="handleUserChange"
+              clearable
+            >
+              <el-option
+                v-for="user in userList"
+                :key="user.id"
+                :label="`${user.display_name || user.username} - ${user.resume_title}`"
+                :value="user.id"
+              >
+                <div class="user-option">
+                  <div class="user-info">
+                    <span class="user-name">{{ user.display_name || user.username }}</span>
+                    <span class="user-email">{{ user.email }}</span>
+                  </div>
+                  <div class="resume-info">
+                    <span class="resume-title">{{ user.resume_title }}</span>
+                    <span class="resume-version">v{{ user.current_version }}</span>
+                    <span class="resume-date">{{ formatDate(user.updated_at) }}</span>
+                  </div>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item label="选择版本" v-if="publicResumeConfig.user_id">
+            <el-select
+              v-model="publicResumeConfig.version"
+              placeholder="选择要显示的版本"
+              style="width: 300px"
+              @change="handleVersionChange"
+            >
+              <el-option label="最新版本" value="latest">
+                <div class="version-option">
+                  <span class="version-label">最新版本</span>
+                  <span class="version-desc">始终显示用户的最新简历</span>
+                </div>
+              </el-option>
+              <el-option
+                v-for="version in versionList"
+                :key="version.version"
+                :label="`v${version.version} - ${version.title}`"
+                :value="version.version"
+              >
+                <div class="version-option">
+                  <div class="version-header">
+                    <span class="version-number">v{{ version.version }}</span>
+                    <span class="version-title">{{ version.title }}</span>
+                  </div>
+                  <div class="version-meta">
+                    <span class="version-date">{{ formatDate(version.created_at) }}</span>
+                    <span v-if="version.created_by_name" class="version-author">by {{ version.created_by_name }}</span>
+                  </div>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item v-if="selectedUserResume">
+            <div class="resume-preview">
+              <h4>简历预览</h4>
+              <div class="preview-info">
+                <p><strong>标题:</strong> {{ selectedUserResume.title }}</p>
+                <p><strong>版本:</strong> v{{ publicResumeConfig.version === 'latest' ? selectedUserResume.current_version : publicResumeConfig.version }}</p>
+                <p><strong>更新时间:</strong> {{ formatDate(selectedUserResume.updated_at) }}</p>
+              </div>
+            </div>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="savePublicResumeConfig" :loading="savingConfig">保存公开简历配置</el-button>
+            <el-button @click="clearPublicResumeConfig">清除配置</el-button>
+            <el-button @click="previewPublicResume" v-if="publicResumeConfig.user_id">预览公开简历</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -71,6 +158,14 @@ const { t } = useI18n()
 // 响应式数据
 const siteConfig = ref({})
 const configLoading = ref(false)
+const userList = ref([])
+const versionList = ref([])
+const selectedUserResume = ref(null)
+const savingConfig = ref(false)
+const publicResumeConfig = ref({
+  user_id: null,
+  version: 'latest'
+})
 
 // 方法
 const loadSiteConfig = async () => {
@@ -78,6 +173,22 @@ const loadSiteConfig = async () => {
     configLoading.value = true
     const response = await axios.get('/api/config')
     siteConfig.value = response.data.configs
+    
+    // 加载公开简历配置
+    if (siteConfig.value.public_resume_config?.value) {
+      try {
+        const config = JSON.parse(siteConfig.value.public_resume_config.value)
+        publicResumeConfig.value = {
+          user_id: config.user_id || null,
+          version: config.version || 'latest'
+        }
+        if (publicResumeConfig.value.user_id) {
+          await loadUserResume(publicResumeConfig.value.user_id)
+        }
+      } catch (parseErr) {
+        console.error('解析公开简历配置失败:', parseErr)
+      }
+    }
   } catch (error) {
     console.error('获取站点配置失败:', error)
     ElMessage.error(t('admin.site_config.messages.fetch_failed'))
@@ -157,8 +268,103 @@ defineExpose({
   loadSiteConfig
 })
 
+// 新增方法
+const loadUserList = async () => {
+  try {
+    const response = await axios.get('/api/resumes/admin/users-with-resumes')
+    userList.value = response.data.users
+  } catch (error) {
+    console.error('获取有简历的用户列表失败:', error)
+    ElMessage.error('获取有简历的用户列表失败')
+  }
+}
+
+const loadUserResume = async (userId) => {
+  try {
+    const [resumeResponse, versionsResponse] = await Promise.all([
+      axios.get(`/api/resumes/admin/user/${userId}`),
+      axios.get(`/api/resumes/admin/user/${userId}/versions`)
+    ])
+    
+    selectedUserResume.value = resumeResponse.data.resume
+    versionList.value = versionsResponse.data.versions
+  } catch (error) {
+    console.error('获取用户简历失败:', error)
+    selectedUserResume.value = null
+    versionList.value = []
+  }
+}
+
+const handleUserChange = async (userId) => {
+  if (userId) {
+    await loadUserResume(userId)
+  } else {
+    selectedUserResume.value = null
+    versionList.value = []
+  }
+  publicResumeConfig.value.version = 'latest'
+}
+
+const handleVersionChange = (version) => {
+  // 版本改变处理
+}
+
+const savePublicResumeConfig = async () => {
+  if (!publicResumeConfig.value.user_id) {
+    ElMessage.error('请选择要公开的用户')
+    return
+  }
+  
+  try {
+    savingConfig.value = true
+    const configValue = JSON.stringify({
+      user_id: publicResumeConfig.value.user_id,
+      version: publicResumeConfig.value.version
+    })
+    
+    await axios.put('/api/config/public_resume_config', { 
+      value: configValue,
+      description: '公开简历配置，指定要在公共页面显示的用户简历和版本',
+      type: 'json'
+    })
+    ElMessage.success('公开简历配置保存成功')
+    
+    // 重新加载配置
+    await loadSiteConfig()
+  } catch (error) {
+    console.error('保存公开简历配置失败:', error)
+    ElMessage.error('保存公开简历配置失败')
+  } finally {
+    savingConfig.value = false
+  }
+}
+
+const clearPublicResumeConfig = async () => {
+  try {
+    await axios.delete('/api/config/public_resume_config')
+    publicResumeConfig.value = { user_id: null, version: 'latest' }
+    selectedUserResume.value = null
+    versionList.value = []
+    ElMessage.success('公开简历配置已清除')
+  } catch (error) {
+    console.error('清除公开简历配置失败:', error)
+    ElMessage.error('清除公开简历配置失败')
+  }
+}
+
+const previewPublicResume = () => {
+  window.open('/resume', '_blank')
+}
+
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleString('zh-CN')
+}
+
 // 生命周期
-onMounted(loadSiteConfig)
+onMounted(async () => {
+  await loadSiteConfig()
+  await loadUserList()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -246,6 +452,127 @@ onMounted(loadSiteConfig)
           font-size: 14px;
         }
       }
+    }
+  }
+}
+
+.resume-preview {
+  background: var(--ai-bg-secondary);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--ai-border);
+  
+  h4 {
+    margin: 0 0 12px 0;
+    color: var(--ai-text-primary);
+  }
+  
+  .preview-info {
+    p {
+      margin: 8px 0;
+      color: var(--ai-text-regular);
+      
+      strong {
+        color: var(--ai-text-primary);
+      }
+    }
+  }
+}
+
+.user-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .user-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    
+    .user-name {
+      font-weight: 500;
+      color: var(--el-text-color-primary);
+    }
+    
+    .user-email {
+      color: var(--el-text-color-secondary);
+      font-size: 12px;
+    }
+  }
+  
+  .resume-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+    
+    .resume-title {
+      color: var(--el-text-color-regular);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .resume-version {
+      background: var(--el-fill-color-light);
+      padding: 1px 4px;
+      border-radius: 2px;
+      color: var(--el-text-color-secondary);
+    }
+    
+    .resume-date {
+      color: var(--el-text-color-placeholder);
+    }
+  }
+}
+
+.version-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .version-label {
+    font-weight: 500;
+    color: var(--el-color-primary);
+  }
+  
+  .version-desc {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+  
+  .version-header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    
+    .version-number {
+      background: var(--el-color-primary);
+      color: white;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .version-title {
+      color: var(--el-text-color-primary);
+      font-weight: 500;
+    }
+  }
+  
+  .version-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    
+    .version-date {
+      color: var(--el-text-color-secondary);
+    }
+    
+    .version-author {
+      color: var(--el-text-color-placeholder);
     }
   }
 }
