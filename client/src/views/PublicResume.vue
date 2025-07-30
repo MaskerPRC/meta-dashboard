@@ -48,6 +48,13 @@
         <!-- 简历正文 -->
         <div class="resume-body" :class="{ 'fullscreen-content': isFullscreen }">
           <div class="markdown-content" v-html="renderedContent"></div>
+          
+          <!-- 全屏模式下的退出按钮 -->
+          <div v-if="isFullscreen" class="fullscreen-exit-btn">
+            <el-button @click="toggleFullscreen" circle type="info" size="large">
+              <el-icon><Close /></el-icon>
+            </el-button>
+          </div>
         </div>
 
         <!-- 底部信息 -->
@@ -63,14 +70,7 @@
       </div>
     </div>
 
-    <!-- 全屏遮罩 -->
-    <div v-if="isFullscreen" class="fullscreen-overlay" @click="toggleFullscreen">
-      <div class="fullscreen-controls">
-        <el-button @click="toggleFullscreen" circle>
-          <el-icon><Close /></el-icon>
-        </el-button>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -352,28 +352,36 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
-.fullscreen-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
-  z-index: 9998;
-}
-
-.fullscreen-controls {
+.fullscreen-exit-btn {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 10000;
+  z-index: 10001;
+  
+  .el-button {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .el-icon {
+      color: #606266;
+      font-size: 18px;
+    }
+  }
 }
 
 /* 打印样式 */
 @media print {
   .resume-header .header-actions,
   .resume-footer,
-  .fullscreen-overlay {
+  .fullscreen-exit-btn {
     display: none !important;
   }
   
