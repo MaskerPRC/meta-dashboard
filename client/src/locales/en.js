@@ -5,6 +5,7 @@ export default {
     home: 'Home',
     projects: 'Projects',
     global_history: 'Global History',
+    resume: 'My Resume',
     about: 'About',
     admin: 'Admin',
     login: 'Login',
@@ -16,6 +17,7 @@ export default {
     home: 'AI Project Dashboard - 100 AI Products Challenge',
     projects: 'AI Project List',
     project_detail: 'Project Details',
+    resume: 'My Resume',
     admin: 'Admin Dashboard',
     login: 'Login',
     about: 'About Challenge',
@@ -267,6 +269,7 @@ export default {
     config_management: 'Site Configuration',
     user_management: 'User Management',
     comment_management: 'Comment Management',
+    resume_management: 'Resume Management',
 
     // AI Project Generator
     ai_generator: {
@@ -712,5 +715,98 @@ Brief description of this AI project's functionality and goals.
     title: 'Language',
     chinese: '中文',
     english: 'English'
+  },
+
+  // Resume Management
+  resume: {
+    title: 'My Resume',
+    subtitle: 'Edit and manage your personal resume',
+    edit: 'Edit Resume',
+    preview: 'Resume Preview',
+    version_history: 'Version History',
+    save: 'Save Resume',
+    saving: 'Saving...',
+    
+    // Form
+    form: {
+      title_label: 'Resume Title',
+      title_placeholder: 'Enter resume title...',
+      content_label: 'Resume Content',
+      content_placeholder: 'Write your resume content here, Markdown format supported...',
+      settings_label: 'Resume Settings',
+      status_placeholder: 'Select status',
+      public_label: 'Public resume (other users can view)'
+    },
+
+    // Status
+    status: {
+      draft: 'Draft',
+      published: 'Published',
+      archived: 'Archived'
+    },
+
+    // Actions
+    actions: {
+      view: 'View',
+      edit: 'Edit',
+      delete: 'Delete',
+      archive: 'Archive',
+      export_pdf: 'Export PDF',
+      full_preview: 'Full Preview',
+      view_version: 'View Version',
+      refresh: 'Refresh',
+      export_data: 'Export Data'
+    },
+
+    // Version
+    version: {
+      current: 'Current Version',
+      history: 'Version History',
+      view_content: 'View Content',
+      no_history: 'No version history',
+      created_by: 'Created by'
+    },
+
+    // Messages
+    messages: {
+      save_success: 'Resume saved successfully',
+      save_failed: 'Failed to save resume',
+      fetch_failed: 'Failed to fetch resume',
+      title_required: 'Please enter resume title',
+      login_required: 'Please login first',
+      fetch_versions_failed: 'Failed to fetch version history',
+      archive_confirm: 'Are you sure to archive this resume?',
+      pdf_export_developing: 'PDF export feature is under development...'
+    },
+
+    // Preview
+    preview: {
+      title: 'Resume Preview',
+      last_updated: 'Last updated',
+      version_label: 'Version',
+      export_pdf: 'Export PDF',
+      close: 'Close'
+    },
+
+    // Admin
+    admin: {
+      title: 'Resume Management',
+      search_placeholder: 'Search resume title or username...',
+      filter_status: 'Filter status',
+      table: {
+        id: 'ID',
+        title: 'Resume Title',
+        user: 'User Info',
+        status: 'Status',
+        version: 'Version',
+        public: 'Public',
+        created_at: 'Created At',
+        updated_at: 'Updated At',
+        actions: 'Actions'
+      },
+      empty_text: 'No resume data',
+      version_need_login: 'Version history requires user login to view, please contact user for details',
+      archive_feature_developing: 'Admin archive feature is under development'
+    }
   }
 }

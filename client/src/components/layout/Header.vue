@@ -29,6 +29,16 @@
             <el-icon><Clock /></el-icon>
             <span>{{ $t('nav.global_history') }}</span>
           </router-link>
+          <router-link 
+            v-if="authStore.isAuthenticated" 
+            to="/resume" 
+            class="nav-item" 
+            active-class="router-link-active" 
+            @click="handleNavClick('/resume')"
+          >
+            <el-icon><Document /></el-icon>
+            <span>{{ $t('nav.resume') }}</span>
+          </router-link>
           <router-link to="/about" class="nav-item" active-class="router-link-active" @click="handleNavClick('/about')">
             <el-icon><InfoFilled /></el-icon>
             <span>{{ $t('nav.about') }}</span>
@@ -188,6 +198,16 @@
                 <span>{{ $t('nav.global_history') }}</span>
               </router-link>
               <router-link 
+                v-if="authStore.isAuthenticated"
+                to="/resume" 
+                class="mobile-nav-item"
+                :class="{ 'active': $route.path === '/resume' }"
+                @click="handleMobileNavClick('/resume')"
+              >
+                <el-icon><Document /></el-icon>
+                <span>{{ $t('nav.resume') }}</span>
+              </router-link>
+              <router-link 
                 to="/about" 
                 class="mobile-nav-item"
                 :class="{ 'active': $route.path === '/about' }"
@@ -268,7 +288,7 @@ import LanguageSwitcher from '../common/LanguageSwitcher.vue'
 import ProfileDialog from '../common/ProfileDialog.vue'
 import { 
   House, List, InfoFilled, User, ArrowDown, 
-  Setting, SwitchButton, Moon, Sunny, Menu, Close, Clock
+  Setting, SwitchButton, Moon, Sunny, Menu, Close, Clock, Document
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

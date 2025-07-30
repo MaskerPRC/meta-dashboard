@@ -34,6 +34,15 @@ const routes = [
     meta: { title: '全局项目进展' }
   },
   {
+    path: '/resume',
+    name: 'Resume',
+    component: () => import('../views/Resume.vue'),
+    meta: { 
+      title: '我的简历',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/admin',
     name: 'Admin',
     component: () => import('../views/Admin.vue'),

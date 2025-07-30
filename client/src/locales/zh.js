@@ -5,6 +5,7 @@ export default {
     home: '首页',
     projects: '项目列表',
     global_history: '全局进展',
+    resume: '我的简历',
     about: '关于挑战',
     admin: '管理后台',
     login: '登录',
@@ -16,6 +17,7 @@ export default {
     home: 'AI项目看板 - 一年100个AI产品挑战',
     projects: 'AI项目列表',
     project_detail: '项目详情',
+    resume: '我的简历',
     admin: '管理后台',
     login: '登录',
     about: '关于挑战',
@@ -267,6 +269,7 @@ export default {
     config_management: '站点配置',
     user_management: '用户管理',
     comment_management: '评论管理',
+    resume_management: '简历管理',
 
     // AI项目生成器
     ai_generator: {
@@ -712,5 +715,98 @@ export default {
     title: '语言',
     chinese: '中文',
     english: 'English'
+  },
+
+  // 简历管理
+  resume: {
+    title: '我的简历',
+    subtitle: '编辑和管理您的个人简历',
+    edit: '编辑简历',
+    preview: '简历预览',
+    version_history: '版本历史',
+    save: '保存简历',
+    saving: '保存中...',
+    
+    // 表单
+    form: {
+      title_label: '简历标题',
+      title_placeholder: '输入简历标题...',
+      content_label: '简历内容',
+      content_placeholder: '在这里编写您的简历内容，支持Markdown格式...',
+      settings_label: '简历设置',
+      status_placeholder: '选择状态',
+      public_label: '公开简历（其他用户可以查看）'
+    },
+
+    // 状态
+    status: {
+      draft: '草稿',
+      published: '已发布',
+      archived: '已归档'
+    },
+
+    // 操作
+    actions: {
+      view: '查看',
+      edit: '编辑',
+      delete: '删除',
+      archive: '归档',
+      export_pdf: '导出PDF',
+      full_preview: '全屏预览',
+      view_version: '查看版本',
+      refresh: '刷新',
+      export_data: '导出数据'
+    },
+
+    // 版本
+    version: {
+      current: '当前版本',
+      history: '版本历史',
+      view_content: '查看内容',
+      no_history: '暂无版本历史',
+      created_by: '创建者'
+    },
+
+    // 消息
+    messages: {
+      save_success: '简历保存成功',
+      save_failed: '保存简历失败',
+      fetch_failed: '获取简历失败',
+      title_required: '请输入简历标题',
+      login_required: '请先登录',
+      fetch_versions_failed: '获取版本历史失败',
+      archive_confirm: '确定要归档这份简历吗？',
+      pdf_export_developing: 'PDF导出功能开发中...'
+    },
+
+    // 预览
+    preview: {
+      title: '简历预览',
+      last_updated: '最后更新',
+      version_label: '版本',
+      export_pdf: '导出PDF',
+      close: '关闭'
+    },
+
+    // 管理端
+    admin: {
+      title: '简历管理',
+      search_placeholder: '搜索简历标题或用户名...',
+      filter_status: '筛选状态',
+      table: {
+        id: 'ID',
+        title: '简历标题',
+        user: '用户信息',
+        status: '状态',
+        version: '版本',
+        public: '公开',
+        created_at: '创建时间',
+        updated_at: '更新时间',
+        actions: '操作'
+      },
+      empty_text: '暂无简历数据',
+      version_need_login: '版本历史功能需要用户登录查看，请联系用户获取详情',
+      archive_feature_developing: '管理员归档功能待开发'
+    }
   }
 }

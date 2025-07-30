@@ -74,6 +74,14 @@
               />
             </el-tab-pane>
 
+            <!-- 简历管理 -->
+            <el-tab-pane label="简历管理" name="resumes">
+              <ResumesManagement 
+                ref="resumesManagementRef"
+                @stats-updated="handleStatsUpdated"
+              />
+            </el-tab-pane>
+
             <!-- 站点配置 -->
             <el-tab-pane :label="$t('admin.config_management')" name="config">
               <SiteConfigManagement ref="siteConfigManagementRef" />
@@ -107,6 +115,7 @@ import AdminStats from '../components/admin/AdminStats.vue'
 import ProjectsManagement from '../components/admin/ProjectsManagement.vue'
 import UsersManagement from '../components/admin/UsersManagement.vue'
 import CommentsManagement from '../components/admin/CommentsManagement.vue'
+import ResumesManagement from '../components/admin/ResumesManagement.vue'
 import SiteConfigManagement from '../components/admin/SiteConfigManagement.vue'
 import AIProjectGenerator from '../components/admin/AIProjectGenerator.vue'
 import axios from '../utils/axios'
@@ -127,6 +136,7 @@ const adminStatsRef = ref(null)
 const projectsManagementRef = ref(null)
 const usersManagementRef = ref(null)
 const commentsManagementRef = ref(null)
+const resumesManagementRef = ref(null)
 const siteConfigManagementRef = ref(null)
 
 // 方法
