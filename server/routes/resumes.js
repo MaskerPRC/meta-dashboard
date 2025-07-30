@@ -18,6 +18,73 @@ const requireAdmin = (req, res, next) => {
   res.status(403).json({ message: '需要管理员权限' });
 };
 
+// 检查公开简历是否可用（所有人都可以访问）
+router.get('/public/status', (req, res) => {
+  // 检查公开简历配置是否存在
+  db.get(
+    'SELECT value FROM site_config WHERE key = ?',
+    ['public_resume_config'],
+    (configErr, configRow) => {
+      if (configErr) {
+        console.error('获取公开简历配置失败:', configErr);
+        return res.status(500).json({ message: '检查公开简历状态失败' });
+      }
+      
+      // 如果没有配置，返回不可用状态
+      if (!configRow || !configRow.value) {
+        return res.json({ 
+          available: false,
+          message: '未配置公开简历'
+        });
+      }
+      
+      let config;
+      try {
+        config = JSON.parse(configRow.value);
+      } catch (parseErr) {
+        console.error('公开简历配置格式错误:', parseErr);
+        return res.json({ 
+          available: false,
+          message: '公开简历配置格式错误'
+        });
+      }
+      
+      const { user_id } = config;
+      
+      if (!user_id) {
+        return res.json({ 
+          available: false,
+          message: '未配置公开简历用户'
+        });
+      }
+      
+      // 检查用户是否存在且有简历
+      db.get(
+        'SELECT r.id FROM resumes r LEFT JOIN users u ON r.user_id = u.id WHERE r.user_id = ?',
+        [user_id],
+        (resumeErr, resume) => {
+          if (resumeErr) {
+            console.error('检查用户简历失败:', resumeErr);
+            return res.status(500).json({ message: '检查公开简历状态失败' });
+          }
+          
+          if (!resume) {
+            return res.json({ 
+              available: false,
+              message: '指定用户简历不存在'
+            });
+          }
+          
+          return res.json({ 
+            available: true,
+            message: '公开简历可用'
+          });
+        }
+      );
+    }
+  );
+});
+
 // 获取公开简历（所有人都可以访问）
 router.get('/public', (req, res) => {
   // 首先获取公开简历配置

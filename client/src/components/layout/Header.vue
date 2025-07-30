@@ -30,6 +30,7 @@
             <span>{{ $t('nav.global_history') }}</span>
           </router-link>
           <router-link 
+            v-if="isPublicResumeAvailable"
             to="/resume" 
             class="nav-item" 
             active-class="router-link-active" 
@@ -202,6 +203,7 @@
                 <span>{{ $t('nav.global_history') }}</span>
               </router-link>
               <router-link 
+                v-if="isPublicResumeAvailable"
                 to="/resume" 
                 class="mobile-nav-item"
                 :class="{ 'active': $route.path === '/resume' }"
@@ -295,6 +297,7 @@ import {
   House, List, InfoFilled, User, ArrowDown, 
   Setting, SwitchButton, Moon, Sunny, Menu, Close, Clock, Document
 } from '@element-plus/icons-vue'
+import axios from '../../utils/axios'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -304,6 +307,7 @@ const isDark = ref(false)
 const showMobileMenu = ref(false)
 const showProfileDialog = ref(false)
 const mobileMenuRef = ref(null)
+const isPublicResumeAvailable = ref(false)
 
 // 主题切换
 const toggleTheme = () => {
@@ -370,13 +374,27 @@ const handleUserCommand = (command) => {
   }
 }
 
-onMounted(() => {
+// 检查公开简历是否可用
+const checkPublicResumeStatus = async () => {
+  try {
+    const response = await axios.get('/api/resumes/public/status')
+    isPublicResumeAvailable.value = response.data.available
+  } catch (error) {
+    console.error('检查公开简历状态失败:', error)
+    isPublicResumeAvailable.value = false
+  }
+}
+
+onMounted(async () => {
   // 恢复主题设置
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark') {
     isDark.value = true
     document.documentElement.classList.add('dark')
   }
+  
+  // 检查公开简历状态
+  await checkPublicResumeStatus()
 })
 </script>
 
