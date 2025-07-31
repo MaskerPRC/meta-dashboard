@@ -109,9 +109,22 @@ router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   document.title = to.meta.title ? `${to.meta.title} - AI项目看板` : 'AI项目看板'
   
+  // 记录之前的认证状态
+  const wasAuthenticated = authStore.isAuthenticated
+  
   // 如果还没有检查过身份验证状态，先检查
   if (!authStore.hasCheckedAuth) {
     await authStore.checkAuthStatus()
+  }
+  
+  // 检查是否刚刚完成登录（第三方登录成功的情况）
+  if (!wasAuthenticated && authStore.isAuthenticated && !from.name) {
+    // 如果之前未登录，现在已登录，且没有来源页面（直接访问），说明是第三方登录回调
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('userLoggedIn', { 
+        detail: { user: authStore.user, isThirdPartyLogin: true } 
+      }))
+    }, 1500)
   }
   
   // 检查是否需要登录

@@ -110,7 +110,7 @@ VITE_API_BASE_URL=https://your-api-domain.com
 
 1. **FRONTEND_URL** 是最关键的配置，它告诉API服务器登录成功后应该重定向到哪个前端应用URL
 2. 如果不配置 `FRONTEND_URL`，生产环境默认重定向到 `https://your-frontend-domain.com`（需要手动修改）
-3. 开发环境默认重定向到 `http://localhost:5173`
+3. 开发环境默认重定向到 `http://localhost:5100`
 
 ### 角色管理系统
 

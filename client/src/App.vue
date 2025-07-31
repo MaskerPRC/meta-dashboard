@@ -14,13 +14,40 @@
     
     <!-- 全局通知组件 -->
     <Notifications />
+    
+    <!-- 微信群弹窗管理器 -->
+    <WechatGroupDialogManager ref="wechatDialogManager" />
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import Header from './components/layout/Header.vue'
 import Notifications from './components/common/Notifications.vue'
-// 移除不需要的导入和逻辑，因为路由守卫已经处理了身份验证检查
+import WechatGroupDialogManager from './components/common/WechatGroupDialogManager.vue'
+
+const wechatDialogManager = ref(null)
+
+// 监听登录成功事件
+const handleUserLoggedIn = (event) => {
+  const { user, isNewUser } = event.detail
+  console.log('用户登录成功:', user, '是否新用户:', isNewUser)
+  
+  // 显示微信群弹窗
+  if (wechatDialogManager.value) {
+    wechatDialogManager.value.showWechatGroupDialog()
+  }
+}
+
+onMounted(() => {
+  // 监听登录事件
+  window.addEventListener('userLoggedIn', handleUserLoggedIn)
+})
+
+onUnmounted(() => {
+  // 清理事件监听器
+  window.removeEventListener('userLoggedIn', handleUserLoggedIn)
+})
 </script>
 
 <style lang="scss">

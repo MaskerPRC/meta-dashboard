@@ -263,6 +263,11 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 微信交流群 -->
+    <div class="wechat-group-wrapper">
+      <WechatGroup :is-compact="true" />
+    </div>
   </div>
 </template>
 
@@ -276,6 +281,7 @@ import {
   Check, Link
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
+import WechatGroup from '../components/common/WechatGroup.vue'
 import axios from '../utils/axios'
 
 const router = useRouter()
@@ -760,6 +766,12 @@ onMounted(() => {
       color: white;
       border-color: #f56c6c;
     }
+  }
+
+  .wechat-group-wrapper {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--ai-border);
   }
 }
 

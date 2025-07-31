@@ -134,6 +134,11 @@
         @current-change="handleCurrentChange"
       />
     </div>
+
+    <!-- 微信交流群 -->
+    <div class="wechat-group-wrapper">
+      <WechatGroup :is-compact="true" />
+    </div>
   </div>
 </template>
 
@@ -144,6 +149,7 @@ import { useI18n } from 'vue-i18n'
 import { showNotification } from '../utils/notification'
 import { ArrowRight, Clock, TrendCharts, DocumentAdd, Trophy, View } from '@element-plus/icons-vue'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
+import WechatGroup from '../components/common/WechatGroup.vue'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
@@ -540,11 +546,17 @@ onMounted(() => {
   color: var(--ai-text-secondary);
 }
 
-.pagination-wrapper {
-  margin-top: 32px;
-  display: flex;
-  justify-content: center;
-}
+  .pagination-wrapper {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .wechat-group-wrapper {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--ai-border);
+  }
 
 /* 响应式设计 */
 @media (max-width: 768px) {

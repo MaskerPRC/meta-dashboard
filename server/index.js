@@ -38,7 +38,7 @@ const getAllowedOrigins = () => {
     return origins.split(',').map(origin => origin.trim())
   } else {
     // 开发环境：确保域名一致性（关键修复）
-    return ['http://localhost:5173', 'http://localhost:3015']
+    return ['http://localhost:5100', 'http://localhost:3015']
   }
 }
 

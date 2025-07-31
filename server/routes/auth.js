@@ -116,7 +116,7 @@ router.get('/github/callback',
         const frontendUrl = process.env.FRONTEND_URL ||
             (process.env.NODE_ENV === 'production'
                 ? 'https://share.agitao.net'
-                : 'http://localhost:5173');
+                : 'http://localhost:5100');
 
         res.redirect(frontendUrl);
       });
@@ -146,7 +146,7 @@ router.get('/google/callback',
         const frontendUrl = process.env.FRONTEND_URL ||
             (process.env.NODE_ENV === 'production'
                 ? 'https://share.agitao.net'
-                : 'http://localhost:5173');
+                : 'http://localhost:5100');
 
         res.redirect(frontendUrl);
       });
@@ -173,7 +173,7 @@ router.get('/wechat/callback', oauthLoginRateLimit,
       const frontendUrl = process.env.FRONTEND_URL ||
         (process.env.NODE_ENV === 'production'
           ? 'https://share.agitao.net'
-          : 'http://localhost:5173');
+          : 'http://localhost:5100');
       return res.redirect(`${frontendUrl}/login?error=auth_failed&message=${encodeURIComponent('登录失败')}`);
     }
 
@@ -184,7 +184,7 @@ router.get('/wechat/callback', oauthLoginRateLimit,
         const frontendUrl = process.env.FRONTEND_URL ||
           (process.env.NODE_ENV === 'production'
             ? 'https://share.agitao.net'
-            : 'http://localhost:5173');
+            : 'http://localhost:5100');
 
         return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
       }
@@ -196,7 +196,7 @@ router.get('/wechat/callback', oauthLoginRateLimit,
           const frontendUrl = process.env.FRONTEND_URL ||
             (process.env.NODE_ENV === 'production'
               ? 'https://share.agitao.net'
-              : 'http://localhost:5173');
+              : 'http://localhost:5100');
 
           return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
         }
@@ -208,7 +208,7 @@ router.get('/wechat/callback', oauthLoginRateLimit,
         const frontendUrl = process.env.FRONTEND_URL ||
           (process.env.NODE_ENV === 'production'
             ? 'https://share.agitao.net'
-            : 'http://localhost:5173');
+            : 'http://localhost:5100');
 
         // 如果是管理员，重定向到管理页面，否则重定向到首页
         const redirectUrl = user.role === 'admin' ? `${frontendUrl}/admin` : frontendUrl;
@@ -234,7 +234,7 @@ router.get('/wechat-mp', oauthLoginRateLimit, (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL ||
     (process.env.NODE_ENV === 'production'
       ? 'https://share.agitao.net'
-      : 'http://localhost:5173');
+      : 'http://localhost:5100');
 
   // 构建回调URL
   const callbackUrl = process.env.WECHAT_MP_CALLBACK_URL || 
@@ -278,7 +278,7 @@ router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL ||
       (process.env.NODE_ENV === 'production'
         ? 'https://share.agitao.net'
-        : 'http://localhost:5173');
+        : 'http://localhost:5100');
     return res.redirect(`${frontendUrl}/login?error=wechat_mp&message=${encodeURIComponent('授权验证失败')}`);
   }
 
@@ -287,7 +287,7 @@ router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL ||
       (process.env.NODE_ENV === 'production'
         ? 'https://share.agitao.net'
-        : 'http://localhost:5173');
+        : 'http://localhost:5100');
     return res.redirect(`${frontendUrl}/login?error=wechat_mp&message=${encodeURIComponent('授权失败')}`);
   }
 
@@ -356,7 +356,7 @@ router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
         const frontendUrl = process.env.FRONTEND_URL ||
           (process.env.NODE_ENV === 'production'
             ? 'https://share.agitao.net'
-            : 'http://localhost:5173');
+            : 'http://localhost:5100');
         return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
       }
 
@@ -367,7 +367,7 @@ router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
           const frontendUrl = process.env.FRONTEND_URL ||
             (process.env.NODE_ENV === 'production'
               ? 'https://share.agitao.net'
-              : 'http://localhost:5173');
+              : 'http://localhost:5100');
           return res.redirect(`${frontendUrl}/login?error=session_error&message=${encodeURIComponent('登录状态保存失败')}`);
         }
 
@@ -380,7 +380,7 @@ router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
           (process.env.FRONTEND_URL ||
             (process.env.NODE_ENV === 'production'
               ? 'https://share.agitao.net'
-              : 'http://localhost:5173'));
+              : 'http://localhost:5100'));
         delete req.session.wechat_mp_redirect;
 
         console.log(`微信公众号登录成功 - 用户: ${user.username}, 角色: ${user.role}, 重定向到: ${redirectUrl}`);
@@ -393,7 +393,7 @@ router.get('/wechat-mp/callback', oauthLoginRateLimit, async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL ||
       (process.env.NODE_ENV === 'production'
         ? 'https://share.agitao.net'
-        : 'http://localhost:5173');
+        : 'http://localhost:5100');
     return res.redirect(`${frontendUrl}/login?error=wechat_mp&message=${encodeURIComponent('登录失败')}`);
   }
 });

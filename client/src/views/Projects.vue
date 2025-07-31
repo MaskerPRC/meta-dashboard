@@ -217,6 +217,11 @@
           @current-change="handleCurrentChange"
         />
       </div>
+
+      <!-- 微信交流群 -->
+      <div class="wechat-group-wrapper">
+        <WechatGroup :is-compact="true" />
+      </div>
     </div>
   </div>
 </template>
@@ -228,6 +233,7 @@ import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '../stores/projects'
 import { useAuthStore } from '../stores/auth'
 import ProjectCard from '../components/project/ProjectCard.vue'
+import WechatGroup from '../components/common/WechatGroup.vue'
 import dayjs from 'dayjs'
 import {
   Setting, Search, Grid, List, Refresh
@@ -517,6 +523,12 @@ watch(() => router.currentRoute.value.query, (newQuery) => {
     display: flex;
     justify-content: center;
     padding: 20px 0;
+  }
+
+  .wechat-group-wrapper {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--ai-border);
   }
 }
 </style> 

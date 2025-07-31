@@ -111,6 +111,13 @@
       </div>
     </section>
 
+    <!-- 微信交流群 -->
+    <section class="wechat-group-section">
+      <div class="container">
+        <WechatGroup :is-compact="true" :show-contact-info="true" />
+      </div>
+    </section>
+
     <!-- 挑战宣言 -->
     <section class="manifesto-section">
       <div class="container">
@@ -135,6 +142,7 @@ import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '../stores/projects'
 import { useAuthStore } from '../stores/auth'
 import ProjectCard from '../components/project/ProjectCard.vue'
+import WechatGroup from '../components/common/WechatGroup.vue'
 import {
   View, InfoFilled, ArrowRight, DocumentAdd,
   Star, Edit, Cpu, Operation, Upload, Check, VideoPause
@@ -616,6 +624,11 @@ onMounted(() => {
         }
       }
     }
+  }
+
+  .wechat-group-section {
+    padding: 80px 0;
+    background: var(--ai-bg-secondary);
   }
 
   .manifesto-section {

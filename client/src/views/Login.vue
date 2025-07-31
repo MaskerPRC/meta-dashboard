@@ -370,6 +370,13 @@ const handleLocalLogin = async () => {
       // 更新认证状态
       authStore.user = response.data.user
 
+      // 触发微信群弹窗
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('userLoggedIn', { 
+          detail: { user: response.data.user } 
+        }))
+      }, 1000)
+
       // 跳转到首页或目标页面
       const redirect = route.query.redirect || '/'
       router.push(redirect)
@@ -411,6 +418,13 @@ const handleRegister = async () => {
 
       // 更新认证状态
       authStore.user = response.data.user
+
+      // 触发微信群弹窗（新用户注册）
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('userLoggedIn', { 
+          detail: { user: response.data.user, isNewUser: true } 
+        }))
+      }, 1000)
 
       // 跳转到首页或目标页面
       const redirect = route.query.redirect || '/'
