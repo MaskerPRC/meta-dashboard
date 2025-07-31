@@ -86,6 +86,7 @@ require('./config/passport');
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/comments', require('./routes/comments'));
+app.use('/api/ideas', require('./routes/ideas'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/config', require('./routes/config'));
 app.use('/api/upload', require('./routes/upload'));

@@ -22,6 +22,18 @@ const routes = [
     meta: { title: '项目详情' }
   },
   {
+    path: '/ideas',
+    name: 'Ideas',
+    component: () => import('../views/Ideas.vue'),
+    meta: { title: '想法征集' }
+  },
+  {
+    path: '/idea/:id',
+    name: 'IdeaDetail',
+    component: () => import('../views/IdeaDetail.vue'),
+    meta: { title: '想法详情' }
+  },
+  {
     path: '/project/:id/history',
     name: 'ProjectHistory',
     component: () => import('../views/ProjectHistory.vue'),

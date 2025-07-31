@@ -4,6 +4,7 @@ export default {
     title: 'Navigation Menu',
     home: 'Home',
     projects: 'Projects',
+    ideas: 'Ideas',
     global_history: 'Global History',
     resume: 'My Resume',
     about: 'About',
@@ -817,6 +818,116 @@ Brief description of this AI project's functionality and goals.
       invalid_link: 'Invalid link',
       image_loading_error: 'Image loading failed',
       video_loading_error: 'Video loading failed'
+    }
+  },
+
+  // Ideas collection
+  ideas: {
+    title: 'Ideas Collection',
+    subtitle: 'Share your creative ideas, participate in voting, and drive AI project development together',
+    submit_idea: 'Submit Idea',
+    login_to_submit: 'Login to Submit Ideas',
+    search_placeholder: 'Search idea titles or descriptions...',
+    filter_by_status: 'Filter by Status',
+    sort_by: 'Sort By',
+    sort_by_votes: 'Vote Count',
+    sort_by_date: 'Latest Created',
+    sort_by_title: 'Title',
+    ascending: 'Ascending',
+    descending: 'Descending',
+    reset_filters: 'Reset',
+    
+    // Statistics
+    stats: {
+      total_ideas: 'Total Ideas',
+      pending_ideas: 'Pending',
+      adopted_ideas: 'Adopted',
+      my_votes_today: 'My Votes Today'
+    },
+
+    // Idea status
+    status: {
+      pending: 'Pending',
+      adopted: 'Adopted',
+      rejected: 'Rejected'
+    },
+
+    // Idea card
+    card: {
+      vote_for_idea: 'Vote for Idea',
+      votes_count: 'votes',
+      voters_count: 'voters',
+      view_project: 'View Project',
+      vote_1: 'Vote 1',
+      vote_2: 'Vote 2',
+      already_voted: 'You have already voted for this idea',
+      vote_limit_reached: 'Daily vote limit reached',
+      remaining_votes: 'Remaining votes today: {count}'
+    },
+
+    // Submit idea form
+    submit: {
+      dialog_title: 'Submit Idea',
+      title_label: 'Idea Title',
+      title_placeholder: 'Briefly describe your idea (max 200 characters)',
+      description_label: 'Idea Description',
+      description_placeholder: 'Describe your idea in detail (max 1000 characters)',
+      content_label: 'Detailed Content',
+      content_placeholder: 'Optional: Provide more detailed implementation ideas, technical solutions, etc. (Markdown supported, max 10000 characters)',
+      submit_button: 'Submit Idea',
+      cancel_button: 'Cancel',
+      success_message: 'Idea submitted successfully, waiting for admin review'
+    },
+
+    // Idea detail
+    detail: {
+      back_to_list: 'Back to Ideas List',
+      idea_description: 'Idea Description',
+      idea_content: 'Detailed Content',
+      author_info: 'Author Information',
+      submitted_at: 'submitted',
+      adoption_info: 'Adoption Information',
+      adopter: 'Adopter',
+      adopted_at: 'Adopted At',
+      related_project: 'Related Project',
+      converted_to_project: 'Converted to Project',
+      view_project_detail: 'View Project Details',
+      idea_not_found: 'Idea Not Found',
+      idea_not_found_desc: 'This idea may have been deleted or you do not have access permission'
+    },
+
+    // Voting related
+    voting: {
+      vote_success: 'Vote successful, you voted {votes} for this idea',
+      vote_failed: 'Vote failed',
+      already_voted: 'You have already voted for this idea',
+      daily_limit_reached: 'Your daily vote limit has been reached, {remaining} votes remaining',
+      login_required: 'Please login first',
+      idea_not_votable: 'Idea does not exist or is no longer votable'
+    },
+
+    // Empty state
+    empty: {
+      no_ideas: 'No ideas data',
+      submit_first: 'Submit the first idea'
+    },
+
+    // Admin functions
+    admin: {
+      ideas_management: 'Ideas Management',
+      adopt_idea: 'Adopt Idea',
+      reject_idea: 'Reject Idea',
+      transform_to_project: 'AI Transform to Project',
+      adoption_success: 'Idea adopted successfully, can start AI transformation to project',
+      rejection_success: 'Idea rejected',
+      transform_success: 'AI transformation successful! Project ID: {projectId}',
+      transform_confirm: 'Are you sure you want to transform idea "{title}" into an AI project? This process may take some time.',
+      adopt_confirm: 'Are you sure you want to adopt idea "{title}"?',
+      reject_confirm: 'Are you sure you want to reject idea "{title}"?',
+      reject_reason: 'Rejection Reason',
+      reject_reason_placeholder: 'Please enter rejection reason (optional)',
+      processing: 'AI transformation in progress, please wait...',
+      already_transformed: 'This idea has already been transformed into a project'
     }
   }
 }

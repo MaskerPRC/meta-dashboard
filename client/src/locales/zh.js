@@ -4,6 +4,7 @@ export default {
     title: '导航菜单',
     home: '首页',
     projects: '项目列表',
+    ideas: '想法征集',
     global_history: '全局进展',
     resume: '我的简历',
     about: '关于挑战',
@@ -817,6 +818,116 @@ export default {
       invalid_link: '无效链接',
       image_loading_error: '图片加载失败',
       video_loading_error: '视频加载失败'
+    }
+  },
+
+  // 想法征集
+  ideas: {
+    title: '想法征集',
+    subtitle: '分享你的创意想法，参与投票，一起推动AI项目发展',
+    submit_idea: '提交想法',
+    login_to_submit: '登录提交想法',
+    search_placeholder: '搜索想法标题或描述...',
+    filter_by_status: '状态筛选',
+    sort_by: '排序方式',
+    sort_by_votes: '投票数',
+    sort_by_date: '最新创建',
+    sort_by_title: '标题',
+    ascending: '升序',
+    descending: '降序',
+    reset_filters: '重置',
+    
+    // 统计信息
+    stats: {
+      total_ideas: '总想法数',
+      pending_ideas: '待审核',
+      adopted_ideas: '已采纳',
+      my_votes_today: '我今日投票'
+    },
+
+    // 想法状态
+    status: {
+      pending: '待审核',
+      adopted: '已采纳',
+      rejected: '已拒绝'
+    },
+
+    // 想法卡片
+    card: {
+      vote_for_idea: '为想法投票',
+      votes_count: '票',
+      voters_count: '人投票',
+      view_project: '查看项目',
+      vote_1: '投1票',
+      vote_2: '投2票',
+      already_voted: '您已为此想法投票',
+      vote_limit_reached: '今日投票已达上限',
+      remaining_votes: '今日剩余投票：{count} 票'
+    },
+
+    // 提交想法表单
+    submit: {
+      dialog_title: '提交想法',
+      title_label: '想法标题',
+      title_placeholder: '简明扼要地描述你的想法（最多200字符）',
+      description_label: '想法描述',
+      description_placeholder: '详细描述你的想法（最多1000字符）',
+      content_label: '详细内容',
+      content_placeholder: '可选：提供更详细的实现思路、技术方案等（支持Markdown格式，最多10000字符）',
+      submit_button: '提交想法',
+      cancel_button: '取消',
+      success_message: '想法提交成功，等待管理员审核'
+    },
+
+    // 想法详情
+    detail: {
+      back_to_list: '返回想法列表',
+      idea_description: '想法描述',
+      idea_content: '详细内容',
+      author_info: '提交者信息',
+      submitted_at: '提交',
+      adoption_info: '采纳信息',
+      adopter: '采纳人',
+      adopted_at: '采纳时间',
+      related_project: '关联项目',
+      converted_to_project: '已转化为项目',
+      view_project_detail: '查看项目详情',
+      idea_not_found: '想法不存在',
+      idea_not_found_desc: '该想法可能已被删除或您没有访问权限'
+    },
+
+    // 投票相关
+    voting: {
+      vote_success: '投票成功，您为此想法投了{votes}票',
+      vote_failed: '投票失败',
+      already_voted: '您已经为此想法投过票了',
+      daily_limit_reached: '您今日投票数已达上限，剩余{remaining}票',
+      login_required: '请先登录',
+      idea_not_votable: '想法不存在或已不可投票'
+    },
+
+    // 空状态
+    empty: {
+      no_ideas: '暂无想法数据',
+      submit_first: '提交第一个想法'
+    },
+
+    // 管理功能（用于管理端）
+    admin: {
+      ideas_management: '想法管理',
+      adopt_idea: '采纳想法',
+      reject_idea: '拒绝想法',
+      transform_to_project: 'AI转化为项目',
+      adoption_success: '想法采纳成功，可以开始AI转化为项目',
+      rejection_success: '想法已拒绝',
+      transform_success: 'AI转化成功！项目ID: {projectId}',
+      transform_confirm: '确定要将想法"{title}"转化为AI项目吗？这个过程可能需要一些时间。',
+      adopt_confirm: '确定要采纳想法"{title}"吗？',
+      reject_confirm: '确定要拒绝想法"{title}"吗？',
+      reject_reason: '拒绝原因',
+      reject_reason_placeholder: '请输入拒绝原因（可选）',
+      processing: '正在进行AI转化，请稍等...',
+      already_transformed: '该想法已转化为项目'
     }
   }
 }

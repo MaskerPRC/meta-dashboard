@@ -44,6 +44,14 @@
               />
             </el-tab-pane>
 
+            <!-- 想法管理 -->
+            <el-tab-pane label="想法管理" name="ideas">
+              <IdeasManagement 
+                ref="ideasManagementRef"
+                @stats-updated="handleStatsUpdated"
+              />
+            </el-tab-pane>
+
             <!-- 评论管理 -->
             <el-tab-pane :label="$t('admin.comment_management')" name="comments">
               <div class="comments-management-header">
@@ -114,6 +122,7 @@ import ProjectEditDialog from '../components/admin/ProjectEditDialog.vue'
 import AdminStats from '../components/admin/AdminStats.vue'
 import ProjectsManagement from '../components/admin/ProjectsManagement.vue'
 import UsersManagement from '../components/admin/UsersManagement.vue'
+import IdeasManagement from '../components/admin/IdeasManagement.vue'
 import CommentsManagement from '../components/admin/CommentsManagement.vue'
 import ResumesManagement from '../components/admin/ResumesManagement.vue'
 import SiteConfigManagement from '../components/admin/SiteConfigManagement.vue'
@@ -135,6 +144,7 @@ const editingProject = ref(null)
 const adminStatsRef = ref(null)
 const projectsManagementRef = ref(null)
 const usersManagementRef = ref(null)
+const ideasManagementRef = ref(null)
 const commentsManagementRef = ref(null)
 const resumesManagementRef = ref(null)
 const siteConfigManagementRef = ref(null)
