@@ -291,7 +291,9 @@ Please return the result in JSON format with the following fields:
     const projectType = this.detectProjectType(text);
 
     return new Promise((resolve) => {
-      setTimeout(() => {
+      // 使用 requestIdleCallback 或更短的延迟来模拟处理时间
+      // 避免阻塞主线程过长时间
+      const processData = () => {
         const result = {
           title: this.generateTitle(text, keywords),
           description: this.generateDescription(text, keywords),
@@ -303,7 +305,14 @@ Please return the result in JSON format with the following fields:
           estimated_duration: this.estimateDuration(text)
         };
         resolve(result);
-      }, 1000); // 模拟AI处理时间
+      };
+
+      // 使用更短的延迟时间，避免性能警告
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(processData, { timeout: 50 });
+      } else {
+        setTimeout(processData, 50); // 减少到50ms，避免性能警告
+      }
     });
   }
 

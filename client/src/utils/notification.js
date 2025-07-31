@@ -7,40 +7,40 @@ export const showNotification = {
       title,
       message,
       type: 'success',
-      position: 'bottom-right',
+      position: 'top-left',
       duration: 3000,
       showClose: true
     })
   },
-  
+
   error: (message, title = '错误') => {
     ElNotification({
       title,
       message,
       type: 'error',
-      position: 'bottom-right',
+      position: 'top-left',
       duration: 4000,
       showClose: true
     })
   },
-  
+
   warning: (message, title = '警告') => {
     ElNotification({
       title,
       message,
       type: 'warning',
-      position: 'bottom-right',
+      position: 'top-left',
       duration: 3500,
       showClose: true
     })
   },
-  
+
   info: (message, title = '信息') => {
     ElNotification({
       title,
       message,
       type: 'info',
-      position: 'bottom-right',
+      position: 'top-left',
       duration: 3000,
       showClose: true
     })
