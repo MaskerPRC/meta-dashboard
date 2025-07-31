@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from '../utils/axios'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 
 export const useProjectsStore = defineStore('projects', () => {
   // 状态
@@ -68,7 +68,7 @@ export const useProjectsStore = defineStore('projects', () => {
       return response.data
     } catch (error) {
       console.error('获取项目列表失败:', error)
-      ElMessage.error('获取项目列表失败')
+      showNotification.error('获取项目列表失败')
       return null
     } finally {
       loading.value = false
@@ -84,7 +84,7 @@ export const useProjectsStore = defineStore('projects', () => {
       return response.data
     } catch (error) {
       console.error('获取项目详情失败:', error)
-      ElMessage.error('获取项目详情失败')
+      showNotification.error('获取项目详情失败')
       return null
     } finally {
       loading.value = false
@@ -96,12 +96,12 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       loading.value = true
       const response = await axios.post('/api/projects', projectData)
-      ElMessage.success('项目创建成功')
+      showNotification.success('项目创建成功')
       await fetchProjects()
       return response.data.project
     } catch (error) {
       console.error('创建项目失败:', error)
-      ElMessage.error(error.response?.data?.message || '创建项目失败')
+      showNotification.error(error.response?.data?.message || '创建项目失败')
       return null
     } finally {
       loading.value = false
@@ -113,7 +113,7 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       loading.value = true
       const response = await axios.put(`/api/projects/${id}`, projectData)
-      ElMessage.success('项目更新成功')
+      showNotification.success('项目更新成功')
       
       // 更新本地数据
       const index = projects.value.findIndex(p => p.id === id)
@@ -127,7 +127,7 @@ export const useProjectsStore = defineStore('projects', () => {
       return response.data.project
     } catch (error) {
       console.error('更新项目失败:', error)
-      ElMessage.error(error.response?.data?.message || '更新项目失败')
+      showNotification.error(error.response?.data?.message || '更新项目失败')
       return null
     } finally {
       loading.value = false
@@ -139,7 +139,7 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       loading.value = true
       await axios.delete(`/api/projects/${id}`)
-      ElMessage.success('项目删除成功')
+      showNotification.success('项目删除成功')
       
       // 从本地数据中移除
       projects.value = projects.value.filter(p => p.id !== id)
@@ -150,7 +150,7 @@ export const useProjectsStore = defineStore('projects', () => {
       return true
     } catch (error) {
       console.error('删除项目失败:', error)
-      ElMessage.error(error.response?.data?.message || '删除项目失败')
+      showNotification.error(error.response?.data?.message || '删除项目失败')
       return false
     } finally {
       loading.value = false
@@ -161,12 +161,12 @@ export const useProjectsStore = defineStore('projects', () => {
   const updateProjectsOrder = async (projectsOrder) => {
     try {
       await axios.put('/api/projects/reorder/batch', { projects: projectsOrder })
-      ElMessage.success('排序更新成功')
+      showNotification.success('排序更新成功')
       await fetchProjects()
       return true
     } catch (error) {
       console.error('更新排序失败:', error)
-      ElMessage.error('更新排序失败')
+      showNotification.error('更新排序失败')
       return false
     }
   }

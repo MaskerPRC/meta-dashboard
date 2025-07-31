@@ -327,7 +327,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { useProjectsStore } from '../stores/projects'
 import axios from '../utils/axios'
 import {
@@ -363,18 +363,18 @@ const wechatGroupConfig = ref({
 // 联系方式交互方法
 const openEmail = () => {
   window.location.href = 'mailto:maskerprc@gmail.com?subject=关于100个AI产品挑战&body=您好，我看到了您的100个AI产品挑战...'
-  ElMessage.success('正在打开邮件客户端...')
+  showNotification.success('正在打开邮件客户端...')
 }
 
 const openGithub = () => {
   window.open('https://github.com/MaskerPRC', '_blank')
-  ElMessage.success('正在打开GitHub页面...')
+  showNotification.success('正在打开GitHub页面...')
 }
 
 const copyWechat = async () => {
   try {
     await navigator.clipboard.writeText('QQTommer')
-    ElMessage.success('微信号已复制到剪贴板！可以打开微信搜索添加好友')
+    showNotification.success('微信号已复制到剪贴板！可以打开微信搜索添加好友')
   } catch (err) {
     // 降级处理：创建临时文本域来复制
     const textArea = document.createElement('textarea')
@@ -383,18 +383,18 @@ const copyWechat = async () => {
     textArea.select()
     document.execCommand('copy')
     document.body.removeChild(textArea)
-    ElMessage.success('微信号已复制到剪贴板！可以打开微信搜索添加好友')
+    showNotification.success('微信号已复制到剪贴板！可以打开微信搜索添加好友')
   }
 }
 
 const callPhone = () => {
   window.location.href = 'tel:13022898959'
-  ElMessage.success('正在启动拨号功能...')
+  showNotification.success('正在启动拨号功能...')
 }
 
 const openIssue = () => {
   window.open('https://github.com/MaskerPRC/meta-dashboard/issues', '_blank')
-  ElMessage.success('正在打开GitHub Issues页面...')
+  showNotification.success('正在打开GitHub Issues页面...')
 }
 
 // 加载微信群配置

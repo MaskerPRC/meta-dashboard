@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 
 const routes = [
   {
@@ -116,14 +116,14 @@ router.beforeEach(async (to, from, next) => {
   
   // 检查是否需要登录
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    ElMessage.warning('请先登录')
+          showNotification.warning('请先登录后再访问此页面', '需要登录')
     next('/login')
     return
   }
   
   // 检查是否需要管理员权限
   if (to.meta.requiresAdmin && !authStore.isAdmin) {
-    ElMessage.error('需要管理员权限')
+          showNotification.error('您没有管理员权限，无法访问此页面', '权限不足')
     next('/')
     return
   }

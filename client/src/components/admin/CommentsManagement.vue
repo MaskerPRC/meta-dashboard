@@ -128,7 +128,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import { Picture, VideoPlay, InfoFilled } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
@@ -151,7 +152,7 @@ const fetchComments = async () => {
     comments.value = response.data.comments
   } catch (error) {
     console.error('获取评论列表失败:', error)
-    ElMessage.error(t('admin.comments.messages.fetch_failed'))
+    showNotification.error(t('admin.comments.messages.fetch_failed'))
   } finally {
     commentsLoading.value = false
   }
@@ -178,12 +179,12 @@ const deleteComment = async (comment) => {
       comments.value.splice(index, 1)
     }
 
-    ElMessage.success(t('admin.comments.messages.delete_success'))
+    showNotification.success(t('admin.comments.messages.delete_success'))
     emit('stats-updated')
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除评论失败:', error)
-      ElMessage.error(error.response?.data?.message || t('admin.comments.messages.delete_failed'))
+      showNotification.error(error.response?.data?.message || t('admin.comments.messages.delete_failed'))
     }
   }
 }
@@ -235,10 +236,10 @@ const revalidateComment = async (comment) => {
       checked_at: response.data.validation.checked_at
     })
     
-    ElMessage.success('重新检测完成')
+    showNotification.success('重新检测完成')
   } catch (error) {
     console.error('重新检测失败:', error)
-    ElMessage.error('重新检测失败: ' + (error.response?.data?.message || error.message))
+    showNotification.error('重新检测失败: ' + (error.response?.data?.message || error.message))
   } finally {
     comment.revalidating = false
   }

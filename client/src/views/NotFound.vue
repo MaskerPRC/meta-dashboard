@@ -162,7 +162,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectsStore } from '../stores/projects'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import dayjs from 'dayjs'
 import {
   Warning, Search, House, List, InfoFilled, MagicStick, ArrowLeft
@@ -186,7 +186,7 @@ const randomProject = computed(() => {
 // 方法
 const handleSearch = () => {
   if (!searchQuery.value.trim()) {
-    ElMessage.warning('请输入搜索关键词')
+    showNotification.warning('请输入搜索关键词')
     return
   }
   
@@ -236,7 +236,7 @@ const formatDate = (date) => {
 
 const submitErrorReport = async () => {
   if (!errorReport.value.trim()) {
-    ElMessage.warning('请输入错误描述')
+    showNotification.warning('请输入错误描述')
     return
   }
   
@@ -249,11 +249,11 @@ const submitErrorReport = async () => {
     // 模拟提交
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    ElMessage.success('错误报告已提交，感谢您的反馈！')
+    showNotification.success('错误报告已提交，感谢您的反馈！')
     errorReport.value = ''
   } catch (error) {
     console.error('提交错误报告失败:', error)
-    ElMessage.error('提交失败，请稍后重试')
+    showNotification.error('提交失败，请稍后重试')
   } finally {
     submitting.value = false
   }

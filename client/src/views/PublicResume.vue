@@ -77,7 +77,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { User, FullScreen, CopyDocument, Printer, Close } from '@element-plus/icons-vue'
 import axios from '../utils/axios'
 import dayjs from 'dayjs'
@@ -108,7 +108,7 @@ const fetchPublicResume = async () => {
       // 404 是正常情况，表示没有公开简历
       resume.value = null
     } else {
-      ElMessage.error('获取简历失败')
+      showNotification.error('获取简历失败')
     }
   } finally {
     loading.value = false

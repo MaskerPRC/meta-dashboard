@@ -173,7 +173,8 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { ElMessage, ElDialog, ElSteps, ElStep, ElForm, ElFormItem, ElInput, ElRadioGroup, ElRadio, ElButton, ElDivider, ElTag, ElProgress, ElAlert } from 'element-plus'
+import { ElDialog, ElSteps, ElStep, ElForm, ElFormItem, ElInput, ElRadioGroup, ElRadio, ElButton, ElDivider, ElTag, ElProgress, ElAlert } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import { useI18n } from 'vue-i18n'
 import { Loading } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
@@ -210,7 +211,7 @@ const { t } = useI18n()
 // 方法
 const startGenerate = async () => {
   if (!form.text.trim()) {
-    ElMessage.warning(t('admin.ai_generator.messages.empty_description'))
+    showNotification.warning(t('admin.ai_generator.messages.empty_description'))
     return
   }
 
@@ -241,10 +242,10 @@ const startGenerate = async () => {
       }, 500)
     }
 
-    ElMessage.success(t('admin.ai_generator.messages.generate_success'))
+    showNotification.success(t('admin.ai_generator.messages.generate_success'))
   } catch (error) {
     console.error('AI生成失败:', error)
-    ElMessage.error(error.response?.data?.message || t('admin.ai_generator.messages.generate_failed'))
+    showNotification.error(error.response?.data?.message || t('admin.ai_generator.messages.generate_failed'))
     currentStep.value = 0
     clearInterval(progressInterval)
   }
@@ -255,13 +256,13 @@ const saveProject = async () => {
     const response = await axios.post('/api/projects', generatedProject.value)
 
     if (response.data.project) {
-      ElMessage.success(t('admin.ai_generator.messages.create_success'))
+      showNotification.success(t('admin.ai_generator.messages.create_success'))
       emit('project-created', response.data.project)
       closeDialog()
     }
   } catch (error) {
     console.error('保存项目失败:', error)
-    ElMessage.error(error.response?.data?.message || t('admin.ai_generator.messages.create_failed'))
+    showNotification.error(error.response?.data?.message || t('admin.ai_generator.messages.create_failed'))
   }
 }
 

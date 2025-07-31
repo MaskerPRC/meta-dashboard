@@ -128,7 +128,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { ArrowLeft, Star, Check, Link } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import axios from '../utils/axios'
@@ -152,7 +152,7 @@ const fetchIdeaDetail = async () => {
     idea.value = response.data.idea
   } catch (error) {
     console.error('获取想法详情失败:', error)
-    ElMessage.error('获取想法详情失败')
+    showNotification.error('获取想法详情失败')
   } finally {
     loading.value = false
   }
@@ -180,30 +180,30 @@ const fetchUserVotes = async () => {
 
 const voteForIdea = async (votes) => {
   if (!authStore.isAuthenticated) {
-    ElMessage.warning('请先登录')
+    showNotification.warning('请先登录')
     return
   }
 
   if (hasVoted.value) {
-    ElMessage.warning('您已经为此想法投过票了')
+    showNotification.warning('您已经为此想法投过票了')
     return
   }
 
   if (userVotesToday.value + votes > 10) {
-    ElMessage.warning(`您今日投票数已达上限，剩余${10 - userVotesToday.value}票`)
+    showNotification.warning(`您今日投票数已达上限，剩余${10 - userVotesToday.value}票`)
     return
   }
 
   try {
     await axios.post(`/api/ideas/${idea.value.id}/vote`, { votes })
-    ElMessage.success(`投票成功，您为此想法投了${votes}票`)
+    showNotification.success(`投票成功，您为此想法投了${votes}票`)
     
     // 刷新数据
     fetchIdeaDetail()
     fetchUserVotes()
   } catch (error) {
     console.error('投票失败:', error)
-    ElMessage.error('投票失败: ' + (error.response?.data?.message || error.message))
+    showNotification.error('投票失败: ' + (error.response?.data?.message || error.message))
   }
 }
 

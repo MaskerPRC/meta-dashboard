@@ -267,7 +267,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { Cpu, ArrowLeft, User, Lock, Message, Phone } from '@element-plus/icons-vue'
 import axios from '../utils/axios'
 import { isWechatBrowser } from '../utils/wechatDetector'
@@ -365,7 +365,7 @@ const handleLocalLogin = async () => {
     })
 
     if (response.data.success) {
-      ElMessage.success('登录成功！')
+              showNotification.success('欢迎回来！', '登录成功')
 
       // 更新认证状态
       authStore.user = response.data.user
@@ -374,14 +374,14 @@ const handleLocalLogin = async () => {
       const redirect = route.query.redirect || '/'
       router.push(redirect)
     } else {
-      ElMessage.error(response.data.message || '登录失败')
+              showNotification.error(response.data.message || '登录失败', '登录失败')
     }
   } catch (error) {
     console.error('登录错误:', error)
     if (error.response?.data?.message) {
-      ElMessage.error(error.response.data.message)
+      showNotification.error(error.response.data.message, '登录失败')
     } else {
-      ElMessage.error('登录失败，请检查网络连接')
+              showNotification.error('请检查网络连接后重试', '网络错误')
     }
   } finally {
     loading.value = false
@@ -407,7 +407,7 @@ const handleRegister = async () => {
     })
 
     if (response.data.success) {
-      ElMessage.success('注册成功！已自动登录')
+              showNotification.success('账户创建成功，已自动登录', '注册成功')
 
       // 更新认证状态
       authStore.user = response.data.user
@@ -416,14 +416,14 @@ const handleRegister = async () => {
       const redirect = route.query.redirect || '/'
       router.push(redirect)
     } else {
-      ElMessage.error(response.data.message || '注册失败')
+              showNotification.error(response.data.message || '注册失败', '注册失败')
     }
   } catch (error) {
     console.error('注册错误:', error)
     if (error.response?.data?.message) {
-      ElMessage.error(error.response.data.message)
+      showNotification.error(error.response.data.message, '注册失败')
     } else {
-      ElMessage.error('注册失败，请检查网络连接')
+              showNotification.error('请检查网络连接后重试', '网络错误')
     }
   } finally {
     loading.value = false
@@ -436,7 +436,7 @@ const loginWithGitHub = async () => {
   try {
     authStore.loginWithGitHub()
   } catch (error) {
-    ElMessage.error('GitHub登录失败，请重试')
+    showNotification.error('GitHub登录失败，请重试', '登录失败')
     loading.value = false
   }
 }
@@ -447,7 +447,7 @@ const loginWithGoogle = async () => {
   try {
     authStore.loginWithGoogle()
   } catch (error) {
-    ElMessage.error('Google登录失败，请重试')
+    showNotification.error('Google登录失败，请重试', '登录失败')
     loading.value = false
   }
 }
@@ -458,7 +458,7 @@ const loginWithWechat = async () => {
   try {
     authStore.loginWithWechat()
   } catch (error) {
-    ElMessage.error('微信登录失败，请重试')
+    showNotification.error('微信登录失败，请重试', '登录失败')
     loading.value = false
   }
 }
@@ -473,17 +473,17 @@ onMounted(async () => {
     const errorMessage = route.query.message
 
     if (errorType === 'github') {
-      ElMessage.error('GitHub登录失败，请重试')
+      showNotification.error('GitHub登录失败，请重试', '登录失败')
     } else if (errorType === 'google') {
-      ElMessage.error('Google登录失败，请重试')
+      showNotification.error('Google登录失败，请重试', '登录失败')
     } else if (errorType === 'wechat') {
-      ElMessage.error('微信扫码登录失败，请重试')
+      showNotification.error('微信扫码登录失败，请重试', '登录失败')
     } else if (errorType === 'wechat_mp') {
-      ElMessage.error(errorMessage ? decodeURIComponent(errorMessage) : '微信登录失败，请重试')
+      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : '微信登录失败，请重试', '登录失败')
     } else if (errorType === 'auth_failed') {
-      ElMessage.error(errorMessage ? decodeURIComponent(errorMessage) : '登录失败')
+      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : '登录失败', '认证失败')
     } else if (errorType === 'session_error') {
-      ElMessage.error(errorMessage ? decodeURIComponent(errorMessage) : '登录状态保存失败')
+      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : '登录状态保存失败', '会话错误')
     }
   }
 

@@ -217,7 +217,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { 
   Clock, DocumentAdd, FullScreen, Download, Close, CopyDocument 
 } from '@element-plus/icons-vue'
@@ -270,7 +271,7 @@ const fetchResume = async () => {
     }
   } catch (error) {
     console.error('获取简历失败:', error)
-    ElMessage.error('获取简历失败')
+    showNotification.error('获取简历失败')
   } finally {
     loading.value = false
   }
@@ -278,7 +279,7 @@ const fetchResume = async () => {
 
 const handleSave = async () => {
   if (!resumeData.value.title.trim()) {
-    ElMessage.error('请输入简历标题')
+    showNotification.error('请输入简历标题')
     return
   }
 
@@ -292,10 +293,10 @@ const handleSave = async () => {
     })
 
     resumeData.value = { ...response.data.resume }
-    ElMessage.success('简历保存成功')
+    showNotification.success('简历保存成功')
   } catch (error) {
     console.error('保存简历失败:', error)
-    ElMessage.error(error.response?.data?.message || '保存简历失败')
+    showNotification.error(error.response?.data?.message || '保存简历失败')
   } finally {
     saving.value = false
   }
@@ -307,7 +308,7 @@ const fetchVersions = async () => {
     versions.value = response.data.versions
   } catch (error) {
     console.error('获取版本历史失败:', error)
-    ElMessage.error('获取版本历史失败')
+    showNotification.error('获取版本历史失败')
   }
 }
 
@@ -318,7 +319,7 @@ const viewVersionContent = async (version) => {
 }
 
 const exportPDF = () => {
-  ElMessage.info('PDF导出功能开发中...')
+  showNotification.info('PDF导出功能开发中...')
 }
 
 const getStatusTagType = (status) => {
@@ -347,7 +348,7 @@ const formatDate = (dateString) => {
 onMounted(async () => {
   // 检查登录状态
   if (!authStore.isAuthenticated) {
-    ElMessage.warning('请先登录')
+    showNotification.warning('请先登录')
     router.push('/login')
     return
   }

@@ -124,7 +124,7 @@
 import { ref, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import axios from '../../utils/axios'
 import AttachmentPreview from './AttachmentPreview.vue'
 import { renderEnhancedMarkdown } from '../../utils/markdownRenderer'
@@ -195,7 +195,7 @@ const handlePaste = async (event) => {
 
 const uploadFile = async (file) => {
   if (uploading.value) {
-    ElMessage.warning('文件正在上传中，请稍候...')
+    showNotification.warning('文件正在上传中，请稍候...')
     return
   }
   
@@ -218,23 +218,23 @@ const uploadFile = async (file) => {
     
     if (errors.length > 0) {
       errors.forEach(error => {
-        ElMessage.error(`${error.filename}: ${error.error}`)
+        showNotification.error(`${error.filename}: ${error.error}`)
       })
     }
     
     if (images.length > 0) {
       attachments.value.images.push(...images)
-      ElMessage.success(`成功上传 ${images.length} 张图片`)
+      showNotification.success(`成功上传 ${images.length} 张图片`)
     }
     
     if (videos.length > 0) {
       attachments.value.videos.push(...videos)
-      ElMessage.success(`成功上传 ${videos.length} 个视频`)
+      showNotification.success(`成功上传 ${videos.length} 个视频`)
     }
     
   } catch (error) {
     console.error('文件上传失败:', error)
-    ElMessage.error(error.response?.data?.message || '文件上传失败')
+    showNotification.error(error.response?.data?.message || '文件上传失败')
   } finally {
     uploading.value = false
   }
@@ -246,26 +246,26 @@ const validateFile = (file) => {
   
   if (file.type.startsWith('image/')) {
     if (!allowedImageTypes.includes(file.type)) {
-      ElMessage.error('只支持 JPG、PNG、GIF、WebP 格式的图片')
+      showNotification.error('只支持 JPG、PNG、GIF、WebP 格式的图片')
       return false
     }
     const isLt5M = file.size / 1024 / 1024 < 5
     if (!isLt5M) {
-      ElMessage.error('图片大小不能超过 5MB')
+      showNotification.error('图片大小不能超过 5MB')
       return false
     }
   } else if (file.type.startsWith('video/')) {
     if (!allowedVideoTypes.includes(file.type)) {
-      ElMessage.error('只支持 MP4、WebM 格式的视频')
+      showNotification.error('只支持 MP4、WebM 格式的视频')
       return false
     }
     const isLt50M = file.size / 1024 / 1024 < 50
     if (!isLt50M) {
-      ElMessage.error('视频大小不能超过 50MB')
+      showNotification.error('视频大小不能超过 50MB')
       return false
     }
   } else {
-    ElMessage.error('只支持图片和视频文件')
+    showNotification.error('只支持图片和视频文件')
     return false
   }
   

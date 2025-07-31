@@ -181,7 +181,8 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -303,7 +304,7 @@ const fetchComments = async () => {
     pagination.page = response.data.pagination.page
   } catch (error) {
     console.error('获取评论失败:', error)
-    ElMessage.error('获取评论失败')
+    showNotification.error('获取评论失败')
   } finally {
     loading.value = false
   }
@@ -322,10 +323,10 @@ const submitComment = async (data) => {
     newComment.value = ''
     pagination.total++
     
-    ElMessage.success('评论发表成功')
+    showNotification.success('评论发表成功')
   } catch (error) {
     console.error('发表评论失败:', error)
-    ElMessage.error(error.response?.data?.message || '发表评论失败')
+    showNotification.error(error.response?.data?.message || '发表评论失败')
   } finally {
     submitting.value = false
   }
@@ -356,7 +357,7 @@ const cancelEdit = () => {
 
 const saveEdit = async (commentId) => {
   if (!editContent.value.trim()) {
-    ElMessage.warning('评论内容不能为空')
+    showNotification.warning('评论内容不能为空')
     return
   }
   
@@ -372,10 +373,10 @@ const saveEdit = async (commentId) => {
     }
     
     cancelEdit()
-    ElMessage.success('评论修改成功')
+    showNotification.success('评论修改成功')
   } catch (error) {
     console.error('修改评论失败:', error)
-    ElMessage.error(error.response?.data?.message || '修改评论失败')
+    showNotification.error(error.response?.data?.message || '修改评论失败')
   } finally {
     saving.value = false
   }
@@ -402,11 +403,11 @@ const deleteComment = async (comment) => {
       pagination.total--
     }
     
-    ElMessage.success('评论删除成功')
+    showNotification.success('评论删除成功')
   } catch (error) {
     if (error === 'cancel') return
     console.error('删除评论失败:', error)
-    ElMessage.error(error.response?.data?.message || '删除评论失败')
+    showNotification.error(error.response?.data?.message || '删除评论失败')
   }
 }
 

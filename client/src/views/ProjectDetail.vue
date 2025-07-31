@@ -218,7 +218,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { ArrowLeft, Edit, Delete, Link, View, ArrowRight, Clock } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
@@ -341,7 +342,7 @@ const handleProjectSaved = async (savedProject) => {
   // 更新当前页面的项目数据
   project.value = savedProject
   showEditDialog.value = false
-  ElMessage.success(t('admin.project_saved'))
+  showNotification.success(t('admin.project_saved'))
 }
 
 const deleteProject = async () => {
@@ -357,7 +358,7 @@ const deleteProject = async () => {
     )
     
     await axios.delete(`/api/projects/${route.params.id}`)
-    ElMessage.success('项目删除成功')
+    showNotification.success('项目删除成功')
     router.push('/projects')
   } catch (error) {
     if (error !== 'cancel') {

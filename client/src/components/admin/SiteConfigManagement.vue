@@ -149,7 +149,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import { Plus } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 
@@ -191,7 +191,7 @@ const loadSiteConfig = async () => {
     }
   } catch (error) {
     console.error('获取站点配置失败:', error)
-    ElMessage.error(t('admin.site_config.messages.fetch_failed'))
+    showNotification.error(t('admin.site_config.messages.fetch_failed'))
   } finally {
     configLoading.value = false
   }
@@ -200,10 +200,10 @@ const loadSiteConfig = async () => {
 const updateConfig = async (key, value) => {
   try {
     await axios.put(`/api/config/${key}`, { value })
-    ElMessage.success(t('admin.site_config.messages.update_success'))
+    showNotification.success(t('admin.site_config.messages.update_success'))
   } catch (error) {
     console.error('更新配置失败:', error)
-    ElMessage.error(t('admin.site_config.messages.update_failed'))
+    showNotification.error(t('admin.site_config.messages.update_failed'))
     // 重新加载配置以恢复原值
     loadSiteConfig()
   }
@@ -217,10 +217,10 @@ const saveAllConfigs = async () => {
     })
 
     await axios.put('/api/config', { configs })
-    ElMessage.success(t('admin.site_config.messages.save_success'))
+    showNotification.success(t('admin.site_config.messages.save_success'))
   } catch (error) {
     console.error('保存配置失败:', error)
-    ElMessage.error(t('admin.site_config.messages.save_failed'))
+    showNotification.error(t('admin.site_config.messages.save_failed'))
   }
 }
 
@@ -229,11 +229,11 @@ const beforeQRUpload = (file) => {
   const isLt5M = file.size / 1024 / 1024 < 5
 
   if (!isImage) {
-    ElMessage.error(t('admin.site_config.messages.image_only'))
+    showNotification.error(t('admin.site_config.messages.image_only'))
     return false
   }
   if (!isLt5M) {
-    ElMessage.error(t('admin.site_config.messages.file_too_large'))
+    showNotification.error(t('admin.site_config.messages.file_too_large'))
     return false
   }
   return true
@@ -254,12 +254,12 @@ const handleQRUpload = async (uploadFile) => {
         siteConfig.value.wechat_group_qr = {}
       }
       siteConfig.value.wechat_group_qr.value = base64Data
-      ElMessage.success(t('admin.site_config.messages.upload_success'))
+      showNotification.success(t('admin.site_config.messages.upload_success'))
     }
     reader.readAsDataURL(uploadFile.file)
   } catch (error) {
     console.error('上传二维码失败:', error)
-    ElMessage.error(t('admin.site_config.messages.upload_failed'))
+    showNotification.error(t('admin.site_config.messages.upload_failed'))
   }
 }
 
@@ -275,7 +275,7 @@ const loadUserList = async () => {
     userList.value = response.data.users
   } catch (error) {
     console.error('获取有简历的用户列表失败:', error)
-    ElMessage.error('获取有简历的用户列表失败')
+    showNotification.error('获取有简历的用户列表失败')
   }
 }
 
@@ -311,7 +311,7 @@ const handleVersionChange = (version) => {
 
 const savePublicResumeConfig = async () => {
   if (!publicResumeConfig.value.user_id) {
-    ElMessage.error('请选择要公开的用户')
+    showNotification.error('请选择要公开的用户')
     return
   }
   
@@ -327,13 +327,13 @@ const savePublicResumeConfig = async () => {
       description: '公开简历配置，指定要在公共页面显示的用户简历和版本',
       type: 'json'
     })
-    ElMessage.success('公开简历配置保存成功')
+    showNotification.success('公开简历配置保存成功')
     
     // 重新加载配置
     await loadSiteConfig()
   } catch (error) {
     console.error('保存公开简历配置失败:', error)
-    ElMessage.error('保存公开简历配置失败')
+    showNotification.error('保存公开简历配置失败')
   } finally {
     savingConfig.value = false
   }
@@ -345,10 +345,10 @@ const clearPublicResumeConfig = async () => {
     publicResumeConfig.value = { user_id: null, version: 'latest' }
     selectedUserResume.value = null
     versionList.value = []
-    ElMessage.success('公开简历配置已清除')
+    showNotification.success('公开简历配置已清除')
   } catch (error) {
     console.error('清除公开简历配置失败:', error)
-    ElMessage.error('清除公开简历配置失败')
+    showNotification.error('清除公开简历配置失败')
   }
 }
 

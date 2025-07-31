@@ -128,7 +128,7 @@ import ResumesManagement from '../components/admin/ResumesManagement.vue'
 import SiteConfigManagement from '../components/admin/SiteConfigManagement.vue'
 import AIProjectGenerator from '../components/admin/AIProjectGenerator.vue'
 import axios from '../utils/axios'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 
 const route = useRoute()
 
@@ -160,7 +160,7 @@ const batchValidateComments = async () => {
       limit: batchValidateLimit.value
     })
     
-    ElMessage.success(`批量检测完成：成功处理 ${response.data.processed} 条，失败 ${response.data.failed} 条`)
+    showNotification.success(`批量检测完成：成功处理 ${response.data.processed} 条，失败 ${response.data.failed} 条`)
     
     // 刷新评论列表
     if (commentsManagementRef.value) {
@@ -172,7 +172,7 @@ const batchValidateComments = async () => {
     
   } catch (error) {
     console.error('批量检测失败:', error)
-    ElMessage.error('批量检测失败: ' + (error.response?.data?.message || error.message))
+    showNotification.error('批量检测失败: ' + (error.response?.data?.message || error.message))
   } finally {
     batchValidating.value = false
   }
@@ -186,7 +186,7 @@ const editProject = async (project = null) => {
       editingProject.value = response.data
     } catch (error) {
       console.error('获取项目详情失败:', error)
-      ElMessage.error('获取项目详情失败，请重试')
+      showNotification.error('获取项目详情失败，请重试')
       return
     }
   } else {

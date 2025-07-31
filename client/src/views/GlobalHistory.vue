@@ -141,7 +141,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { ArrowRight, Clock, TrendCharts, DocumentAdd, Trophy, View } from '@element-plus/icons-vue'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import dayjs from 'dayjs'
@@ -186,7 +186,7 @@ const fetchGlobalHistory = async () => {
     Object.assign(pagination, response.data.pagination)
   } catch (error) {
     console.error('获取全局历史失败:', error)
-    ElMessage.error(t('message.error'))
+    showNotification.error(t('message.error'))
   } finally {
     loading.value = false
   }

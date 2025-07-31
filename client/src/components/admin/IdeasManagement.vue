@@ -280,7 +280,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import {
   Search, Download, Delete, View, Check, Close, MagicStick,
   Star, ArrowDown, ArrowUp
@@ -348,7 +349,7 @@ const fetchIdeas = async () => {
     totalIdeas.value = response.data.pagination.count
   } catch (error) {
     console.error('获取想法列表失败:', error)
-    ElMessage.error('获取想法列表失败')
+    showNotification.error('获取想法列表失败')
   } finally {
     ideasLoading.value = false
   }
@@ -389,7 +390,7 @@ const viewIdeaDetail = async (idea) => {
     ideaDetailDialogVisible.value = true
   } catch (error) {
     console.error('获取想法详情失败:', error)
-    ElMessage.error('获取想法详情失败')
+    showNotification.error('获取想法详情失败')
   }
 }
 
@@ -411,7 +412,7 @@ const adoptIdea = async (idea) => {
     )
 
     await axios.post(`/api/ideas/${idea.id}/adopt`)
-    ElMessage.success('想法采纳成功')
+    showNotification.success('想法采纳成功')
 
     // 刷新列表
     fetchIdeas()
@@ -423,7 +424,7 @@ const adoptIdea = async (idea) => {
   } catch (error) {
     if (error !== 'cancel') {
       console.error('采纳想法失败:', error)
-      ElMessage.error('采纳想法失败')
+      showNotification.error('采纳想法失败')
     }
   }
 }
@@ -446,7 +447,7 @@ const confirmReject = async () => {
       reason: rejectReason.value
     })
 
-    ElMessage.success('想法已拒绝')
+    showNotification.success('想法已拒绝')
     rejectDialogVisible.value = false
 
     // 刷新列表
@@ -461,7 +462,7 @@ const confirmReject = async () => {
     rejectReason.value = ''
   } catch (error) {
     console.error('拒绝想法失败:', error)
-    ElMessage.error('拒绝想法失败')
+    showNotification.error('拒绝想法失败')
   }
 }
 
@@ -477,11 +478,11 @@ const transformToProject = async (idea) => {
       }
     )
 
-    ElMessage.info('正在进行AI转化，请稍等...')
+    showNotification.info('正在进行AI转化，请稍等...')
 
     const response = await axios.post(`/api/ideas/${idea.id}/transform-to-project`)
 
-    ElMessage.success(`AI转化成功！项目ID: ${response.data.project_id}`)
+    showNotification.success(`AI转化成功！项目ID: ${response.data.project_id}`)
 
     // 刷新列表
     fetchIdeas()
@@ -493,7 +494,7 @@ const transformToProject = async (idea) => {
   } catch (error) {
     if (error !== 'cancel') {
       console.error('AI转化失败:', error)
-      ElMessage.error('AI转化失败: ' + (error.response?.data?.message || error.message))
+      showNotification.error('AI转化失败: ' + (error.response?.data?.message || error.message))
     }
   }
 }
@@ -512,19 +513,19 @@ const deleteIdea = async (idea) => {
 
     // 这里需要实现删除API
     // await axios.delete(`/api/ideas/${idea.id}`)
-    ElMessage.success('想法已删除')
+    showNotification.success('想法已删除')
     fetchIdeas()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除想法失败:', error)
-      ElMessage.error('删除想法失败')
+      showNotification.error('删除想法失败')
     }
   }
 }
 
 const handleBatchDelete = async () => {
   if (selectedIdeas.value.length === 0) {
-    ElMessage.warning('请选择要删除的想法')
+    showNotification.warning('请选择要删除的想法')
     return
   }
 
@@ -540,20 +541,20 @@ const handleBatchDelete = async () => {
     )
 
     // 这里需要实现批量删除API
-    ElMessage.success(`已删除 ${selectedIdeas.value.length} 个想法`)
+    showNotification.success(`已删除 ${selectedIdeas.value.length} 个想法`)
     selectedIdeas.value = []
     fetchIdeas()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('批量删除失败:', error)
-      ElMessage.error('批量删除失败')
+      showNotification.error('批量删除失败')
     }
   }
 }
 
 const exportIdeas = () => {
   // 实现导出功能
-  ElMessage.info('导出功能开发中...')
+  showNotification.info('导出功能开发中...')
 }
 
 const viewProject = (projectId) => {

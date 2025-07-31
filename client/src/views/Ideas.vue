@@ -269,7 +269,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import {
   Plus, User, Search, ArrowDown, ArrowUp, Refresh, Star,
   Check, Link
@@ -355,7 +356,7 @@ const fetchIdeas = async () => {
     updateStats()
   } catch (error) {
     console.error('获取想法列表失败:', error)
-    ElMessage.error('获取想法列表失败')
+    showNotification.error('获取想法列表失败')
   } finally {
     loading.value = false
   }
@@ -439,30 +440,30 @@ const hasVoted = (ideaId) => {
 
 const voteForIdea = async (idea, votes) => {
   if (!authStore.isAuthenticated) {
-    ElMessage.warning('请先登录')
+    showNotification.warning('请先登录')
     return
   }
 
   if (hasVoted(idea.id)) {
-    ElMessage.warning('您已经为此想法投过票了')
+    showNotification.warning('您已经为此想法投过票了')
     return
   }
 
   if (userVotesToday.value + votes > 10) {
-    ElMessage.warning(`您今日投票数已达上限，剩余${10 - userVotesToday.value}票`)
+    showNotification.warning(`您今日投票数已达上限，剩余${10 - userVotesToday.value}票`)
     return
   }
 
   try {
     await axios.post(`/api/ideas/${idea.id}/vote`, { votes })
-    ElMessage.success(`投票成功，您为此想法投了${votes}票`)
+    showNotification.success(`投票成功，您为此想法投了${votes}票`)
     
     // 刷新数据
     fetchIdeas()
     fetchUserVotes()
   } catch (error) {
     console.error('投票失败:', error)
-    ElMessage.error('投票失败: ' + (error.response?.data?.message || error.message))
+    showNotification.error('投票失败: ' + (error.response?.data?.message || error.message))
   }
 }
 
@@ -475,15 +476,15 @@ const submitIdea = async () => {
     submitting.value = true
     await axios.post('/api/ideas', submitForm)
     
-    ElMessage.success('想法提交成功，等待管理员审核')
+    showNotification.success('想法提交成功，等待管理员审核')
     closeSubmitDialog()
     fetchIdeas()
   } catch (error) {
     if (error.response) {
-      ElMessage.error('提交失败: ' + error.response.data.message)
+      showNotification.error('提交失败: ' + error.response.data.message)
     } else {
       console.error('提交想法失败:', error)
-      ElMessage.error('提交失败，请重试')
+      showNotification.error('提交失败，请重试')
     }
   } finally {
     submitting.value = false

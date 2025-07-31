@@ -121,7 +121,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import { Search, Download, Delete } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
@@ -168,7 +169,7 @@ const fetchProjects = async () => {
     projects.value = response.data.projects
       } catch (error) {
       console.error('获取项目列表失败:', error)
-      ElMessage.error(t('admin.projects.messages.fetch_failed'))
+      showNotification.error(t('admin.projects.messages.fetch_failed'))
     } finally {
     projectsLoading.value = false
   }
@@ -215,19 +216,19 @@ const deleteProject = async (project) => {
       projects.value.splice(index, 1)
     }
 
-    ElMessage.success(t('admin.projects.messages.delete_success'))
+    showNotification.success(t('admin.projects.messages.delete_success'))
     emit('stats-updated')
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除项目失败:', error)
-      ElMessage.error(error.response?.data?.message || t('admin.projects.messages.delete_failed'))
+      showNotification.error(error.response?.data?.message || t('admin.projects.messages.delete_failed'))
     }
   }
 }
 
 const handleBatchDelete = async () => {
   if (selectedProjects.value.length === 0) {
-    ElMessage.warning(t('admin.projects.messages.batch_delete_warning'))
+    showNotification.warning(t('admin.projects.messages.batch_delete_warning'))
     return
   }
 
@@ -252,12 +253,12 @@ const handleBatchDelete = async () => {
     projects.value = projects.value.filter(p => !projectIds.includes(p.id))
     selectedProjects.value = []
 
-    ElMessage.success(t('admin.projects.messages.batch_delete_success'))
+    showNotification.success(t('admin.projects.messages.batch_delete_success'))
     emit('stats-updated')
   } catch (error) {
     if (error !== 'cancel') {
       console.error('批量删除失败:', error)
-      ElMessage.error(error.response?.data?.message || t('admin.projects.messages.batch_delete_failed'))
+      showNotification.error(error.response?.data?.message || t('admin.projects.messages.batch_delete_failed'))
     }
   }
 }
@@ -278,10 +279,10 @@ const exportProjects = async () => {
     link.remove()
     window.URL.revokeObjectURL(url)
 
-    ElMessage.success(t('admin.projects.messages.export_success'))
+    showNotification.success(t('admin.projects.messages.export_success'))
   } catch (error) {
     console.error('导出数据失败:', error)
-    ElMessage.error(t('admin.projects.messages.export_failed'))
+    showNotification.error(t('admin.projects.messages.export_failed'))
   }
 }
 

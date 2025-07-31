@@ -312,7 +312,7 @@
 <script setup>
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import hljs from 'highlight.js'
 import axios from '../../utils/axios'
@@ -421,26 +421,26 @@ const validateFile = (file) => {
   
   if (file.type.startsWith('image/')) {
     if (!allowedImageTypes.includes(file.type)) {
-      ElMessage.error(t('project.attachments.supported_image_formats'))
+      showNotification.error(t('project.attachments.supported_image_formats'))
       return false
     }
     const isLt5M = file.size / 1024 / 1024 < 5
     if (!isLt5M) {
-      ElMessage.error(t('project.attachments.max_image_size'))
+      showNotification.error(t('project.attachments.max_image_size'))
       return false
     }
   } else if (file.type.startsWith('video/')) {
     if (!allowedVideoTypes.includes(file.type)) {
-      ElMessage.error(t('project.attachments.supported_video_formats'))
+      showNotification.error(t('project.attachments.supported_video_formats'))
       return false
     }
     const isLt50M = file.size / 1024 / 1024 < 50
     if (!isLt50M) {
-      ElMessage.error(t('project.attachments.max_video_size'))
+      showNotification.error(t('project.attachments.max_video_size'))
       return false
     }
   } else {
-    ElMessage.error(t('project.attachments.invalid_format'))
+    showNotification.error(t('project.attachments.invalid_format'))
     return false
   }
   
@@ -449,7 +449,7 @@ const validateFile = (file) => {
 
 const uploadFile = async (file) => {
   if (uploading.value) {
-    ElMessage.warning(t('project.attachments.uploading'))
+    showNotification.warning(t('project.attachments.uploading'))
     return
   }
   
@@ -472,23 +472,23 @@ const uploadFile = async (file) => {
     
     if (errors.length > 0) {
       errors.forEach(error => {
-        ElMessage.error(`${error.filename}: ${error.error}`)
+        showNotification.error(`${error.filename}: ${error.error}`)
       })
     }
     
     if (images.length > 0) {
       formData.attachments.images.push(...images)
-      ElMessage.success(`${t('project.attachments.upload_success')} ${images.length} ${t('project.attachments.images')}`)
+      showNotification.success(`${t('project.attachments.upload_success')} ${images.length} ${t('project.attachments.images')}`)
     }
     
     if (videos.length > 0) {
       formData.attachments.videos.push(...videos)
-      ElMessage.success(`${t('project.attachments.upload_success')} ${videos.length} ${t('project.attachments.videos')}`)
+      showNotification.success(`${t('project.attachments.upload_success')} ${videos.length} ${t('project.attachments.videos')}`)
     }
     
   } catch (error) {
     console.error('文件上传失败:', error)
-    ElMessage.error(error.response?.data?.message || t('project.attachments.upload_failed'))
+    showNotification.error(error.response?.data?.message || t('project.attachments.upload_failed'))
   } finally {
     uploading.value = false
   }
@@ -599,11 +599,11 @@ const handleSave = async () => {
       response = await axios.post('/api/projects', data)
     }
 
-    ElMessage.success(props.project ? t('project.messages.project_update_success') : t('project.messages.project_create_success'))
+    showNotification.success(props.project ? t('project.messages.project_update_success') : t('project.messages.project_create_success'))
     emit('saved', response.data.project)
   } catch (error) {
     console.error('保存项目失败:', error)
-    ElMessage.error(error.response?.data?.message || t('project.messages.save_project_failed'))
+    showNotification.error(error.response?.data?.message || t('project.messages.save_project_failed'))
   } finally {
     saving.value = false
   }

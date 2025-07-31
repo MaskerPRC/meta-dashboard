@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import { showNotification } from './notification'
 
 // 创建axios实例
 const axiosInstance = axios.create({
@@ -42,24 +42,24 @@ axiosInstance.interceptors.response.use(
       
       switch (status) {
         case 401:
-          ElMessage.error('未登录或登录已过期')
+          showNotification.error('登录状态已过期，请重新登录', '认证失败')
           break
         case 403:
-          ElMessage.error('没有权限访问此资源')
+          showNotification.error('您没有权限访问此资源', '权限不足')
           break
         case 404:
-          ElMessage.error('请求的资源不存在')
+          showNotification.error('请求的资源不存在', '资源未找到')
           break
         case 500:
-          ElMessage.error('服务器内部错误')
+          showNotification.error('服务器内部错误，请稍后重试', '服务器错误')
           break
         default:
-          ElMessage.error(data?.message || '请求失败')
+          showNotification.error(data?.message || '请求失败', '请求失败')
       }
     } else if (error.request) {
-      ElMessage.error('网络错误，请检查网络连接')
+      showNotification.error('网络连接失败，请检查网络设置', '网络错误')
     } else {
-      ElMessage.error('请求配置错误')
+      showNotification.error('请求配置错误', '配置错误')
     }
     
     return Promise.reject(error)

@@ -206,7 +206,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import { Search, Refresh, Download } from '@element-plus/icons-vue'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import axios from '../../utils/axios'
@@ -274,7 +275,7 @@ const fetchResumes = async () => {
     totalResumes.value = response.data.data.pagination.total
   } catch (error) {
     console.error('获取简历列表失败:', error)
-    ElMessage.error('获取简历列表失败')
+    showNotification.error('获取简历列表失败')
   } finally {
     resumesLoading.value = false
   }
@@ -312,7 +313,7 @@ const viewResume = async (resume) => {
     showResumeDetail.value = true
   } catch (error) {
     console.error('获取简历详情失败:', error)
-    ElMessage.error('获取简历详情失败')
+    showNotification.error('获取简历详情失败')
   }
 }
 
@@ -320,10 +321,10 @@ const viewVersions = async (resume) => {
   try {
     // 这里需要调用获取版本历史的API
     // 由于当前API只支持用户自己获取版本历史，这里先显示提示
-    ElMessage.info('版本历史功能需要用户登录查看，请联系用户获取详情')
+    showNotification.info('版本历史功能需要用户登录查看，请联系用户获取详情')
   } catch (error) {
     console.error('获取版本历史失败:', error)
-    ElMessage.error('获取版本历史失败')
+    showNotification.error('获取版本历史失败')
   }
 }
 
@@ -340,7 +341,7 @@ const archiveResume = async (resume) => {
     )
 
     // 这里需要添加管理员归档简历的API
-    ElMessage.info('管理员归档功能待开发')
+    showNotification.info('管理员归档功能待开发')
   } catch (error) {
     // 用户取消操作
   }

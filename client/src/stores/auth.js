@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from '../utils/axios'
-import { ElMessage } from 'element-plus'
+import { showNotification } from '../utils/notification'
 import { isWechatBrowser } from '../utils/wechatDetector'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -63,12 +63,12 @@ export const useAuthStore = defineStore('auth', () => {
       await axios.post('/api/auth/logout')
       user.value = null
       hasCheckedAuth.value = false // 重置检查状态，确保下次重新检查
-      ElMessage.success('登出成功')
+      showNotification.success('已安全退出系统')
       // 刷新页面回到首页
       window.location.href = '/'
     } catch (error) {
       console.error('登出失败:', error)
-      ElMessage.error('登出失败')
+      showNotification.error('退出失败，请重试')
     } finally {
       loading.value = false
     }
@@ -135,16 +135,16 @@ export const useAuthStore = defineStore('auth', () => {
       if (response.data.success) {
         // 更新本地用户信息
         user.value = response.data.user
-        ElMessage.success(response.data.message)
+        showNotification.success(response.data.message)
         return { success: true, user: response.data.user }
       } else {
-        ElMessage.error(response.data.message || '更新失败')
+        showNotification.error(response.data.message || '更新失败')
         return { success: false, message: response.data.message }
       }
     } catch (error) {
       console.error('更新用户信息失败:', error)
       const errorMessage = error.response?.data?.message || '更新失败，请稍后重试'
-      ElMessage.error(errorMessage)
+      showNotification.error(errorMessage)
       return { success: false, message: errorMessage }
     } finally {
       loading.value = false
@@ -158,16 +158,16 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await axios.post('/api/auth/change-password', passwordData)
       
       if (response.data.success) {
-        ElMessage.success(response.data.message)
+        showNotification.success(response.data.message)
         return { success: true }
       } else {
-        ElMessage.error(response.data.message || '密码修改失败')
+        showNotification.error(response.data.message || '密码修改失败')
         return { success: false, message: response.data.message }
       }
     } catch (error) {
       console.error('修改密码失败:', error)
       const errorMessage = error.response?.data?.message || '密码修改失败，请稍后重试'
-      ElMessage.error(errorMessage)
+      showNotification.error(errorMessage)
       return { success: false, message: errorMessage }
     } finally {
       loading.value = false

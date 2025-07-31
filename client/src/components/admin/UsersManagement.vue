@@ -104,7 +104,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { showNotification } from '../../utils/notification'
 import { Search, User } from '@element-plus/icons-vue'
 import { useAuthStore } from '../../stores/auth'
 import axios from '../../utils/axios'
@@ -148,7 +149,7 @@ const fetchUsers = async () => {
     }))
   } catch (error) {
     console.error('获取用户列表失败:', error)
-    ElMessage.error(t('admin.users.messages.fetch_failed'))
+    showNotification.error(t('admin.users.messages.fetch_failed'))
   } finally {
     usersLoading.value = false
     // 延迟重置标记，确保数据已完全加载并渲染
@@ -173,10 +174,10 @@ const updateUserAdmin = async (user) => {
       is_admin: user.is_admin
     })
 
-    ElMessage.success(user.is_admin ? t('admin.users.messages.admin_grant_success') : t('admin.users.messages.admin_revoke_success'))
+    showNotification.success(user.is_admin ? t('admin.users.messages.admin_grant_success') : t('admin.users.messages.admin_revoke_success'))
   } catch (error) {
     console.error('更新用户权限失败:', error)
-    ElMessage.error(t('admin.users.messages.admin_update_failed'))
+    showNotification.error(t('admin.users.messages.admin_update_failed'))
     // 恢复原值
     user.is_admin = !user.is_admin
   }
@@ -223,12 +224,12 @@ const resetUserPassword = async (user) => {
       await axios.put(`/api/admin/users/${user.id}/password`, {
         new_password: value
       })
-      ElMessage.success(t('admin.users.messages.reset_password_success'))
+      showNotification.success(t('admin.users.messages.reset_password_success'))
     })
   } catch (error) {
     if (error !== 'cancel') {
       console.error('重置密码失败:', error)
-      ElMessage.error(error.response?.data?.message || t('admin.users.messages.reset_password_failed'))
+      showNotification.error(error.response?.data?.message || t('admin.users.messages.reset_password_failed'))
     }
   }
 }
@@ -254,12 +255,12 @@ const deleteUser = async (user) => {
       users.value.splice(index, 1)
     }
 
-    ElMessage.success(t('admin.users.messages.delete_success'))
+    showNotification.success(t('admin.users.messages.delete_success'))
     emit('stats-updated')
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除用户失败:', error)
-      ElMessage.error(error.response?.data?.message || t('admin.users.messages.delete_failed'))
+      showNotification.error(error.response?.data?.message || t('admin.users.messages.delete_failed'))
     }
   }
 }
