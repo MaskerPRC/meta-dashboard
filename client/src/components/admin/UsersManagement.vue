@@ -191,7 +191,7 @@ const getProviderName = (user) => {
 }
 
 const getProviderTagType = (user) => {
-  if (user.password_hash) return ''
+  if (user.password_hash) return 'primary'
   if (user.github_id) return 'success'
   if (user.google_id) return 'warning'
   if (user.wechat_id) return 'success'

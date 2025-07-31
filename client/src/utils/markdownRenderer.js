@@ -215,8 +215,12 @@ export function createI18nMarkdownRenderer(t) {
   }
 }
 
+// 为了向后兼容，提供 renderMarkdown 别名
+export const renderMarkdown = renderEnhancedMarkdown
+
 export default {
   renderEnhancedMarkdown,
+  renderMarkdown,
   getMediaInfo,
   isImageUrl,
   isVideoUrl,

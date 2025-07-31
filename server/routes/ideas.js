@@ -648,25 +648,57 @@ function updateLogStatus(logId, status, errorMessage = null, processingTime = nu
   });
 }
 
+// 引入AI服务
+const aiService = require('../services/aiService');
+
 // AI转化想法为项目的服务函数
 async function transformIdeaToProject(idea) {
-  // 这里应该调用实际的AI服务
-  // 暂时返回一个模拟的结果
-  const mockProjectData = {
-    title: `【AI项目】${idea.title}`,
-    description: `基于用户想法转化的AI项目：${idea.description}`,
-    content: `# ${idea.title}\n\n## 项目概述\n${idea.description}\n\n## 详细说明\n${idea.content || '详细实现方案待补充'}\n\n## 开发计划\n- [ ] 需求分析\n- [ ] 设计方案\n- [ ] 开发实现\n- [ ] 测试验证\n- [ ] 部署发布`,
-    status: 'planning',
-    priority: 'medium',
-    progress: 10,
-    tech_stack: '待确定',
-    tags: 'AI转化,用户想法'
-  };
+  try {
+    // 构建AI输入文本
+    const aiInput = `
+想法标题: ${idea.title}
+想法描述: ${idea.description}
+想法内容: ${idea.content || ''}
+作者: ${idea.author_name}
 
-  // 模拟API调用延迟
-  await new Promise(resolve => setTimeout(resolve, 1000));
+请基于以上用户想法，生成一个完整的项目规划。
+    `.trim();
 
-  return mockProjectData;
+    // 调用AI服务生成项目
+    const aiResponse = await aiService.generateProject(aiInput, 'zh');
+    
+    // 返回AI生成的项目数据
+    return {
+      title: aiResponse.title || `【AI项目】${idea.title}`,
+      description: aiResponse.description || `基于用户想法转化的AI项目：${idea.description}`,
+      content: aiResponse.content || `# ${idea.title}\n\n## 项目概述\n${idea.description}\n\n## 详细说明\n${idea.content || '详细实现方案待补充'}\n\n## 开发计划\n- [ ] 需求分析\n- [ ] 设计方案\n- [ ] 开发实现\n- [ ] 测试验证\n- [ ] 部署发布`,
+      status: aiResponse.status || 'planning',
+      priority: aiResponse.priority || 'medium',
+      progress: aiResponse.progress || 10,
+      tech_stack: Array.isArray(aiResponse.tech_stack) ? aiResponse.tech_stack.join(',') : (aiResponse.tech_stack || '待确定'),
+      tags: Array.isArray(aiResponse.tags) ? aiResponse.tags.join(',') : (aiResponse.tags || 'AI转化,用户想法'),
+      ai_generated: true,
+      ai_source: aiResponse.ai_source,
+      estimated_duration: aiResponse.estimated_duration
+    };
+  } catch (error) {
+    console.error('AI转化想法失败:', error);
+    
+    // 如果AI服务失败，回退到基本的模拟数据
+    console.log('🔄 AI服务失败，使用基本转化逻辑');
+    return {
+      title: `【AI项目】${idea.title}`,
+      description: `基于用户想法转化的项目：${idea.description}`,
+      content: `# ${idea.title}\n\n## 项目概述\n${idea.description}\n\n## 详细说明\n${idea.content || '详细实现方案待补充'}\n\n## 开发计划\n- [ ] 需求分析\n- [ ] 设计方案\n- [ ] 开发实现\n- [ ] 测试验证\n- [ ] 部署发布`,
+      status: 'planning',
+      priority: 'medium',
+      progress: 10,
+      tech_stack: '待确定',
+      tags: 'AI转化,用户想法',
+      ai_generated: true,
+      ai_source: 'fallback'
+    };
+  }
 }
 
 module.exports = router;

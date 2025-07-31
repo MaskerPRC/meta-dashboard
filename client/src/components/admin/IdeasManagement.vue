@@ -115,7 +115,7 @@
                 <el-icon><View /></el-icon>
                 查看
               </el-button>
-              
+
               <template v-if="scope.row.status === 'pending'">
                 <el-button size="small" type="success" @click="adoptIdea(scope.row)">
                   <el-icon><Check /></el-icon>
@@ -128,13 +128,13 @@
               </template>
 
               <template v-if="scope.row.status === 'adopted'">
-                <el-button 
-                  size="small" 
-                  type="primary" 
+                <el-button
+                  size="small"
+                  type="primary"
                   @click="transformToProject(scope.row)"
                   :disabled="scope.row.project_id"
                 >
-                  <el-icon><Magic /></el-icon>
+                  <el-icon><MagicStick /></el-icon>
                   {{ scope.row.project_id ? '已转化' : 'AI转化' }}
                 </el-button>
               </template>
@@ -224,7 +224,7 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeIdeaDetailDialog">关闭</el-button>
-          
+
           <template v-if="selectedIdea && selectedIdea.status === 'pending'">
             <el-button type="success" @click="adoptIdea(selectedIdea)">
               <el-icon><Check /></el-icon>
@@ -238,7 +238,7 @@
 
           <template v-if="selectedIdea && selectedIdea.status === 'adopted' && !selectedIdea.project_id">
             <el-button type="primary" @click="transformToProject(selectedIdea)">
-              <el-icon><Magic /></el-icon>
+              <el-icon><MagicStick /></el-icon>
               AI转化为项目
             </el-button>
           </template>
@@ -282,7 +282,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Search, Download, Delete, View, Check, Close, Magic,
+  Search, Download, Delete, View, Check, Close, MagicStick,
   Star, ArrowDown, ArrowUp
 } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
@@ -412,10 +412,10 @@ const adoptIdea = async (idea) => {
 
     await axios.post(`/api/ideas/${idea.id}/adopt`)
     ElMessage.success('想法采纳成功')
-    
+
     // 刷新列表
     fetchIdeas()
-    
+
     // 如果详情对话框开着，也更新
     if (selectedIdea.value && selectedIdea.value.id === idea.id) {
       viewIdeaDetail(idea)
@@ -445,18 +445,18 @@ const confirmReject = async () => {
     await axios.post(`/api/ideas/${rejectingIdea.value.id}/reject`, {
       reason: rejectReason.value
     })
-    
+
     ElMessage.success('想法已拒绝')
     rejectDialogVisible.value = false
-    
+
     // 刷新列表
     fetchIdeas()
-    
+
     // 如果详情对话框开着，也更新
     if (selectedIdea.value && selectedIdea.value.id === rejectingIdea.value.id) {
       viewIdeaDetail(rejectingIdea.value)
     }
-    
+
     rejectingIdea.value = null
     rejectReason.value = ''
   } catch (error) {
@@ -478,14 +478,14 @@ const transformToProject = async (idea) => {
     )
 
     ElMessage.info('正在进行AI转化，请稍等...')
-    
+
     const response = await axios.post(`/api/ideas/${idea.id}/transform-to-project`)
-    
+
     ElMessage.success(`AI转化成功！项目ID: ${response.data.project_id}`)
-    
+
     // 刷新列表
     fetchIdeas()
-    
+
     // 如果详情对话框开着，也更新
     if (selectedIdea.value && selectedIdea.value.id === idea.id) {
       viewIdeaDetail(idea)
@@ -558,7 +558,7 @@ const exportIdeas = () => {
 
 const viewProject = (projectId) => {
   // 跳转到项目详情页
-  window.open(`/projects/${projectId}`, '_blank')
+  window.open(`/project/${projectId}`, '_blank')
 }
 
 const getStatusName = (status) => {
@@ -593,13 +593,13 @@ onMounted(() => {
   padding: 16px;
   background: #f8f9fa;
   border-radius: 8px;
-  
+
   .toolbar-left {
     display: flex;
     gap: 12px;
     align-items: center;
   }
-  
+
   .toolbar-right {
     display: flex;
     gap: 12px;
@@ -630,7 +630,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   .author-name {
     font-size: 13px;
   }
@@ -641,7 +641,7 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  
+
   small {
     color: #666;
   }
@@ -658,12 +658,12 @@ onMounted(() => {
     background-color: #ffd04b;
     color: #ad6800;
   }
-  
+
   &.adopted {
     background-color: #67c23a;
     color: white;
   }
-  
+
   &.rejected {
     background-color: #f56c6c;
     color: white;
@@ -681,16 +681,16 @@ onMounted(() => {
     border-bottom: 1px solid #eee;
     padding-bottom: 16px;
     margin-bottom: 20px;
-    
+
     h2 {
       margin: 0 0 8px 0;
     }
-    
+
     .idea-meta {
       display: flex;
       align-items: center;
       gap: 12px;
-      
+
       .vote-info {
         display: flex;
         align-items: center;
@@ -699,7 +699,7 @@ onMounted(() => {
       }
     }
   }
-  
+
   .idea-content {
     .description-section,
     .content-section,
@@ -707,30 +707,30 @@ onMounted(() => {
     .adoption-section,
     .project-section {
       margin-bottom: 20px;
-      
+
       h4 {
         margin: 0 0 8px 0;
         color: #333;
       }
     }
-    
+
     .markdown-content {
       padding: 12px;
       background: #f8f9fa;
       border-radius: 4px;
       border-left: 4px solid #409eff;
     }
-    
+
     .author-info {
       display: flex;
       align-items: center;
       gap: 12px;
-      
+
       .author-details {
         .author-name {
           font-weight: 500;
         }
-        
+
         .submit-time {
           font-size: 12px;
           color: #666;
@@ -750,14 +750,14 @@ onMounted(() => {
   .ideas-toolbar {
     flex-direction: column;
     gap: 12px;
-    
+
     .toolbar-left,
     .toolbar-right {
       width: 100%;
       justify-content: space-between;
     }
   }
-  
+
   .action-buttons {
     .el-button {
       padding: 4px 8px;

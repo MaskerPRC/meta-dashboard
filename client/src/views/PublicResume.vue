@@ -177,7 +177,7 @@ onUnmounted(() => {
 }
 
 .resume-content {
-  background: white;
+  background: var(--ai-bg-primary);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -240,14 +240,14 @@ onUnmounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: white;
+  background: var(--ai-bg-primary);
   z-index: 9999;
   overflow-y: auto;
   padding: 60px 80px;
 }
 
 .markdown-content {
-  color: var(--el-text-color-primary);
+  color: var(--ai-text-primary);
   font-size: 16px;
 }
 
@@ -260,18 +260,18 @@ onUnmounted(() => {
   margin-top: 32px;
   margin-bottom: 16px;
   font-weight: 600;
-  color: var(--el-text-color-primary);
+  color: var(--ai-text-primary);
 }
 
 .markdown-content h1 {
   font-size: 32px;
-  border-bottom: 2px solid var(--el-color-primary);
+  border-bottom: 2px solid var(--ai-primary);
   padding-bottom: 12px;
 }
 
 .markdown-content h2 {
   font-size: 24px;
-  border-bottom: 1px solid var(--el-border-color-light);
+  border-bottom: 1px solid var(--ai-border);
   padding-bottom: 8px;
 }
 
@@ -294,7 +294,7 @@ onUnmounted(() => {
 }
 
 .markdown-content code {
-  background: var(--el-fill-color-light);
+  background: var(--ai-bg-secondary);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Monaco', 'Consolas', monospace;
@@ -302,19 +302,19 @@ onUnmounted(() => {
 }
 
 .markdown-content pre {
-  background: var(--el-fill-color-light);
+  background: var(--ai-bg-secondary);
   padding: 20px;
   border-radius: 8px;
   overflow-x: auto;
   margin-bottom: 20px;
-  border-left: 4px solid var(--el-color-primary);
+  border-left: 4px solid var(--ai-primary);
 }
 
 .markdown-content blockquote {
-  border-left: 4px solid var(--el-color-primary);
+  border-left: 4px solid var(--ai-primary);
   padding-left: 20px;
   margin: 20px 0;
-  color: var(--el-text-color-secondary);
+  color: var(--ai-text-secondary);
   font-style: italic;
 }
 
@@ -326,13 +326,13 @@ onUnmounted(() => {
 
 .markdown-content th,
 .markdown-content td {
-  border: 1px solid var(--el-border-color-light);
+  border: 1px solid var(--ai-border);
   padding: 12px;
   text-align: left;
 }
 
 .markdown-content th {
-  background: var(--el-fill-color-lighter);
+  background: var(--ai-bg-secondary);
   font-weight: 600;
 }
 

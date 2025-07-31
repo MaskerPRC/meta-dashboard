@@ -43,6 +43,10 @@
             <el-icon><List /></el-icon>
             <span>{{ $t('nav.projects') }}</span>
           </router-link>
+          <router-link to="/ideas" class="nav-item" active-class="router-link-active" @click="handleNavClick('/ideas')">
+            <el-icon><Star /></el-icon>
+            <span>{{ $t('nav.ideas') }}</span>
+          </router-link>
           <router-link to="/global-history" class="nav-item" active-class="router-link-active" @click="handleNavClick('/global-history')">
             <el-icon><Clock /></el-icon>
             <span>{{ $t('nav.global_history') }}</span>
@@ -212,6 +216,15 @@
                 <span>{{ $t('nav.projects') }}</span>
               </router-link>
               <router-link 
+                to="/ideas" 
+                class="mobile-nav-item"
+                :class="{ 'active': $route.path === '/ideas' }"
+                @click="handleMobileNavClick('/ideas')"
+              >
+                <el-icon><Star /></el-icon>
+                <span>{{ $t('nav.ideas') }}</span>
+              </router-link>
+              <router-link 
                 to="/global-history" 
                 class="mobile-nav-item"
                 :class="{ 'active': $route.path === '/global-history' }"
@@ -326,7 +339,7 @@ import LanguageSwitcher from '../common/LanguageSwitcher.vue'
 import ProfileDialog from '../common/ProfileDialog.vue'
 import { 
   House, List, InfoFilled, User, ArrowDown, 
-  Setting, SwitchButton, Moon, Sunny, Menu, Close, Clock, Document
+  Setting, SwitchButton, Moon, Sunny, Menu, Close, Clock, Document, Star
 } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 
