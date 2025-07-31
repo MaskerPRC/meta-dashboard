@@ -185,11 +185,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { marked } from 'marked'
-import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import CommentForm from './CommentForm.vue'
 import AttachmentPreview from './AttachmentPreview.vue'
+import { renderEnhancedMarkdown } from '../../utils/markdownRenderer'
 import {
   ChatLineSquare, User, ChatDotSquare, MoreFilled, 
   Edit, Delete, View
@@ -199,19 +198,7 @@ import {
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
 
-// 配置 marked
-marked.setOptions({
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(code, { language: lang }).value
-      } catch (__) {}
-    }
-    return hljs.highlightAuto(code).value
-  },
-  breaks: true,
-  gfm: true
-})
+
 
 const props = defineProps({
   projectId: {
@@ -268,20 +255,7 @@ const canEditComment = (comment) => {
 
 // 方法
 const renderMarkdown = (content) => {
-  if (!content) return ''
-  
-  try {
-    const sanitized = content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
-    
-    return marked(sanitized)
-  } catch (error) {
-    console.error('Markdown渲染失败:', error)
-    return content
-  }
+  return renderEnhancedMarkdown(content)
 }
 
 // 获取检测状态的标签类型

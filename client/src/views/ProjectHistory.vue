@@ -238,7 +238,7 @@
 </template>
 
 <script>
-import { marked } from 'marked';
+import { renderEnhancedMarkdown } from '@/utils/markdownRenderer';
 import MarkdownEditor from '@/components/common/MarkdownEditor.vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -416,7 +416,7 @@ export default {
     },
     
     renderMarkdown(content) {
-      return marked(content);
+      return renderEnhancedMarkdown(content);
     },
     
     openImagePreview(url) {

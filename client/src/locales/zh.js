@@ -808,5 +808,15 @@ export default {
       version_need_login: '版本历史功能需要用户登录查看，请联系用户获取详情',
       archive_feature_developing: '管理员归档功能待开发'
     }
+  },
+
+  // Markdown渲染器
+  markdown: {
+    media: {
+      video_not_supported: '您的浏览器不支持视频播放。',
+      invalid_link: '无效链接',
+      image_loading_error: '图片加载失败',
+      video_loading_error: '视频加载失败'
+    }
   }
 }

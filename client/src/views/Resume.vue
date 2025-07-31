@@ -221,10 +221,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Clock, DocumentAdd, FullScreen, Download, Close, CopyDocument 
 } from '@element-plus/icons-vue'
-import { marked } from 'marked'
 import MarkdownEditor from '../components/common/MarkdownEditor.vue'
 import axios from '../utils/axios'
 import dayjs from 'dayjs'
+import { renderEnhancedMarkdown } from '../utils/markdownRenderer'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -251,12 +251,12 @@ const selectedVersion = ref(null)
 // 计算属性
 const renderedContent = computed(() => {
   if (!resumeData.value.content) return ''
-  return marked(resumeData.value.content)
+  return renderEnhancedMarkdown(resumeData.value.content)
 })
 
 const renderedVersionContent = computed(() => {
   if (!selectedVersion.value?.content) return ''
-  return marked(selectedVersion.value.content)
+  return renderEnhancedMarkdown(selectedVersion.value.content)
 })
 
 // 方法

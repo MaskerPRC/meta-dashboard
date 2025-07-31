@@ -208,7 +208,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Download } from '@element-plus/icons-vue'
-import { marked } from 'marked'
+import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import axios from '../../utils/axios'
 import dayjs from 'dayjs'
 
@@ -254,7 +254,7 @@ const filteredResumes = computed(() => {
 
 const renderedContent = computed(() => {
   if (!selectedResume.value?.content) return ''
-  return marked(selectedResume.value.content)
+  return renderEnhancedMarkdown(selectedResume.value.content)
 })
 
 // 方法

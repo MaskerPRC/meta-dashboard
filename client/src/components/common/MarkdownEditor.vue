@@ -103,8 +103,8 @@
 </template>
 
 <script>
-import { marked } from 'marked';
 import axios from '@/utils/axios';
+import { renderEnhancedMarkdown } from '@/utils/markdownRenderer';
 
 export default {
   name: 'MarkdownEditor',
@@ -134,7 +134,7 @@ export default {
   },
   computed: {
     renderedContent() {
-      return marked(this.content);
+      return renderEnhancedMarkdown(this.content);
     }
   },
   watch: {

@@ -79,9 +79,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, FullScreen, CopyDocument, Printer, Close } from '@element-plus/icons-vue'
-import { marked } from 'marked'
 import axios from '../utils/axios'
 import dayjs from 'dayjs'
+import { renderEnhancedMarkdown } from '../utils/markdownRenderer'
 
 const router = useRouter()
 
@@ -93,7 +93,7 @@ const isFullscreen = ref(false)
 // 计算属性
 const renderedContent = computed(() => {
   if (!resume.value?.content) return ''
-  return marked(resume.value.content)
+  return renderEnhancedMarkdown(resume.value.content)
 })
 
 // 方法

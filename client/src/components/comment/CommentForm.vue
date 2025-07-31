@@ -125,27 +125,14 @@ import { ref, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { marked } from 'marked'
-import hljs from 'highlight.js'
 import axios from '../../utils/axios'
 import AttachmentPreview from './AttachmentPreview.vue'
+import { renderEnhancedMarkdown } from '../../utils/markdownRenderer'
 import {
   User, Edit, View, Upload, QuestionFilled
 } from '@element-plus/icons-vue'
 
-// 配置 marked
-marked.setOptions({
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(code, { language: lang }).value
-      } catch (__) {}
-    }
-    return hljs.highlightAuto(code).value
-  },
-  breaks: true,
-  gfm: true
-})
+
 
 const props = defineProps({
   modelValue: {
@@ -176,20 +163,7 @@ const previewContent = computed(() => {
 
 // 方法
 const renderMarkdown = (content) => {
-  if (!content) return ''
-  
-  try {
-    const sanitized = content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
-    
-    return marked(sanitized)
-  } catch (error) {
-    console.error('Markdown渲染失败:', error)
-    return content
-  }
+  return renderEnhancedMarkdown(content)
 }
 
 const hasAttachmentsToSubmit = () => {

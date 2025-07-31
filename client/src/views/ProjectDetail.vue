@@ -220,12 +220,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Edit, Delete, Link, View, ArrowRight, Clock } from '@element-plus/icons-vue'
-import { marked } from 'marked'
 import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
 import dayjs from 'dayjs'
 import CommentsSection from '@/components/comment/CommentsSection.vue'
 import ProjectEditDialog from '@/components/admin/ProjectEditDialog.vue'
+import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 
 const route = useRoute()
 const router = useRouter()
@@ -240,7 +240,7 @@ const showEditDialog = ref(false)
 // 计算属性
 const renderedContent = computed(() => {
   if (!project.value?.content) return ''
-  return marked(project.value.content)
+  return renderEnhancedMarkdown(project.value.content)
 })
 
 const hasAttachments = computed(() => {

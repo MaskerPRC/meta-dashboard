@@ -313,7 +313,7 @@
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { marked } from 'marked'
+import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import hljs from 'highlight.js'
 import axios from '../../utils/axios'
 import {
@@ -384,22 +384,7 @@ const formRules = {
 // 计算属性
 const renderedContent = computed(() => {
   if (!formData.content) return `<p class="empty-preview">${t('project.editor.empty_preview')}</p>`
-
-  // 配置marked
-  marked.setOptions({
-    highlight: function(code, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          return hljs.highlight(code, { language: lang }).value
-        } catch (err) {}
-      }
-      return hljs.highlightAuto(code).value
-    },
-    breaks: true,
-    gfm: true
-  })
-
-  return marked(formData.content)
+  return renderEnhancedMarkdown(formData.content)
 })
 
 const hasAttachments = computed(() => {

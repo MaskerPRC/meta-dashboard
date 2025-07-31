@@ -143,7 +143,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ArrowRight, Clock, TrendCharts, DocumentAdd, Trophy, View } from '@element-plus/icons-vue'
-import { marked } from 'marked'
+import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
@@ -267,8 +267,7 @@ const formatDate = (dateString) => {
 
 // 渲染Markdown
 const renderMarkdown = (content) => {
-  if (!content) return ''
-  return marked(content)
+  return renderEnhancedMarkdown(content)
 }
 
 // 生命周期

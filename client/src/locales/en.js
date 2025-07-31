@@ -808,5 +808,15 @@ Brief description of this AI project's functionality and goals.
       version_need_login: 'Version history requires user login to view, please contact user for details',
       archive_feature_developing: 'Admin archive feature is under development'
     }
+  },
+
+  // Markdown renderer
+  markdown: {
+    media: {
+      video_not_supported: 'Your browser does not support video playback.',
+      invalid_link: 'Invalid link',
+      image_loading_error: 'Image loading failed',
+      video_loading_error: 'Video loading failed'
+    }
   }
 }
