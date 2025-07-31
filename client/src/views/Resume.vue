@@ -323,11 +323,11 @@ const exportPDF = () => {
 
 const getStatusTagType = (status) => {
   const statusTypes = {
-    draft: '',
+    draft: 'warning',
     published: 'success',
     archived: 'info'
   }
-  return statusTypes[status] || ''
+  return statusTypes[status] || 'primary'
 }
 
 const getStatusText = (status) => {

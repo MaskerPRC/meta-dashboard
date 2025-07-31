@@ -462,7 +462,7 @@ export default {
         completed: 'completed'
       };
       const translationKey = statusMap[status] || 'brainstorming';
-      return t(`project.status_options.${translationKey}`);
+      return this.t(`project.status_options.${translationKey}`);
     },
     
     formatTime(timestamp) {

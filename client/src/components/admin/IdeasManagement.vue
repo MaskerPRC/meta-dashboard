@@ -132,7 +132,7 @@
                   size="small"
                   type="primary"
                   @click="transformToProject(scope.row)"
-                  :disabled="scope.row.project_id"
+                  :disabled="Boolean(scope.row.project_id)"
                 >
                   <el-icon><MagicStick /></el-icon>
                   {{ scope.row.project_id ? '已转化' : 'AI转化' }}
