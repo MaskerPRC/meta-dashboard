@@ -228,11 +228,23 @@ onMounted(async () => {
     const projectId = parseInt(route.query.edit)
     await nextTick()
     
-    // 等待项目管理组件加载完成
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 使用更高效的方式等待组件加载
+    // 轮询检查组件是否已加载，避免固定延迟
+    const waitForComponent = async () => {
+      let attempts = 0
+      const maxAttempts = 20 // 最多等待2秒 (20 * 100ms)
+      
+      while (attempts < maxAttempts) {
+        if (projectsManagementRef.value && projectsManagementRef.value.fetchProjects) {
+          return true
+        }
+        await new Promise(resolve => setTimeout(resolve, 100))
+        attempts++
+      }
+      return false
+    }
     
-    // 从项目管理组件获取项目数据
-    if (projectsManagementRef.value) {
+    if (await waitForComponent()) {
       await projectsManagementRef.value.fetchProjects()
       const projects = projectsManagementRef.value.projects || []
       const project = projects.find(p => p.id === projectId)

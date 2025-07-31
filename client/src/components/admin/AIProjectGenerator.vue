@@ -236,10 +236,11 @@ const startGenerate = async () => {
       generatedProject.value = response.data.project
       progress.value = 100
 
-      setTimeout(() => {
+      // 使用 requestAnimationFrame 进行更流畅的UI更新
+      requestAnimationFrame(() => {
         currentStep.value = 2
         clearInterval(progressInterval)
-      }, 500)
+      })
     }
 
     showNotification.success(t('admin.ai_generator.messages.generate_success'))

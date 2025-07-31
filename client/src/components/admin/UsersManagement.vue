@@ -102,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox } from 'element-plus'
 import { showNotification } from '../../utils/notification'
@@ -152,10 +152,11 @@ const fetchUsers = async () => {
     showNotification.error(t('admin.users.messages.fetch_failed'))
   } finally {
     usersLoading.value = false
-    // 延迟重置标记，确保数据已完全加载并渲染
-    setTimeout(() => {
+    // 使用 nextTick 确保DOM更新完成后重置加载状态
+    // 避免不必要的定时器延迟
+    nextTick(() => {
       isLoadingUsers.value = false
-    }, 100)
+    })
   }
 }
 
