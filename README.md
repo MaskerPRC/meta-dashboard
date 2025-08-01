@@ -2,6 +2,11 @@
 
 赋能"一年100个AI产品挑战"的全栈项目管理解决方案，让独立开发者在AI时代事半功倍
 
+## 示例
+<img width="2267" height="1542" alt="image" src="https://github.com/user-attachments/assets/11bf6ba0-a425-4c48-ae94-21d3e95b2feb" />
+<img width="2280" height="1581" alt="image" src="https://github.com/user-attachments/assets/32e3c3ba-fc68-4f36-851f-f6d97d09cfe4" />
+
+
 ## ✨ 功能特性
 
 ### 🤖 AI增强开发
