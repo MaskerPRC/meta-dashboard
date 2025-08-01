@@ -4,11 +4,14 @@
 
 **开发不易，求个小星星✨**
 
-## 示例
+## 👣示例
 https://100.agitao.net/
 
 <img width="2267" height="1542" alt="image" src="https://github.com/user-attachments/assets/11bf6ba0-a425-4c48-ae94-21d3e95b2feb" />
 <img width="2280" height="1581" alt="image" src="https://github.com/user-attachments/assets/32e3c3ba-fc68-4f36-851f-f6d97d09cfe4" />
+
+## 👀欢迎加入微信交流群
+![100个AI项目交流群](https://github.com/user-attachments/assets/8aa6c8c0-4308-486b-9740-602c07ba19ff)
 
 
 ## ✨ 功能特性
