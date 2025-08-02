@@ -101,7 +101,7 @@
       <div class="stats-bar">
         <div class="stats-item">
           <span class="stats-label">{{ $t('projects.total_projects') }}：</span>
-          <span class="stats-value">{{ projectsStore.pagination.total }}</span>
+          <span class="stats-value">{{ projectsStore.stats.totalProjects || projectsStore.pagination.total }}</span>
         </div>
         <div class="stats-item">
           <span class="stats-label">{{ $t('projects.average_progress') }}：</span>
@@ -342,7 +342,11 @@ const formatDate = (date) => {
 }
 
 // 生命周期
-onMounted(() => {
+onMounted(async () => {
+  // 获取统计数据
+  await projectsStore.fetchStats()
+  
+  // 获取项目列表
   fetchProjects()
 })
 

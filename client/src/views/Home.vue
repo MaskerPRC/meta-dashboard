@@ -29,7 +29,7 @@
           <div class="hero-visual">
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-number">{{ projectsStore.projects.length || 0 }}</div>
+                <div class="stat-number">{{ projectsStore.stats.totalProjects || 0 }}</div>
                 <div class="stat-label">{{ $t('home.stats.ai_projects') }}</div>
               </div>
               <div class="stat-card">
@@ -191,9 +191,12 @@ const goToProject = (id) => {
   router.push(`/project/${id}`)
 }
 
-onMounted(() => {
-  // 获取项目数据
-  projectsStore.fetchProjects({ limit: 12 })
+onMounted(async () => {
+  // 获取统计数据
+  await projectsStore.fetchStats()
+  
+  // 获取最新项目数据用于展示
+  projectsStore.fetchProjects({ limit: 6 })
 })
 </script>
 

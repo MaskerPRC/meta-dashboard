@@ -274,6 +274,162 @@ router.get('/', (req, res) => {
   });
 });
 
+// 获取项目统计数据（公开接口） - 必须在 /:id 路由之前定义
+router.get('/stats', (req, res) => {
+  console.log('📊 开始计算项目统计数据...');
+  
+  // 使用多个独立查询避免复杂SQL
+  const queries = {
+    // 总项目数
+    totalProjects: 'SELECT COUNT(*) as total FROM projects',
+    
+    // 各状态项目数
+    statusCounts: `
+      SELECT status, COUNT(*) as count 
+      FROM projects 
+      GROUP BY status
+    `,
+    
+    // 平均进度
+    avgProgress: 'SELECT AVG(progress) as avg_progress FROM projects',
+    
+    // 各优先级项目数
+    priorityCounts: `
+      SELECT priority, COUNT(*) as count 
+      FROM projects 
+      GROUP BY priority
+    `
+  };
+  
+  let results = {};
+  let completedQueries = 0;
+  const totalQueries = Object.keys(queries).length;
+  
+  // 执行总项目数查询
+  db.get(queries.totalProjects, (err, result) => {
+    if (err) {
+      console.error('获取总项目数失败:', err);
+      return res.status(500).json({ message: '获取统计数据失败' });
+    }
+    
+    results.totalProjects = result.total;
+    completedQueries++;
+    
+    if (completedQueries === totalQueries) {
+      sendResponse();
+    }
+  });
+  
+  // 执行状态统计查询
+  db.all(queries.statusCounts, (err, statusRows) => {
+    if (err) {
+      console.error('获取状态统计失败:', err);
+      return res.status(500).json({ message: '获取统计数据失败' });
+    }
+    
+    // 初始化状态统计对象
+    const statusCounts = {
+      idea: 0,
+      planning: 0,
+      development: 0,
+      testing: 0,
+      deployed: 0,
+      completed: 0,
+      paused: 0
+    };
+    
+    // 填充实际数据
+    statusRows.forEach(row => {
+      if (statusCounts.hasOwnProperty(row.status)) {
+        statusCounts[row.status] = row.count;
+      }
+    });
+    
+    results.statusCounts = statusCounts;
+    completedQueries++;
+    
+    if (completedQueries === totalQueries) {
+      sendResponse();
+    }
+  });
+  
+  // 执行平均进度查询
+  db.get(queries.avgProgress, (err, result) => {
+    if (err) {
+      console.error('获取平均进度失败:', err);
+      return res.status(500).json({ message: '获取统计数据失败' });
+    }
+    
+    results.avgProgress = Math.round(result.avg_progress || 0);
+    completedQueries++;
+    
+    if (completedQueries === totalQueries) {
+      sendResponse();
+    }
+  });
+  
+  // 执行优先级统计查询
+  db.all(queries.priorityCounts, (err, priorityRows) => {
+    if (err) {
+      console.error('获取优先级统计失败:', err);
+      return res.status(500).json({ message: '获取统计数据失败' });
+    }
+    
+    // 初始化优先级统计对象
+    const priorityCounts = {
+      low: 0,
+      medium: 0,
+      high: 0,
+      critical: 0
+    };
+    
+    // 填充实际数据
+    priorityRows.forEach(row => {
+      if (priorityCounts.hasOwnProperty(row.priority)) {
+        priorityCounts[row.priority] = row.count;
+      }
+    });
+    
+    results.priorityCounts = priorityCounts;
+    completedQueries++;
+    
+    if (completedQueries === totalQueries) {
+      sendResponse();
+    }
+  });
+  
+  function sendResponse() {
+    // 计算衍生统计数据
+    const derivedStats = {
+      // 总进度（使用真实平均值）
+      totalProgress: results.avgProgress,
+      
+      // 活跃项目数（开发中+测试中）
+      activeProjects: results.statusCounts.development + results.statusCounts.testing,
+      
+      // 完成率
+      completionRate: results.totalProjects > 0 
+        ? Math.round((results.statusCounts.completed / results.totalProjects) * 100)
+        : 0
+    };
+    
+    const finalStats = {
+      ...results,
+      ...derivedStats,
+      updatedAt: new Date().toISOString()
+    };
+    
+    console.log('✅ 项目统计数据计算完成:', {
+      totalProjects: finalStats.totalProjects,
+      avgProgress: finalStats.avgProgress,
+      completed: finalStats.statusCounts.completed,
+      development: finalStats.statusCounts.development
+    });
+    
+    res.json(finalStats);
+  }
+});
+
 // 获取单个项目详情（包含content）
 router.get('/:id', (req, res) => {
   const { id } = req.params;

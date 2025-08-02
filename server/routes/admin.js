@@ -14,17 +14,30 @@ const requireAdmin = (req, res, next) => {
 
 // 获取系统统计信息
 router.get('/stats', requireAdmin, (req, res) => {
+  console.log('📊 管理员获取系统统计数据...');
+  
   const statsQueries = [
-    // 项目总数和平均进度
+    // 项目统计（使用与项目统计接口相同的逻辑）
     new Promise((resolve, reject) => {
-      db.get(`
-        SELECT 
-          COUNT(*) as totalProjects,
-          ROUND(AVG(progress), 0) as avgProgress
-        FROM projects
-      `, (err, projectStats) => {
-        if (err) reject(err);
-        else resolve(projectStats || { totalProjects: 0, avgProgress: 0 });
+      // 总项目数
+      db.get('SELECT COUNT(*) as totalProjects FROM projects', (err, totalResult) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        
+        // 平均进度
+        db.get('SELECT AVG(progress) as avgProgress FROM projects', (progressErr, progressResult) => {
+          if (progressErr) {
+            reject(progressErr);
+            return;
+          }
+          
+          resolve({
+            totalProjects: totalResult.totalProjects,
+            avgProgress: Math.round(progressResult.avgProgress || 0)
+          });
+        });
       });
     }),
 
@@ -59,6 +72,14 @@ router.get('/stats', requireAdmin, (req, res) => {
   Promise.all(statsQueries)
     .then(results => {
       const stats = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      
+      console.log('✅ 管理员统计数据获取成功:', {
+        totalProjects: stats.totalProjects,
+        avgProgress: stats.avgProgress,
+        totalUsers: stats.totalUsers,
+        totalComments: stats.totalComments
+      });
+      
       res.json(stats);
     })
     .catch(err => {

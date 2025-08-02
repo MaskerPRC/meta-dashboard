@@ -8,6 +8,7 @@ export const useProjectsStore = defineStore('projects', () => {
   const projects = ref([])
   const currentProject = ref(null)
   const loading = ref(false)
+  const statsLoading = ref(false)
   const pagination = ref({
     page: 1,
     limit: 20,
@@ -20,9 +21,11 @@ export const useProjectsStore = defineStore('projects', () => {
     search: ''
   })
   
-  // 计算属性
-  const statusCounts = computed(() => {
-    const counts = {
+  // 统计数据状态（从后端获取的真实统计数据）
+  const stats = ref({
+    totalProjects: 0,
+    avgProgress: 0,
+    statusCounts: {
       idea: 0,
       planning: 0,
       development: 0,
@@ -30,20 +33,21 @@ export const useProjectsStore = defineStore('projects', () => {
       deployed: 0,
       completed: 0,
       paused: 0
-    }
-    projects.value.forEach(project => {
-      if (counts.hasOwnProperty(project.status)) {
-        counts[project.status]++
-      }
-    })
-    return counts
+    },
+    priorityCounts: {
+      low: 0,
+      medium: 0,
+      high: 0,
+      critical: 0
+    },
+    activeProjects: 0,
+    completionRate: 0,
+    updatedAt: null
   })
   
-  const totalProgress = computed(() => {
-    if (projects.value.length === 0) return 0
-    const totalProgress = projects.value.reduce((sum, project) => sum + project.progress, 0)
-    return Math.round(totalProgress / projects.value.length)
-  })
+  // 计算属性（使用真实统计数据）
+  const statusCounts = computed(() => stats.value.statusCounts)
+  const totalProgress = computed(() => stats.value.avgProgress)
   
   // 获取项目列表
   const fetchProjects = async (params = {}) => {
@@ -192,13 +196,41 @@ export const useProjectsStore = defineStore('projects', () => {
     pagination.value.page = 1
   }
   
+  // 获取统计数据
+  const fetchStats = async () => {
+    try {
+      statsLoading.value = true
+      console.log('📊 获取项目统计数据...')
+      
+      const response = await axios.get('/api/projects/stats')
+      stats.value = response.data
+      
+      console.log('✅ 统计数据获取成功:', {
+        totalProjects: stats.value.totalProjects,
+        avgProgress: stats.value.avgProgress,
+        completed: stats.value.statusCounts.completed,
+        development: stats.value.statusCounts.development
+      })
+      
+      return response.data
+    } catch (error) {
+      console.error('获取统计数据失败:', error)
+      showNotification.error('获取统计数据失败')
+      return null
+    } finally {
+      statsLoading.value = false
+    }
+  }
+  
   return {
     // 状态
     projects,
     currentProject,
     loading,
+    statsLoading,
     pagination,
     filters,
+    stats,
     
     // 计算属性
     statusCounts,
@@ -207,6 +239,7 @@ export const useProjectsStore = defineStore('projects', () => {
     // 方法
     fetchProjects,
     fetchProject,
+    fetchStats,
     createProject,
     updateProject,
     deleteProject,
