@@ -11,7 +11,7 @@ https://100.agitao.net/
 <img width="2280" height="1581" alt="image" src="https://github.com/user-attachments/assets/32e3c3ba-fc68-4f36-851f-f6d97d09cfe4" />
 
 ## 👀欢迎加入微信交流群
-![100个AI项目交流群](https://github.com/user-attachments/assets/8aa6c8c0-4308-486b-9740-602c07ba19ff)
+![100个AI项目交流群](https://proxy.agitao.me/img)
 
 
 ## ✨ 功能特性
