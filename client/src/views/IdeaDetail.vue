@@ -6,12 +6,21 @@
       </div>
 
       <div v-else-if="idea" class="idea-detail">
-        <!-- 返回按钮 -->
-        <div class="back-button">
-          <el-button @click="$router.go(-1)">
-            <el-icon><ArrowLeft /></el-icon>
-            返回想法列表
-          </el-button>
+        <!-- 返回按钮和操作按钮 -->
+        <div class="action-bar">
+          <div class="back-button">
+            <el-button @click="$router.go(-1)">
+              <el-icon><ArrowLeft /></el-icon>
+              返回想法列表
+            </el-button>
+          </div>
+          
+          <div class="idea-actions" v-if="canEditIdea">
+            <el-button type="warning" @click="openEditDialog">
+              <el-icon><Edit /></el-icon>
+              编辑想法
+            </el-button>
+          </div>
         </div>
 
         <!-- 想法头部信息 -->
@@ -122,14 +131,69 @@
         </el-result>
       </div>
     </div>
+
+    <!-- 编辑想法对话框 -->
+    <el-dialog
+      v-model="showEditDialog"
+      title="编辑想法"
+      width="600px"
+      :before-close="closeEditDialog"
+    >
+      <el-form
+        ref="editFormRef"
+        :model="editForm"
+        :rules="editRules"
+        label-width="80px"
+      >
+        <el-form-item label="想法标题" prop="title">
+          <el-input
+            v-model="editForm.title"
+            placeholder="简明扼要地描述你的想法（最多200字符）"
+            maxlength="200"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="想法描述" prop="description">
+          <el-input
+            v-model="editForm.description"
+            type="textarea"
+            :rows="4"
+            placeholder="详细描述你的想法（最多1000字符）"
+            maxlength="1000"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="详细内容" prop="content">
+          <el-input
+            v-model="editForm.content"
+            type="textarea"
+            :rows="6"
+            placeholder="可选：提供更详细的实现思路、技术方案等（支持Markdown格式，最多10000字符）"
+            maxlength="10000"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeEditDialog">取消</el-button>
+          <el-button type="primary" @click="updateIdea" :loading="updating">
+            保存修改
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showNotification } from '../utils/notification'
-import { ArrowLeft, Star, Check, Link } from '@element-plus/icons-vue'
+import { ArrowLeft, Star, Check, Link, Edit } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import axios from '../utils/axios'
 import { renderMarkdown } from '../utils/markdownRenderer'
@@ -143,6 +207,51 @@ const idea = ref(null)
 const loading = ref(false)
 const hasVoted = ref(false)
 const userVotesToday = ref(0)
+const showEditDialog = ref(false)
+const updating = ref(false)
+
+// 编辑表单
+const editFormRef = ref(null)
+const editForm = reactive({
+  title: '',
+  description: '',
+  content: ''
+})
+
+const editRules = {
+  title: [
+    { required: true, message: '请输入想法标题', trigger: 'blur' },
+    { max: 200, message: '标题不能超过200字符', trigger: 'blur' }
+  ],
+  description: [
+    { required: true, message: '请输入想法描述', trigger: 'blur' },
+    { max: 1000, message: '描述不能超过1000字符', trigger: 'blur' }
+  ],
+  content: [
+    { max: 10000, message: '详细内容不能超过10000字符', trigger: 'blur' }
+  ]
+}
+
+// 计算属性
+const canEditIdea = computed(() => {
+  if (!idea.value || !authStore.isAuthenticated) return false
+  
+  // 管理员可以编辑任何想法
+  if (authStore.isAdmin) return true
+  
+  // 作者只能编辑自己的想法
+  if (idea.value.author_id !== authStore.user.id) return false
+  
+  // 只能编辑pending状态的想法
+  if (idea.value.status !== 'pending') return false
+  
+  // 检查时间限制（24小时内）
+  const createdAt = new Date(idea.value.created_at)
+  const now = new Date()
+  const timeDiff = (now - createdAt) / (1000 * 60 * 60) // 小时
+  
+  return timeDiff <= 24
+})
 
 // 方法
 const fetchIdeaDetail = async () => {
@@ -224,6 +333,52 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleString()
 }
 
+// 编辑功能方法
+const openEditDialog = () => {
+  if (idea.value) {
+    editForm.title = idea.value.title
+    editForm.description = idea.value.description
+    editForm.content = idea.value.content || ''
+    showEditDialog.value = true
+  }
+}
+
+const closeEditDialog = () => {
+  showEditDialog.value = false
+  editForm.title = ''
+  editForm.description = ''
+  editForm.content = ''
+  if (editFormRef.value) {
+    editFormRef.value.resetFields()
+  }
+}
+
+const updateIdea = async () => {
+  if (!editFormRef.value) return
+
+  try {
+    await editFormRef.value.validate()
+    
+    updating.value = true
+    const response = await axios.put(`/api/ideas/${idea.value.id}`, editForm)
+    
+    showNotification.success('想法更新成功')
+    
+    // 更新本地数据
+    idea.value = response.data.idea
+    closeEditDialog()
+  } catch (error) {
+    if (error.response) {
+      showNotification.error('更新失败: ' + error.response.data.message)
+    } else {
+      console.error('更新想法失败:', error)
+      showNotification.error('更新失败，请重试')
+    }
+  } finally {
+    updating.value = false
+  }
+}
+
 // 组件挂载时获取数据
 onMounted(() => {
   fetchIdeaDetail()
@@ -231,6 +386,11 @@ onMounted(() => {
     fetchUserVotes()
   }
 })
+
+// 监听编辑按钮点击
+const handleEditClick = () => {
+  openEditDialog()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -250,8 +410,30 @@ onMounted(() => {
     align-items: center;
   }
 
-  .back-button {
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 24px;
+    
+    .back-button {
+      flex-shrink: 0;
+    }
+    
+    .idea-actions {
+      display: flex;
+      gap: 12px;
+    }
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+      
+      .idea-actions {
+        justify-content: center;
+      }
+    }
   }
 
   .idea-detail {

@@ -108,6 +108,7 @@ export default {
       milestone: 'Milestone',
       progress_update: 'Progress Update',
       status_change: 'Status Change',
+      progress_log: 'Progress Log',
       manual_record: 'Manual Record'
     }
   },
@@ -487,7 +488,9 @@ export default {
       expected_completion: 'Expected Completion',
       tech_stack: 'Tech Stack',
       project_tags: 'Project Tags',
-      project_content: 'Project Content'
+      project_content: 'Project Content',
+      progress_log: 'Progress Log',
+      progress_log_input: 'Progress Log Input'
     },
 
     // Placeholder text
@@ -500,7 +503,8 @@ export default {
       select_completion_time: 'Select expected completion time',
       add_tech_stack: 'Add tech stack',
       add_tag: 'Add tag',
-      enter_project_content: 'Enter detailed project content, Markdown supported...\nTip: You can directly paste image or video files'
+      enter_project_content: 'Enter detailed project content, Markdown supported...\nTip: You can directly paste image or video files',
+      progress_log_placeholder: 'Describe the progress of this update, such as new features, issues resolved, next steps, etc...'
     },
 
     // Editor related
@@ -538,6 +542,12 @@ export default {
       project_create_success: 'Project created successfully',
       save_project_failed: 'Failed to save project',
       project_saved: 'Project saved successfully'
+    },
+
+    // Progress log
+    progress_log: {
+      title: 'Progress Log Input',
+      tip: 'Filling in progress logs helps the team understand project progress. This content will be displayed in the project progress history.'
     },
 
     // Project template
@@ -723,11 +733,10 @@ Brief description of this AI project's functionality and goals.
     title: 'My Resume',
     subtitle: 'Edit and manage your personal resume',
     edit: 'Edit Resume',
-    preview: 'Resume Preview',
     version_history: 'Version History',
     save: 'Save Resume',
     saving: 'Saving...',
-    
+
     // Form
     form: {
       title_label: 'Resume Title',
@@ -836,7 +845,7 @@ Brief description of this AI project's functionality and goals.
     ascending: 'Ascending',
     descending: 'Descending',
     reset_filters: 'Reset',
-    
+
     // Statistics
     stats: {
       total_ideas: 'Total Ideas',

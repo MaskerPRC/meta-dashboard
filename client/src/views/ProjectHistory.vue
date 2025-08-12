@@ -31,6 +31,7 @@
           <option value="">所有类型</option>
           <option value="progress_update">进度更新</option>
           <option value="status_change">状态变更</option>
+          <option value="progress_log">进展日志</option>
           <option value="manual_note">手动记录</option>
           <option value="milestone">里程碑</option>
         </select>
@@ -98,7 +99,15 @@
               </div>
             </div>
             
-            <div class="content-text" v-html="renderMarkdown(history.content)"></div>
+            <div v-if="history.type === 'progress_log'" class="progress-log-display">
+              <div class="progress-log-header">
+                <i class="fas fa-clipboard-list"></i>
+                <span>项目进展更新</span>
+              </div>
+              <div class="progress-log-content" v-html="renderMarkdown(history.content)"></div>
+            </div>
+            
+            <div v-if="history.type !== 'progress_update' && history.type !== 'status_change' && history.type !== 'progress_log'" class="content-text" v-html="renderMarkdown(history.content)"></div>
             
             <!-- 附件展示 -->
             <div v-if="history.attachments && history.attachments.length > 0" class="attachments">
@@ -638,6 +647,11 @@ export default {
   color: var(--ai-error);
 }
 
+.type-progress_log .history-icon {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--el-color-primary);
+}
+
 .history-content {
   flex: 1;
 }
@@ -670,12 +684,41 @@ export default {
 }
 
 .progress-change,
-.status-change {
+.status-change,
+.progress-log-display {
   margin-bottom: 16px;
   padding: 12px;
   background: var(--ai-bg-secondary);
   border-radius: 6px;
   border: 1px solid var(--ai-border);
+}
+
+.progress-log-display {
+  background: var(--el-color-primary-light-9);
+  border-color: var(--el-color-primary-light-7);
+}
+
+.progress-log-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: var(--el-color-primary);
+  font-size: 14px;
+}
+
+.progress-log-content {
+  line-height: 1.6;
+  color: var(--ai-text-primary);
+}
+
+.progress-log-content :deep(p) {
+  margin: 0 0 12px 0;
+}
+
+.progress-log-content :deep(p:last-child) {
+  margin-bottom: 0;
 }
 
 .progress-comparison {

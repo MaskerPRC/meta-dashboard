@@ -14,6 +14,7 @@
           <el-option :label="$t('global_history.all_types')" value="" />
           <el-option :label="$t('global_history.record_types.progress_update')" value="progress_update" />
           <el-option :label="$t('global_history.record_types.status_change')" value="status_change" />
+          <el-option :label="$t('global_history.record_types.progress_log')" value="progress_log" />
           <el-option :label="$t('global_history.record_types.manual_record')" value="manual_note" />
           <el-option :label="$t('global_history.record_types.milestone')" value="milestone" />
         </el-select>
@@ -78,6 +79,11 @@
                   <el-icon class="arrow"><ArrowRight /></el-icon>
                   <el-tag type="success">{{ history.status_after }}</el-tag>
                 </div>
+              </div>
+              
+              <!-- 进展日志特殊显示 -->
+              <div v-else-if="history.type === 'progress_log'" class="progress-log">
+                <div class="progress-log-content" v-html="renderMarkdown(history.content)"></div>
               </div>
               
               <!-- 通用内容显示 -->
@@ -147,7 +153,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { showNotification } from '../utils/notification'
-import { ArrowRight, Clock, TrendCharts, DocumentAdd, Trophy, View } from '@element-plus/icons-vue'
+import { ArrowRight, Clock, TrendCharts, DocumentAdd, Trophy, View, Document } from '@element-plus/icons-vue'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import WechatGroup from '../components/common/WechatGroup.vue'
 import dayjs from 'dayjs'
@@ -226,6 +232,7 @@ const getTypeClass = (type) => {
   const typeClasses = {
     'progress_update': 'progress',
     'status_change': 'status',
+    'progress_log': 'progress-log',
     'manual_note': 'note',
     'milestone': 'milestone'
   }
@@ -237,6 +244,7 @@ const getTypeIcon = (type) => {
   const typeIcons = {
     'progress_update': TrendCharts,
     'status_change': ArrowRight,
+    'progress_log': Document,
     'manual_note': DocumentAdd,
     'milestone': Trophy
   }
@@ -248,6 +256,7 @@ const getTypeTagType = (type) => {
   const tagTypes = {
     'progress_update': 'success',
     'status_change': 'warning',
+    'progress_log': 'primary',
     'manual_note': 'info',
     'milestone': 'danger'
   }
@@ -259,6 +268,7 @@ const getTypeLabel = (type) => {
   const typeMap = {
     'progress_update': 'progress_update',
     'status_change': 'status_change',
+    'progress_log': 'progress_log',
     'manual_note': 'manual_record',
     'milestone': 'milestone'
   }
@@ -381,6 +391,11 @@ onMounted(() => {
   color: white;
 }
 
+.timeline-marker.progress-log {
+  background: var(--el-color-primary);
+  color: white;
+}
+
 .timeline-marker.note {
   background: var(--ai-primary);
   color: white;
@@ -489,6 +504,43 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.progress-log {
+  margin-top: 12px;
+}
+
+.progress-log-content {
+  padding: 16px;
+  background: var(--el-color-primary-light-9);
+  border: 1px solid var(--el-color-primary-light-7);
+  border-radius: 8px;
+  line-height: 1.6;
+  color: var(--ai-text-primary);
+  position: relative;
+}
+
+.progress-log-content::before {
+  content: '📝';
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+.progress-log-content :deep(p) {
+  margin: 0 0 12px 0;
+}
+
+.progress-log-content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.progress-log-content :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
 }
 
 .content-text {

@@ -301,11 +301,12 @@ router.delete('/:id', requireAuth, (req, res) => {
   });
 });
 
-// 编辑评论（仅评论作者，30分钟内）
+// 编辑评论（评论作者30分钟内 或 管理员）
 router.put('/:id', requireAuth, (req, res) => {
   const { id } = req.params;
   const { content } = req.body;
   const user_id = req.user.id;
+  const is_admin = req.user.is_admin;
 
   if (!content || content.trim().length < 1) {
     return res.status(400).json({ message: '评论内容不能为空' });
@@ -326,18 +327,30 @@ router.put('/:id', requireAuth, (req, res) => {
       return res.status(404).json({ message: '评论不存在' });
     }
 
-    // 检查是否是评论作者
-    if (comment.user_id !== user_id) {
-      return res.status(403).json({ message: '只能编辑自己的评论' });
+    // 权限检查：管理员可以随时编辑，评论作者可以在30分钟内编辑
+    let canEdit = false;
+    let errorMessage = '';
+
+    if (is_admin) {
+      // 管理员可以随时编辑
+      canEdit = true;
+    } else if (comment.user_id === user_id) {
+      // 评论作者检查时间限制
+      const commentTime = new Date(comment.created_at);
+      const now = new Date();
+      const diffMinutes = (now - commentTime) / (1000 * 60);
+
+      if (diffMinutes <= 30) {
+        canEdit = true;
+      } else {
+        errorMessage = '评论发布30分钟后无法编辑';
+      }
+    } else {
+      errorMessage = '权限不足：您没有权限编辑此评论';
     }
 
-    // 检查是否在30分钟内
-    const commentTime = new Date(comment.created_at);
-    const now = new Date();
-    const diffMinutes = (now - commentTime) / (1000 * 60);
-
-    if (diffMinutes > 30) {
-      return res.status(403).json({ message: '评论发布30分钟后无法编辑' });
+    if (!canEdit) {
+      return res.status(403).json({ message: errorMessage });
     }
 
     // 更新评论

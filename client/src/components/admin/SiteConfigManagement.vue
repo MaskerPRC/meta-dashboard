@@ -57,6 +57,138 @@
       </div>
     </div>
 
+    <!-- 社交媒体链接配置 -->
+    <div class="config-section">
+      <h3 class="config-title">社交媒体链接配置</h3>
+      <div class="config-form">
+        <el-form label-width="120px">
+          <el-form-item label="X (Twitter)">
+            <el-input
+              :value="siteConfig.social_x_url?.value || ''"
+              @input="(value) => updateSocialConfig('social_x_url', value)"
+              placeholder="https://x.com/your_username"
+              style="width: 400px"
+              @blur="updateConfig('social_x_url', siteConfig.social_x_url?.value)"
+            >
+              <template #prepend>
+                <el-icon><Link /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="小红书">
+            <el-input
+              :value="siteConfig.social_xiaohongshu_url?.value || ''"
+              @input="(value) => updateSocialConfig('social_xiaohongshu_url', value)"
+              placeholder="https://www.xiaohongshu.com/user/profile/your_id"
+              style="width: 400px"
+              @blur="updateConfig('social_xiaohongshu_url', siteConfig.social_xiaohongshu_url?.value)"
+            >
+              <template #prepend>
+                <el-icon><Link /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="哔哩哔哩">
+            <el-input
+              :value="siteConfig.social_bilibili_url?.value || ''"
+              @input="(value) => updateSocialConfig('social_bilibili_url', value)"
+              placeholder="https://space.bilibili.com/your_uid"
+              style="width: 400px"
+              @blur="updateConfig('social_bilibili_url', siteConfig.social_bilibili_url?.value)"
+            >
+              <template #prepend>
+                <el-icon><Link /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="微信公众号">
+            <el-input
+              :value="siteConfig.social_wechat_official_url?.value || ''"
+              @input="(value) => updateSocialConfig('social_wechat_official_url', value)"
+              placeholder="微信公众号链接或二维码链接"
+              style="width: 400px"
+              @blur="updateConfig('social_wechat_official_url', siteConfig.social_wechat_official_url?.value)"
+            >
+              <template #prepend>
+                <el-icon><Link /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="知乎">
+            <el-input
+              :value="siteConfig.social_zhihu_url?.value || ''"
+              @input="(value) => updateSocialConfig('social_zhihu_url', value)"
+              placeholder="https://www.zhihu.com/people/your_id"
+              style="width: 400px"
+              @blur="updateConfig('social_zhihu_url', siteConfig.social_zhihu_url?.value)"
+            >
+              <template #prepend>
+                <el-icon><Link /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="CSDN">
+            <el-input
+              :value="siteConfig.social_csdn_url?.value || ''"
+              @input="(value) => updateSocialConfig('social_csdn_url', value)"
+              placeholder="https://blog.csdn.net/your_username"
+              style="width: 400px"
+              @blur="updateConfig('social_csdn_url', siteConfig.social_csdn_url?.value)"
+            >
+              <template #prepend>
+                <el-icon><Link /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="saveAllConfigs">保存所有社交媒体链接</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+
+    <!-- 特色内容配置 -->
+    <div class="config-section">
+      <h3 class="config-title">特色内容配置</h3>
+      <div class="config-form">
+        <el-form label-width="140px">
+          <el-form-item label="创业启动文章链接">
+            <el-input
+              :value="siteConfig.startup_article_url?.value || ''"
+              @input="(value) => updateSocialConfig('startup_article_url', value)"
+              placeholder="微信公众号创业启动文章的链接"
+              style="width: 400px"
+              @blur="updateConfig('startup_article_url', siteConfig.startup_article_url?.value)"
+            >
+              <template #prepend>
+                <el-icon><Link /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="文章标题">
+            <el-input
+              :value="siteConfig.startup_article_title?.value || ''"
+              @input="(value) => updateSocialConfig('startup_article_title', value)"
+              placeholder="创业启动文章的标题"
+              style="width: 400px"
+              @blur="updateConfig('startup_article_title', siteConfig.startup_article_title?.value)"
+            />
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="saveAllConfigs">保存特色内容配置</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+
     <!-- 公开简历配置 -->
     <div class="config-section">
       <h3 class="config-title">公开简历配置</h3>
@@ -150,7 +282,7 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { showNotification } from '../../utils/notification'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Link } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 
 const { t } = useI18n()
@@ -207,6 +339,13 @@ const updateConfig = async (key, value) => {
     // 重新加载配置以恢复原值
     loadSiteConfig()
   }
+}
+
+const updateSocialConfig = (key, value) => {
+  if (!siteConfig.value[key]) {
+    siteConfig.value[key] = { value: '', description: '', type: 'url' }
+  }
+  siteConfig.value[key].value = value
 }
 
 const saveAllConfigs = async () => {

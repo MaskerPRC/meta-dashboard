@@ -17,117 +17,19 @@
       <!-- 项目详情 -->
       <div v-else-if="project" class="project-detail">
         <!-- 项目头部信息 -->
-        <div class="project-header ai-card">
-          <div class="header-main">
-            <div class="title-section">
-              <h1 class="project-title">{{ project.title }}</h1>
-              <p class="project-description">{{ project.description }}</p>
-            </div>
-            
-            <div class="status-section">
-              <el-tag :class="['status-tag', project.status]" size="large">
-                {{ getStatusName(project.status) }}
-              </el-tag>
-              <el-tag :class="['priority-tag', project.priority]" size="large">
-                {{ getPriorityName(project.priority) }}
-              </el-tag>
-            </div>
-          </div>
+        <ProjectHeader 
+          :project="project"
+          :is-admin="authStore.isAdmin"
+          @edit-project="editProject"
+          @delete-project="deleteProject"
+        />
 
-          <!-- 项目元信息 -->
-          <div class="project-meta">
-            <div class="meta-item">
-              <span class="meta-label">{{ t('project.created_at') }}：</span>
-              <span class="meta-value">{{ formatDate(project.created_at) }}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">{{ t('project.updated_at') }}：</span>
-              <span class="meta-value">{{ formatDate(project.updated_at) }}</span>
-            </div>
-          </div>
-
-          <!-- 项目链接 -->
-          <div class="project-links">
-            <!-- 进展历史链接（始终显示） -->
-            <router-link 
-              :to="`/project/${project.id}/history`"
-              class="link-card history-link"
-            >
-              <div class="link-icon">
-                <el-icon><Clock /></el-icon>
-              </div>
-              <div class="link-content">
-                <div class="link-title">{{ t('project.progress_history') }}</div>
-                <div class="link-desc">{{ t('project.view_development_timeline') }}</div>
-              </div>
-              <div class="link-arrow">
-                <el-icon><ArrowRight /></el-icon>
-              </div>
-            </router-link>
-
-            <a 
-              v-if="project.github_repo" 
-              :href="project.github_repo" 
-              target="_blank" 
-              class="link-card github-link"
-            >
-              <div class="link-icon">
-                <el-icon><Link /></el-icon>
-              </div>
-              <div class="link-content">
-                <div class="link-title">GitHub 仓库</div>
-                <div class="link-desc">查看源代码</div>
-              </div>
-              <div class="link-arrow">
-                <el-icon><ArrowRight /></el-icon>
-              </div>
-            </a>
-
-            <a 
-              v-if="project.demo_url" 
-              :href="project.demo_url" 
-              target="_blank" 
-              class="link-card demo-link"
-            >
-              <div class="link-icon">
-                <el-icon><View /></el-icon>
-              </div>
-              <div class="link-content">
-                <div class="link-title">在线演示</div>
-                <div class="link-desc">体验项目效果</div>
-              </div>
-              <div class="link-arrow">
-                <el-icon><ArrowRight /></el-icon>
-              </div>
-            </a>
-          </div>
-
-          <!-- 技术栈 -->
-          <div v-if="project.tech_stack && project.tech_stack.length" class="tech-stack">
-            <h3>技术栈</h3>
-            <div class="tech-tags">
-              <el-tag 
-                v-for="tech in project.tech_stack" 
-                :key="tech" 
-                class="tech-tag"
-              >
-                {{ tech }}
-              </el-tag>
-            </div>
-          </div>
-
-          <!-- 管理员操作 -->
-          <div v-if="authStore.isAdmin" class="admin-actions">
-            <el-button type="primary" @click="editProject">
-              <el-icon><Edit /></el-icon>
-              {{ t('project.edit_project') }}
-            </el-button>
-            <el-button type="danger" @click="deleteProject">
-              <el-icon><Delete /></el-icon>
-              {{ t('project.delete_project') }}
-            </el-button>
-          </div>
-        </div>
+        <!-- 项目附件（展示在内容前面） -->
+        <ProjectAttachments 
+          v-if="hasAttachments" 
+          :attachments="project.attachments"
+          @preview-image="previewImage"
+        />
 
         <!-- 项目内容 -->
         <div class="project-content ai-card">
@@ -135,53 +37,6 @@
           <div v-if="project.content" class="markdown-content" v-html="renderedContent"></div>
           <div v-else class="empty-content">
             <el-empty description="暂无详细内容" />
-          </div>
-          
-          <!-- 项目附件 -->
-          <div v-if="hasAttachments" class="project-attachments">
-            <h3>{{ t('project.attachments.title') }}</h3>
-            
-            <!-- 图片展示 -->
-            <div v-if="project.attachments.images.length > 0" class="attachments-section">
-              <h4>{{ t('project.attachments.images') }}</h4>
-              <div class="images-grid">
-                <div 
-                  v-for="(image, index) in project.attachments.images" 
-                  :key="`img-${index}`"
-                  class="image-item"
-                  @click="previewImage(image, index)"
-                >
-                  <img :src="image.url" :alt="image.filename" />
-                  <div class="image-overlay">
-                    <span class="filename">{{ image.filename }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 视频展示 -->
-            <div v-if="project.attachments.videos.length > 0" class="attachments-section">
-              <h4>视频</h4>
-              <div class="videos-grid">
-                <div 
-                  v-for="(video, index) in project.attachments.videos" 
-                  :key="`vid-${index}`"
-                  class="video-item"
-                >
-                  <video 
-                    :src="video.url" 
-                    controls 
-                    preload="metadata"
-                    :poster="video.poster"
-                  >
-                    您的浏览器不支持视频播放。
-                  </video>
-                  <div class="video-info">
-                    <span class="filename">{{ video.filename }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -211,6 +66,14 @@
       :project="project"
       @saved="handleProjectSaved"
     />
+
+    <!-- 图片查看器 -->
+    <ProjectImageViewer
+      :show="showImageViewer"
+      :images="project?.attachments?.images || []"
+      :initial-index="currentImageIndex"
+      @close="closeImageViewer"
+    />
   </div>
 </template>
 
@@ -220,12 +83,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox } from 'element-plus'
 import { showNotification } from '../utils/notification'
-import { ArrowLeft, Edit, Delete, Link, View, ArrowRight, Clock } from '@element-plus/icons-vue'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
-import dayjs from 'dayjs'
 import CommentsSection from '@/components/comment/CommentsSection.vue'
 import ProjectEditDialog from '@/components/admin/ProjectEditDialog.vue'
+import ProjectHeader from '@/components/project/ProjectHeader.vue'
+import ProjectAttachments from '@/components/project/ProjectAttachments.vue'
+import ProjectImageViewer from '@/components/project/ProjectImageViewer.vue'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 
 const route = useRoute()
@@ -237,6 +102,8 @@ const { t } = useI18n()
 const project = ref(null)
 const loading = ref(false)
 const showEditDialog = ref(false)
+const currentImageIndex = ref(0)
+const showImageViewer = ref(false)
 
 // 计算属性
 const renderedContent = computed(() => {
@@ -250,60 +117,16 @@ const hasAttachments = computed(() => {
 })
 
 // 方法
-const getStatusName = (status) => {
-  const statusMap = {
-    idea: 'brainstorming',
-    planning: 'planning',
-    development: 'development',
-    testing: 'testing',
-    completed: 'completed',
-    deployed: 'deployed',
-    maintenance: 'deployed'
-  }
-  const translationKey = statusMap[status] || 'brainstorming'
-  return t(`project.status_options.${translationKey}`)
-}
-
-const getPriorityName = (priority) => {
-  const priorityMap = {
-    low: 'low',
-    medium: 'medium',
-    high: 'high',
-    urgent: 'urgent'
-  }
-  const translationKey = priorityMap[priority] || 'medium'
-  return t(`project.priority_options.${translationKey}`)
-}
-
-const formatDate = (dateString) => {
-  return dayjs(dateString).format('YYYY-MM-DD HH:mm')
-}
-
 const previewImage = (image, index) => {
-  // 使用Element Plus的图片预览功能
-  const images = project.value.attachments.images.map(img => img.url)
-  
-  // 创建预览窗口
-  const viewer = document.createElement('div')
-  viewer.className = 'image-viewer-overlay'
-  viewer.innerHTML = `
-    <div class="image-viewer">
-      <img src="${image.url}" alt="${image.filename}" />
-      <div class="image-viewer-toolbar">
-        <span class="image-info">${image.filename}</span>
-        <button class="close-btn" onclick="this.closest('.image-viewer-overlay').remove()">✕</button>
-      </div>
-    </div>
-  `
-  
-  viewer.onclick = (e) => {
-    if (e.target === viewer) {
-      viewer.remove()
-    }
-  }
-  
-  document.body.appendChild(viewer)
+  currentImageIndex.value = index
+  showImageViewer.value = true
 }
+
+const closeImageViewer = () => {
+  showImageViewer.value = false
+}
+
+
 
 
 
@@ -387,469 +210,67 @@ onMounted(async () => {
   padding: 40px;
 }
 
-.project-detail {
-  .project-header {
-    margin-bottom: 24px;
-    padding: 32px;
+.project-content {
+  margin-bottom: 24px;
+  padding: 32px;
 
-    .header-main {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 24px;
+  h2 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
 
-      .title-section {
-        flex: 1;
+  .markdown-content {
+    line-height: 1.7;
+    color: var(--el-text-color-primary);
 
-        .project-title {
-          font-size: 28px;
-          font-weight: 600;
-          margin: 0 0 8px 0;
-          color: var(--el-text-color-primary);
-        }
-
-        .project-description {
-          font-size: 16px;
-          color: var(--el-text-color-regular);
-          margin: 0;
-          line-height: 1.6;
-        }
-      }
-
-      .status-section {
-        display: flex;
-        gap: 12px;
-        flex-shrink: 0;
-      }
+    :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
+      margin: 20px 0 12px 0;
+      font-weight: 600;
     }
 
-    .project-meta {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-      padding: 20px;
+    :deep(p) {
+      margin: 12px 0;
+    }
+
+    :deep(ul), :deep(ol) {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+
+    :deep(code) {
       background: var(--el-bg-color-page);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+    }
+
+    :deep(pre) {
+      background: var(--el-bg-color-page);
+      padding: 16px;
       border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
 
-      .meta-item {
-        display: flex;
-        align-items: center;
-
-        .meta-label {
-          font-weight: 500;
-          color: var(--el-text-color-regular);
-          margin-right: 8px;
-        }
-
-        .meta-value {
-          color: var(--el-text-color-primary);
-        }
+      code {
+        background: none;
+        padding: 0;
       }
     }
 
-    .project-links {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-
-      .link-card {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        padding: 20px;
-        border-radius: 12px;
-        text-decoration: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 2px solid transparent;
-        position: relative;
-        overflow: hidden;
-
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          border-radius: 10px;
-          padding: 2px;
-          background: linear-gradient(135deg, transparent, transparent);
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: exclude;
-          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          mask-composite: exclude;
-          transition: all 0.3s ease;
-        }
-
-        .link-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 48px;
-          height: 48px;
-          border-radius: 12px;
-          margin-right: 16px;
-          font-size: 20px;
-          transition: all 0.3s ease;
-        }
-
-        .link-content {
-          flex: 1;
-
-          .link-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            transition: all 0.3s ease;
-          }
-
-          .link-desc {
-            font-size: 14px;
-            opacity: 0.8;
-            transition: all 0.3s ease;
-          }
-        }
-
-        .link-arrow {
-          display: flex;
-          align-items: center;
-          font-size: 16px;
-          opacity: 0.6;
-          transform: translateX(-8px);
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        &.history-link {
-          background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, var(--ai-bg-primary) 100%);
-          border-color: rgba(99, 102, 241, 0.2);
-
-          &::before {
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-          }
-
-          .link-icon {
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            color: white;
-          }
-
-          .link-title {
-            color: var(--ai-primary);
-          }
-
-          .link-desc {
-            color: var(--ai-text-secondary);
-          }
-
-          .link-arrow {
-            color: var(--ai-primary);
-          }
-
-          &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
-            border-color: var(--ai-primary);
-
-            &::before {
-              background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            }
-
-            .link-icon {
-              transform: scale(1.1);
-              box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
-            }
-
-            .link-arrow {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-        }
-
-        &.github-link {
-          background: linear-gradient(135deg, rgba(107, 114, 126, 0.05) 0%, var(--ai-bg-primary) 100%);
-          border-color: rgba(107, 114, 126, 0.2);
-
-          &::before {
-            background: linear-gradient(135deg, var(--ai-text-primary), var(--ai-text-secondary));
-          }
-
-          .link-icon {
-            background: linear-gradient(135deg, var(--ai-text-primary), var(--ai-text-secondary));
-            color: white;
-          }
-
-          .link-title {
-            color: var(--ai-text-primary);
-          }
-
-          .link-desc {
-            color: var(--ai-text-secondary);
-          }
-
-          .link-arrow {
-            color: var(--ai-text-primary);
-          }
-
-          &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(107, 114, 126, 0.15);
-            border-color: var(--ai-text-primary);
-
-            &::before {
-              background: linear-gradient(135deg, var(--ai-text-primary), var(--ai-text-secondary));
-            }
-
-            .link-icon {
-              transform: scale(1.1);
-              box-shadow: 0 8px 24px rgba(107, 114, 126, 0.3);
-            }
-
-            .link-arrow {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-        }
-
-        &.demo-link {
-          background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, var(--ai-bg-primary) 100%);
-          border-color: rgba(16, 185, 129, 0.2);
-
-          &::before {
-            background: linear-gradient(135deg, var(--ai-success), var(--ai-accent));
-          }
-
-          .link-icon {
-            background: linear-gradient(135deg, var(--ai-success), var(--ai-accent));
-            color: white;
-          }
-
-          .link-title {
-            color: var(--ai-success);
-          }
-
-          .link-desc {
-            color: var(--ai-text-secondary);
-          }
-
-          .link-arrow {
-            color: var(--ai-success);
-          }
-
-          &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.15);
-            border-color: var(--ai-success);
-
-            &::before {
-              background: linear-gradient(135deg, var(--ai-success), var(--ai-accent));
-            }
-
-            .link-icon {
-              transform: scale(1.1);
-              box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-            }
-
-            .link-arrow {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-        }
-      }
-    }
-
-    .tech-stack {
-      margin-bottom: 24px;
-
-      h3 {
-        margin: 0 0 12px 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--el-text-color-primary);
-      }
-
-      .tech-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-
-        .tech-tag {
-          background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-          color: white;
-          border: none;
-        }
-      }
-    }
-
-    .admin-actions {
-      display: flex;
-      gap: 12px;
+    :deep(blockquote) {
+      border-left: 4px solid var(--ai-primary);
+      margin: 16px 0;
+      padding: 8px 16px;
+      background: var(--el-bg-color-page);
+      border-radius: 0 8px 8px 0;
     }
   }
 
-  .project-content {
-    margin-bottom: 24px;
-    padding: 32px;
-
-    h2 {
-      margin: 0 0 20px 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--el-text-color-primary);
-    }
-
-    .markdown-content {
-      line-height: 1.7;
-      color: var(--el-text-color-primary);
-
-      :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
-        margin: 20px 0 12px 0;
-        font-weight: 600;
-      }
-
-      :deep(p) {
-        margin: 12px 0;
-      }
-
-      :deep(ul), :deep(ol) {
-        margin: 12px 0;
-        padding-left: 24px;
-      }
-
-      :deep(code) {
-        background: var(--el-bg-color-page);
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'Fira Code', monospace;
-      }
-
-      :deep(pre) {
-        background: var(--el-bg-color-page);
-        padding: 16px;
-        border-radius: 8px;
-        overflow-x: auto;
-        margin: 16px 0;
-
-        code {
-          background: none;
-          padding: 0;
-        }
-      }
-
-      :deep(blockquote) {
-        border-left: 4px solid var(--ai-primary);
-        margin: 16px 0;
-        padding: 8px 16px;
-        background: var(--el-bg-color-page);
-        border-radius: 0 8px 8px 0;
-      }
-    }
-
-    .empty-content {
-      text-align: center;
-      padding: 40px;
-    }
-  }
-
-  .comments-section {
-    padding: 32px;
-
-    h2 {
-      margin: 0 0 20px 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--el-text-color-primary);
-    }
-
-    .add-comment {
-      margin-bottom: 24px;
-
-      .comment-actions {
-        margin-top: 12px;
-        display: flex;
-        justify-content: flex-end;
-      }
-    }
-
-    .login-prompt {
-      text-align: center;
-      padding: 20px;
-      background: var(--el-bg-color-page);
-      border-radius: 8px;
-      margin-bottom: 24px;
-
-      .login-link {
-        color: var(--ai-primary);
-        text-decoration: none;
-        font-weight: 500;
-
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-    }
-
-    .comments-list {
-      .comments {
-        .comment-item {
-          border-bottom: 1px solid var(--el-border-color-lighter);
-          padding: 20px 0;
-
-          &:last-child {
-            border-bottom: none;
-          }
-
-          .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-
-            .user-info {
-              display: flex;
-              align-items: center;
-              gap: 12px;
-
-              .user-avatar {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                object-fit: cover;
-              }
-
-              .user-name {
-                font-weight: 500;
-                color: var(--el-text-color-primary);
-              }
-            }
-
-            .comment-meta {
-              display: flex;
-              align-items: center;
-              gap: 12px;
-
-              .comment-time {
-                font-size: 12px;
-                color: var(--el-text-color-secondary);
-              }
-            }
-          }
-
-          .comment-content {
-            color: var(--el-text-color-regular);
-            line-height: 1.6;
-            margin-left: 44px;
-          }
-        }
-      }
-
-      .empty-comments {
-        text-align: center;
-        padding: 40px;
-      }
-    }
+  .empty-content {
+    text-align: center;
+    padding: 40px;
   }
 }
 
@@ -859,254 +280,12 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .project-detail {
-    .project-header {
-      padding: 20px;
+  .project-content {
+    padding: 20px;
 
-      .header-main {
-        flex-direction: column;
-        gap: 16px;
-
-        .status-section {
-          align-self: flex-start;
-        }
-      }
-
-      .project-meta {
-        grid-template-columns: 1fr;
-      }
-
-      .project-links {
-        flex-direction: column;
-
-        .link-card {
-          .link-icon {
-            width: 40px;
-            height: 40px;
-            margin-right: 12px;
-            font-size: 18px;
-          }
-
-          .link-content {
-            .link-title {
-              font-size: 15px;
-            }
-
-            .link-desc {
-              font-size: 13px;
-            }
-          }
-        }
-      }
-
-      .admin-actions {
-        flex-direction: column;
-      }
-    }
-
-    .project-content {
-      padding: 20px;
-
-      .markdown-content {
-        :deep(pre) {
-          font-size: 14px;
-        }
-      }
-    }
-
-    .comments-section {
-      padding: 20px;
-
-      .comments {
-        .comment-item {
-          .comment-content {
-            margin-left: 0;
-            margin-top: 12px;
-          }
-        }
-      }
-    }
-  }
-}
-
-.project-attachments {
-  margin-top: 32px;
-  border-top: 1px solid var(--ai-border);
-  padding-top: 24px;
-
-  h3 {
-    color: var(--ai-text-primary);
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 20px;
-  }
-
-  .attachments-section {
-    margin-bottom: 32px;
-
-    h4 {
-      color: var(--ai-text-secondary);
-      font-size: 16px;
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-
-    .images-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .image-item {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      aspect-ratio: 4/3;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      border: 1px solid var(--ai-border);
-
-      &:hover {
-        transform: scale(1.02);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      }
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .image-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-        padding: 16px 12px 12px;
-        color: white;
-
-        .filename {
-          font-size: 14px;
-          font-weight: 500;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-          word-break: break-all;
-        }
-      }
-    }
-
-    .videos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-    }
-
-    .video-item {
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--ai-border);
-      background: var(--ai-bg-secondary);
-
-      video {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        display: block;
-      }
-
-      .video-info {
-        padding: 12px 16px;
-        background: var(--ai-bg-primary);
-        border-top: 1px solid var(--ai-border);
-
-        .filename {
-          font-size: 14px;
-          color: var(--ai-text-primary);
-          font-weight: 500;
-          word-break: break-all;
-        }
-      }
-    }
-  }
-}
-
-/* 图片预览样式 */
-:global(.image-viewer-overlay) {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  cursor: pointer;
-}
-
-:global(.image-viewer) {
-  position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
-  cursor: default;
-}
-
-:global(.image-viewer img) {
-  max-width: 100%;
-  max-height: 90vh;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-:global(.image-viewer-toolbar) {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 8px 16px;
-  border-radius: 6px;
-  color: white;
-}
-
-:global(.image-info) {
-  font-size: 14px;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-:global(.close-btn) {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  line-height: 1;
-}
-
-:global(.close-btn:hover) {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-@media (max-width: 768px) {
-  .project-attachments {
-    .attachments-section {
-      .images-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 12px;
-      }
-
-      .videos-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
+    .markdown-content {
+      :deep(pre) {
+        font-size: 14px;
       }
     }
   }

@@ -301,9 +301,9 @@ export default {
     },
     
     handleImageUpload(e) {
-      const files = e.target.files;
-      for (let file of files) {
-        this.uploadFile(file, 'image');
+      const files = Array.from(e.target.files);
+      if (files.length > 0) {
+        this.uploadMultipleFiles(files, 'image');
       }
       e.target.value = '';
     },
@@ -362,6 +362,78 @@ export default {
         if (index > -1) {
           this.uploadProgress.splice(index, 1);
         }
+      }
+    },
+
+    async uploadMultipleFiles(files, type) {
+      const formData = new FormData();
+      
+      // 添加所有文件到FormData
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+      
+      // 为每个文件添加上传进度
+      const progressItems = files.map(file => ({
+        name: file.name,
+        percent: 0
+      }));
+      this.uploadProgress.push(...progressItems);
+      
+      try {
+        const response = await axios.post('/api/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            // 为所有文件更新相同的进度（简化处理）
+            progressItems.forEach(item => {
+              item.percent = percentCompleted;
+            });
+          }
+        });
+        
+        if (response.data.data) {
+          const { images, videos, errors } = response.data.data;
+          
+          if (type === 'image' && images.length > 0) {
+            // 插入所有成功上传的图片
+            let insertText = '';
+            images.forEach(image => {
+              insertText += `![${image.filename}](${image.url})\n`;
+            });
+            this.insertAtCursor(insertText);
+            this.$emit('upload-success', { type: 'images', files: images });
+          } else if (type === 'video' && videos.length > 0) {
+            // 插入所有成功上传的视频
+            let insertText = '';
+            videos.forEach(video => {
+              insertText += `\n<video controls width="100%" style="max-width: 600px;">\n  <source src="${video.url}" type="${video.type}">\n  您的浏览器不支持视频播放。\n</video>\n\n`;
+            });
+            this.insertAtCursor(insertText);
+            this.$emit('upload-success', { type: 'videos', files: videos });
+          }
+          
+          // 显示错误信息
+          if (errors.length > 0) {
+            const errorMessages = errors.map(error => `${error.filename}: ${error.error}`).join('\n');
+            alert(`部分文件上传失败:\n${errorMessages}`);
+          }
+        }
+        
+      } catch (error) {
+        console.error('批量文件上传失败:', error);
+        this.$emit('upload-error', error);
+        alert('文件上传失败: ' + (error.response?.data?.message || error.message));
+      } finally {
+        // 移除所有进度项
+        progressItems.forEach(item => {
+          const index = this.uploadProgress.indexOf(item);
+          if (index > -1) {
+            this.uploadProgress.splice(index, 1);
+          }
+        });
       }
     }
   }

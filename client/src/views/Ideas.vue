@@ -158,26 +158,41 @@
               </div>
             </div>
 
-            <!-- 投票按钮 -->
-            <div v-if="idea.status === 'pending' && authStore.isAuthenticated" class="vote-actions">
-              <el-button 
-                size="small" 
-                type="success" 
-                @click.stop="voteForIdea(idea, 1)"
-                :disabled="hasVoted(idea.id)"
-              >
-                <el-icon><Check /></el-icon>
-                投1票
-              </el-button>
-              <el-button 
-                size="small" 
-                type="primary" 
-                @click.stop="voteForIdea(idea, 2)"
-                :disabled="hasVoted(idea.id) || userVotesToday >= 10"
-              >
-                <el-icon><Star /></el-icon>
-                投2票
-              </el-button>
+            <!-- 操作按钮 -->
+            <div class="idea-actions">
+              <!-- 编辑按钮 -->
+              <div v-if="canEditIdea(idea)" class="edit-actions">
+                <el-button 
+                  size="small" 
+                  type="warning" 
+                  @click.stop="editIdea(idea)"
+                >
+                  <el-icon><Edit /></el-icon>
+                  编辑
+                </el-button>
+              </div>
+
+              <!-- 投票按钮 -->
+              <div v-if="idea.status === 'pending' && authStore.isAuthenticated" class="vote-actions">
+                <el-button 
+                  size="small" 
+                  type="success" 
+                  @click.stop="voteForIdea(idea, 1)"
+                  :disabled="hasVoted(idea.id)"
+                >
+                  <el-icon><Check /></el-icon>
+                  投1票
+                </el-button>
+                <el-button 
+                  size="small" 
+                  type="primary" 
+                  @click.stop="voteForIdea(idea, 2)"
+                  :disabled="hasVoted(idea.id) || userVotesToday >= 10"
+                >
+                  <el-icon><Star /></el-icon>
+                  投2票
+                </el-button>
+              </div>
             </div>
 
             <!-- 项目关联信息 -->
@@ -278,7 +293,7 @@ import { ElMessageBox } from 'element-plus'
 import { showNotification } from '../utils/notification'
 import {
   Plus, User, Search, ArrowDown, ArrowUp, Refresh, Star,
-  Check, Link
+  Check, Link, Edit
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import WechatGroup from '../components/common/WechatGroup.vue'
@@ -520,6 +535,31 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString()
 }
 
+// 编辑想法相关方法
+const canEditIdea = (idea) => {
+  if (!authStore.isAuthenticated) return false
+  
+  // 管理员可以编辑任何想法
+  if (authStore.isAdmin) return true
+  
+  // 作者只能编辑自己的想法
+  if (idea.author_id !== authStore.user.id) return false
+  
+  // 只能编辑pending状态的想法
+  if (idea.status !== 'pending') return false
+  
+  // 检查时间限制（24小时内）
+  const createdAt = new Date(idea.created_at)
+  const now = new Date()
+  const timeDiff = (now - createdAt) / (1000 * 60 * 60) // 小时
+  
+  return timeDiff <= 24
+}
+
+const editIdea = (idea) => {
+  router.push(`/idea/${idea.id}`)
+}
+
 // 组件挂载时获取数据
 onMounted(() => {
   fetchIdeas()
@@ -730,10 +770,17 @@ onMounted(() => {
         }
       }
 
-      .vote-actions {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 8px;
+      .idea-actions {
+        margin-top: 12px;
+        
+        .edit-actions {
+          margin-bottom: 8px;
+        }
+        
+        .vote-actions {
+          display: flex;
+          gap: 8px;
+        }
       }
 
       .project-link {

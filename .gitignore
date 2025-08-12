@@ -5,3 +5,4 @@ server/.env
 client/dist
 server/data/ai_dashboard_backup*
 client/.env
+server/backups

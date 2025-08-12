@@ -92,6 +92,7 @@ app.use('/api/config', require('./routes/config'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/project-history', require('./routes/project-history').router);
 app.use('/api/resumes', require('./routes/resumes'));
+app.use('/api/changelog', require('./routes/changelog'));
 
 // 静态文件服务（生产环境）
 if (process.env.NODE_ENV === 'production') {

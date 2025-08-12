@@ -24,6 +24,88 @@
                   {{ $t('home.learn_more') }}
                 </el-button>
               </router-link>
+              <a
+                v-if="startupArticle.url"
+                :href="startupArticle.url"
+                target="_blank"
+                class="startup-article-link"
+              >
+                <el-button size="large" class="ai-button featured">
+                  <el-icon><Document /></el-icon>
+                  {{ startupArticle.title || '创业启动文章' }}
+                </el-button>
+              </a>
+            </div>
+
+            <!-- 社交媒体链接 -->
+            <div v-if="hasSocialLinks" class="social-links">
+              <div class="social-buttons">
+                <a
+                  v-if="socialLinks.social_x_url"
+                  :href="socialLinks.social_x_url"
+                  target="_blank"
+                  class="social-link x-link"
+                  title="X (Twitter)"
+                >
+                  <span class="social-icon">𝕏</span>
+                  <span class="social-label">X</span>
+                </a>
+
+                <a
+                  v-if="socialLinks.social_xiaohongshu_url"
+                  :href="socialLinks.social_xiaohongshu_url"
+                  target="_blank"
+                  class="social-link xiaohongshu-link"
+                  title="小红书"
+                >
+                  <span class="social-icon">📱</span>
+                  <span class="social-label">小红书</span>
+                </a>
+
+                <a
+                  v-if="socialLinks.social_bilibili_url"
+                  :href="socialLinks.social_bilibili_url"
+                  target="_blank"
+                  class="social-link bilibili-link"
+                  title="哔哩哔哩"
+                >
+                  <span class="social-icon">📺</span>
+                  <span class="social-label">B站</span>
+                </a>
+
+                <a
+                  v-if="socialLinks.social_wechat_official_url"
+                  :href="socialLinks.social_wechat_official_url"
+                  target="_blank"
+                  class="social-link wechat-link"
+                  title="微信公众号"
+                >
+                  <span class="social-icon">💬</span>
+                  <span class="social-label">公众号</span>
+                </a>
+
+                <a
+                  v-if="socialLinks.social_zhihu_url"
+                  :href="socialLinks.social_zhihu_url"
+                  target="_blank"
+                  class="social-link zhihu-link"
+                  title="知乎"
+                >
+                  <span class="social-icon">🧠</span>
+                  <span class="social-label">知乎</span>
+                </a>
+
+                <a
+                  v-if="socialLinks.social_csdn_url"
+                  :href="socialLinks.social_csdn_url"
+                  target="_blank"
+                  class="social-link csdn-link"
+                  title="CSDN"
+                >
+                  <span class="social-icon">💻</span>
+                  <span class="social-label">CSDN</span>
+                </a>
+              </div>
             </div>
           </div>
           <div class="hero-visual">
@@ -143,8 +225,9 @@ import { useProjectsStore } from '../stores/projects'
 import { useAuthStore } from '../stores/auth'
 import ProjectCard from '../components/project/ProjectCard.vue'
 import WechatGroup from '../components/common/WechatGroup.vue'
+import axios from '../utils/axios'
 import {
-  View, InfoFilled, ArrowRight, DocumentAdd,
+  View, InfoFilled, ArrowRight, DocumentAdd, Document,
   Star, Edit, Cpu, Operation, Upload, Check, VideoPause
 } from '@element-plus/icons-vue'
 
@@ -153,8 +236,16 @@ const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const authStore = useAuthStore()
 
+// 数据
+const socialLinks = ref({})
+const startupArticle = ref({ url: '', title: '' })
+
 const recentProjects = computed(() => {
   return projectsStore.projects.slice(0, 6)
+})
+
+const hasSocialLinks = computed(() => {
+  return Object.values(socialLinks.value).some(url => url && url.trim())
 })
 
 // 获取状态图标
@@ -191,12 +282,49 @@ const goToProject = (id) => {
   router.push(`/project/${id}`)
 }
 
+// 获取社交媒体链接配置
+const loadSocialLinks = async () => {
+  try {
+    const response = await axios.get('/api/config')
+    const configs = response.data.configs
+
+    // 提取社交媒体链接
+    const socialKeys = [
+      'social_x_url',
+      'social_xiaohongshu_url',
+      'social_bilibili_url',
+      'social_wechat_official_url',
+      'social_zhihu_url',
+      'social_csdn_url'
+    ]
+
+    socialKeys.forEach(key => {
+      if (configs[key]?.value) {
+        socialLinks.value[key] = configs[key].value
+      }
+    })
+
+    // 获取创业启动文章配置
+    if (configs.startup_article_url?.value) {
+      startupArticle.value.url = configs.startup_article_url.value
+    }
+    if (configs.startup_article_title?.value) {
+      startupArticle.value.title = configs.startup_article_title.value
+    }
+  } catch (error) {
+    console.error('获取社交媒体链接失败:', error)
+  }
+}
+
 onMounted(async () => {
   // 获取统计数据
   await projectsStore.fetchStats()
-  
+
   // 获取最新项目数据用于展示
   projectsStore.fetchProjects({ limit: 6 })
+
+  // 获取社交媒体链接
+  await loadSocialLinks()
 })
 </script>
 
@@ -251,8 +379,29 @@ onMounted(async () => {
         @media (max-width: 480px) {
           flex-direction: column;
         }
+      }
 
-        // 优化Hero区域中所有按钮的视觉效果
+      .social-links {
+        @media (max-width: 768px) {
+          margin-top: 24px;
+
+          .social-buttons {
+            gap: 8px;
+
+            .social-link {
+              padding: 6px 12px;
+              font-size: 0.8rem;
+
+              .social-icon {
+                font-size: 1rem;
+              }
+            }
+          }
+        }
+      }
+
+      // 优化Hero区域中所有按钮的视觉效果
+      .hero-actions {
         .ai-button {
           border: 2px solid rgba(255, 255, 255, 0.6);
           backdrop-filter: blur(10px);
@@ -284,8 +433,115 @@ onMounted(async () => {
             }
           }
 
+          &.featured {
+            // Featured按钮：特色橙色渐变
+            background: linear-gradient(135deg, #FF6B35, #F7931E);
+            border-color: rgba(255, 255, 255, 0.8);
+            color: white;
+
+            &:hover {
+              background: linear-gradient(135deg, #F7931E, #FF6B35);
+              border-color: white;
+              transform: translateY(-2px);
+              box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+            }
+          }
+
           &:active {
             transform: translateY(0);
+          }
+        }
+      }
+
+      .social-links {
+        margin-top: 32px;
+
+        .social-buttons {
+          display: flex;
+          justify-content: left;
+          gap: 12px;
+          flex-wrap: wrap;
+
+          .social-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+
+            .social-icon {
+              font-size: 1.125rem;
+            }
+
+            .social-label {
+              white-space: nowrap;
+            }
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+              border-color: rgba(255, 255, 255, 0.6);
+            }
+
+            &.x-link {
+              background: rgba(29, 161, 242, 0.8);
+              color: white;
+
+              &:hover {
+                background: rgba(29, 161, 242, 1);
+              }
+            }
+
+            &.xiaohongshu-link {
+              background: rgba(255, 36, 66, 0.8);
+              color: white;
+
+              &:hover {
+                background: rgba(255, 36, 66, 1);
+              }
+            }
+
+            &.bilibili-link {
+              background: rgba(0, 161, 214, 0.8);
+              color: white;
+
+              &:hover {
+                background: rgba(0, 161, 214, 1);
+              }
+            }
+
+            &.wechat-link {
+              background: rgba(7, 193, 96, 0.8);
+              color: white;
+
+              &:hover {
+                background: rgba(7, 193, 96, 1);
+              }
+            }
+
+            &.zhihu-link {
+              background: rgba(0, 132, 255, 0.8);
+              color: white;
+
+              &:hover {
+                background: rgba(0, 132, 255, 1);
+              }
+            }
+
+            &.csdn-link {
+              background: rgba(252, 85, 49, 0.8);
+              color: white;
+
+              &:hover {
+                background: rgba(252, 85, 49, 1);
+              }
+            }
           }
         }
       }

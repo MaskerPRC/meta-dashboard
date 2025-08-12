@@ -116,6 +116,11 @@
                 查看
               </el-button>
 
+              <el-button size="small" type="info" @click="editIdea(scope.row)">
+                <el-icon><Edit /></el-icon>
+                编辑
+              </el-button>
+
               <template v-if="scope.row.status === 'pending'">
                 <el-button size="small" type="success" @click="adoptIdea(scope.row)">
                   <el-icon><Check /></el-icon>
@@ -275,6 +280,61 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 编辑想法对话框 -->
+    <el-dialog
+      v-model="editDialogVisible"
+      title="编辑想法"
+      width="600px"
+      :before-close="closeEditDialog"
+    >
+      <el-form
+        ref="editFormRef"
+        :model="editForm"
+        :rules="editRules"
+        label-width="80px"
+      >
+        <el-form-item label="想法标题" prop="title">
+          <el-input
+            v-model="editForm.title"
+            placeholder="简明扼要地描述你的想法（最多200字符）"
+            maxlength="200"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="想法描述" prop="description">
+          <el-input
+            v-model="editForm.description"
+            type="textarea"
+            :rows="4"
+            placeholder="详细描述你的想法（最多1000字符）"
+            maxlength="1000"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="详细内容" prop="content">
+          <el-input
+            v-model="editForm.content"
+            type="textarea"
+            :rows="6"
+            placeholder="可选：提供更详细的实现思路、技术方案等（支持Markdown格式，最多10000字符）"
+            maxlength="10000"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeEditDialog">取消</el-button>
+          <el-button type="primary" @click="updateIdea" :loading="updating">
+            保存修改
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -284,7 +344,7 @@ import { ElMessageBox } from 'element-plus'
 import { showNotification } from '../../utils/notification'
 import {
   Search, Download, Delete, View, Check, Close, MagicStick,
-  Star, ArrowDown, ArrowUp
+  Star, ArrowDown, ArrowUp, Edit
 } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
 import { renderMarkdown } from '../../utils/markdownRenderer'
@@ -309,6 +369,31 @@ const selectedIdea = ref(null)
 const rejectDialogVisible = ref(false)
 const rejectingIdea = ref(null)
 const rejectReason = ref('')
+
+// 编辑相关状态
+const editDialogVisible = ref(false)
+const editingIdea = ref(null)
+const updating = ref(false)
+const editFormRef = ref(null)
+const editForm = reactive({
+  title: '',
+  description: '',
+  content: ''
+})
+
+const editRules = {
+  title: [
+    { required: true, message: '请输入想法标题', trigger: 'blur' },
+    { max: 200, message: '标题不能超过200字符', trigger: 'blur' }
+  ],
+  description: [
+    { required: true, message: '请输入想法描述', trigger: 'blur' },
+    { max: 1000, message: '描述不能超过1000字符', trigger: 'blur' }
+  ],
+  content: [
+    { max: 10000, message: '详细内容不能超过10000字符', trigger: 'blur' }
+  ]
+}
 
 // 计算属性
 const filteredIdeas = computed(() => {
@@ -573,6 +658,68 @@ const getStatusName = (status) => {
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString()
+}
+
+// 编辑想法相关方法
+const editIdea = async (idea) => {
+  try {
+    // 获取完整的想法详情
+    const response = await axios.get(`/api/ideas/${idea.id}`)
+    editingIdea.value = response.data.idea
+    
+    // 填充编辑表单
+    editForm.title = editingIdea.value.title
+    editForm.description = editingIdea.value.description
+    editForm.content = editingIdea.value.content || ''
+    
+    editDialogVisible.value = true
+  } catch (error) {
+    console.error('获取想法详情失败:', error)
+    showNotification.error('获取想法详情失败')
+  }
+}
+
+const closeEditDialog = () => {
+  editDialogVisible.value = false
+  editingIdea.value = null
+  editForm.title = ''
+  editForm.description = ''
+  editForm.content = ''
+  if (editFormRef.value) {
+    editFormRef.value.resetFields()
+  }
+}
+
+const updateIdea = async () => {
+  if (!editFormRef.value) return
+
+  try {
+    await editFormRef.value.validate()
+    
+    updating.value = true
+    const response = await axios.put(`/api/ideas/${editingIdea.value.id}`, editForm)
+    
+    showNotification.success('想法更新成功')
+    
+    // 刷新列表
+    fetchIdeas()
+    
+    // 如果详情对话框开着，也更新
+    if (selectedIdea.value && selectedIdea.value.id === editingIdea.value.id) {
+      selectedIdea.value = response.data.idea
+    }
+    
+    closeEditDialog()
+  } catch (error) {
+    if (error.response) {
+      showNotification.error('更新失败: ' + error.response.data.message)
+    } else {
+      console.error('更新想法失败:', error)
+      showNotification.error('更新失败，请重试')
+    }
+  } finally {
+    updating.value = false
+  }
 }
 
 // 组件挂载时获取数据

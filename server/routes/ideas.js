@@ -372,6 +372,122 @@ router.get('/user/votes', requireAuth, async (req, res) => {
   }
 });
 
+// 更新想法（作者或管理员）
+router.put('/:id', requireAuth, async (req, res) => {
+  try {
+    const ideaId = parseInt(req.params.id);
+    const { title, description, content } = req.body;
+    const userId = req.user.id;
+    const isAdmin = req.user.is_admin;
+
+    if (!ideaId) {
+      return res.status(400).json({ message: '无效的想法ID' });
+    }
+
+    // 验证输入
+    if (!title || !description) {
+      return res.status(400).json({ message: '标题和描述不能为空' });
+    }
+
+    if (title.length > 200) {
+      return res.status(400).json({ message: '标题不能超过200字符' });
+    }
+
+    if (description.length > 1000) {
+      return res.status(400).json({ message: '描述不能超过1000字符' });
+    }
+
+    if (content && content.length > 10000) {
+      return res.status(400).json({ message: '详细内容不能超过10000字符' });
+    }
+
+    // 检查想法是否存在
+    const checkQuery = 'SELECT * FROM ideas WHERE id = ?';
+    
+    db.get(checkQuery, [ideaId], (err, idea) => {
+      if (err) {
+        console.error('检查想法失败:', err);
+        return res.status(500).json({ message: '服务器错误' });
+      }
+
+      if (!idea) {
+        return res.status(404).json({ message: '想法不存在' });
+      }
+
+      // 检查权限：只有作者或管理员可以编辑
+      if (idea.author_id !== userId && !isAdmin) {
+        return res.status(403).json({ message: '没有权限编辑此想法' });
+      }
+
+      // 检查是否可以编辑：只有pending状态的想法可以编辑，或者管理员可以编辑任何状态
+      if (!isAdmin && idea.status !== 'pending') {
+        return res.status(400).json({ message: '只能编辑待审核状态的想法' });
+      }
+
+      // 检查时间限制：非管理员用户只能在创建后24小时内编辑
+      if (!isAdmin) {
+        const createdAt = new Date(idea.created_at);
+        const now = new Date();
+        const timeDiff = (now - createdAt) / (1000 * 60 * 60); // 小时
+
+        if (timeDiff > 24) {
+          return res.status(400).json({ message: '想法创建24小时后无法编辑' });
+        }
+      }
+
+      // 更新想法
+      const updateQuery = `
+        UPDATE ideas 
+        SET title = ?, description = ?, content = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `;
+
+      db.run(updateQuery, [title, description, content || null, ideaId], function(err) {
+        if (err) {
+          console.error('更新想法失败:', err);
+          return res.status(500).json({ message: '更新想法失败' });
+        }
+
+        if (this.changes === 0) {
+          return res.status(404).json({ message: '想法不存在' });
+        }
+
+        // 返回更新后的想法信息
+        const selectQuery = `
+          SELECT 
+            i.*,
+            u.username as author_name,
+            u.avatar_url as author_avatar,
+            adopter.username as adopter_name,
+            COUNT(DISTINCT iv.user_id) as voters_count,
+            COALESCE(SUM(iv.votes_count), 0) as total_votes
+          FROM ideas i
+          LEFT JOIN users u ON i.author_id = u.id
+          LEFT JOIN users adopter ON i.adopted_by = adopter.id
+          LEFT JOIN idea_votes iv ON i.id = iv.idea_id
+          WHERE i.id = ?
+          GROUP BY i.id
+        `;
+
+        db.get(selectQuery, [ideaId], (err, updatedIdea) => {
+          if (err) {
+            console.error('获取更新后想法失败:', err);
+            return res.status(500).json({ message: '想法更新成功，但获取详情失败' });
+          }
+
+          res.json({
+            message: '想法更新成功',
+            idea: updatedIdea
+          });
+        });
+      });
+    });
+  } catch (error) {
+    console.error('更新想法错误:', error);
+    res.status(500).json({ message: '服务器错误' });
+  }
+});
+
 // ===== 管理员功能 =====
 
 // 管理员采纳想法

@@ -108,6 +108,7 @@ export default {
       milestone: '里程碑',
       progress_update: '进度更新',
       status_change: '状态变更',
+      progress_log: '进展日志',
       manual_record: '手动记录'
     }
   },
@@ -487,7 +488,9 @@ export default {
       expected_completion: '预期完成时间',
       tech_stack: '技术栈',
       project_tags: '项目标签',
-      project_content: '项目详细内容'
+      project_content: '项目详细内容',
+      progress_log: '进展日志',
+      progress_log_input: '进展日志输入'
     },
 
     // 占位符文本
@@ -500,7 +503,8 @@ export default {
       select_completion_time: '选择预期完成时间',
       add_tech_stack: '添加技术栈',
       add_tag: '添加标签',
-      enter_project_content: '请输入项目详细内容，支持Markdown格式...\n提示：可以直接粘贴图片或视频文件'
+      enter_project_content: '请输入项目详细内容，支持Markdown格式...\n提示：可以直接粘贴图片或视频文件',
+      progress_log_placeholder: '描述本次修改的进展情况，如新增功能、解决的问题、下一步计划等...'
     },
 
     // 编辑器相关
@@ -538,6 +542,12 @@ export default {
       project_create_success: '项目创建成功',
       save_project_failed: '保存项目失败',
       project_saved: '项目保存成功'
+    },
+
+    // 进展日志
+    progress_log: {
+      title: '进展日志输入',
+      tip: '填写进展日志有助于团队了解项目推进情况，此内容将在项目进展历史中显示'
     },
 
     // 项目模板
@@ -723,11 +733,10 @@ export default {
     title: '我的简历',
     subtitle: '编辑和管理您的个人简历',
     edit: '编辑简历',
-    preview: '简历预览',
     version_history: '版本历史',
     save: '保存简历',
     saving: '保存中...',
-    
+
     // 表单
     form: {
       title_label: '简历标题',
@@ -836,7 +845,7 @@ export default {
     ascending: '升序',
     descending: '降序',
     reset_filters: '重置',
-    
+
     // 统计信息
     stats: {
       total_ideas: '总想法数',

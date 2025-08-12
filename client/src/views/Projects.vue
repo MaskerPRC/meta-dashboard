@@ -73,6 +73,32 @@
         </div>
 
         <div class="toolbar-right">
+          <!-- 排序选择器 -->
+          <el-select
+            v-model="sortBy"
+            placeholder="排序方式"
+            style="width: 140px"
+            @change="handleSortChange"
+          >
+            <el-option label="创建时间" value="created_at" />
+            <el-option label="最近更新" value="updated_at" />
+            <el-option label="项目名称" value="title" />
+            <el-option label="进度排序" value="progress" />
+            <el-option label="点赞数量" value="likes_count" />
+            <el-option label="优先级" value="priority" />
+            <el-option label="状态" value="status" />
+            <el-option label="自定义排序" value="order_index" />
+          </el-select>
+          
+          <!-- 排序方向 -->
+          <el-button
+            :type="sortOrder === 'desc' ? 'primary' : 'default'"
+            @click="toggleSortOrder"
+          >
+            <el-icon>
+              <component :is="sortOrder === 'desc' ? 'SortDown' : 'SortUp'" />
+            </el-icon>
+          </el-button>
           <!-- 视图切换 -->
           <el-button-group>
             <el-button
@@ -236,7 +262,7 @@ import ProjectCard from '../components/project/ProjectCard.vue'
 import WechatGroup from '../components/common/WechatGroup.vue'
 import dayjs from 'dayjs'
 import {
-  Setting, Search, Grid, List, Refresh
+  Setting, Search, Grid, List, Refresh, SortDown, SortUp
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -248,7 +274,9 @@ const authStore = useAuthStore()
 const viewMode = ref('grid')
 const searchText = ref('')
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(12)
+const sortBy = ref('updated_at')
+const sortOrder = ref('desc')
 
 const filters = ref({
   status: '',
@@ -280,6 +308,8 @@ const resetFilters = () => {
     search: ''
   }
   searchText.value = ''
+  sortBy.value = 'updated_at'
+  sortOrder.value = 'desc'
   currentPage.value = 1
   fetchProjects()
 }
@@ -295,8 +325,23 @@ const handleCurrentChange = (page) => {
   fetchProjects()
 }
 
+const handleSortChange = () => {
+  currentPage.value = 1
+  fetchProjects()
+}
+
+const toggleSortOrder = () => {
+  sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc'
+  currentPage.value = 1
+  fetchProjects()
+}
+
 const fetchProjects = () => {
-  projectsStore.setFilters(filters.value)
+  projectsStore.setFilters({
+    ...filters.value,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value
+  })
   projectsStore.setPagination({
     page: currentPage.value,
     limit: pageSize.value
@@ -472,12 +517,21 @@ watch(() => router.currentRoute.value.query, (newQuery) => {
     }
     
     .projects-list {
-      .projects-table {
-        background: var(--ai-bg-primary);
-        border-radius: 12px;
-        overflow: hidden;
-        
-        .project-title-cell {
+              .projects-table {
+          background: var(--ai-bg-primary);
+          border-radius: 12px;
+          overflow: hidden;
+          
+          :deep(.el-table__row) {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            
+            &:hover {
+              background-color: var(--ai-bg-secondary) !important;
+            }
+          }
+          
+          .project-title-cell {
           h4 {
             margin: 0 0 4px;
             font-size: 1rem;

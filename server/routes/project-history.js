@@ -384,6 +384,13 @@ function recordProjectChange(projectId, changeType, oldData, newData, userId) {
         newValue = newData.progress + '%';
         break;
         
+      case 'progress_log':
+        title = '项目进展更新';
+        content = oldData.progress_log;
+        oldValue = null;
+        newValue = oldData.progress_log;
+        break;
+        
       default:
         title = '项目信息更新';
         content = '项目信息已更新';

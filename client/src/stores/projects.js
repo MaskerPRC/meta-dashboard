@@ -11,14 +11,16 @@ export const useProjectsStore = defineStore('projects', () => {
   const statsLoading = ref(false)
   const pagination = ref({
     page: 1,
-    limit: 20,
+    limit: 12,
     total: 0,
     pages: 0
   })
   const filters = ref({
     status: '',
     priority: '',
-    search: ''
+    search: '',
+    sortBy: 'updated_at',
+    sortOrder: 'desc'
   })
   
   // 统计数据状态（从后端获取的真实统计数据）
@@ -191,7 +193,9 @@ export const useProjectsStore = defineStore('projects', () => {
     filters.value = {
       status: '',
       priority: '',
-      search: ''
+      search: '',
+      sortBy: 'updated_at',
+      sortOrder: 'desc'
     }
     pagination.value.page = 1
   }
@@ -222,6 +226,69 @@ export const useProjectsStore = defineStore('projects', () => {
     }
   }
   
+  // 项目点赞
+  const likeProject = async (projectId) => {
+    try {
+      const response = await axios.post(`/api/projects/${projectId}/like`)
+      
+      // 更新本地项目列表中的点赞数
+      const projectIndex = projects.value.findIndex(p => p.id === projectId)
+      if (projectIndex !== -1) {
+        projects.value[projectIndex].likes_count = response.data.likes_count
+      }
+      
+      // 更新当前项目的点赞数
+      if (currentProject.value?.id === projectId) {
+        currentProject.value.likes_count = response.data.likes_count
+      }
+      
+      showNotification.success(response.data.message)
+      return response.data
+    } catch (error) {
+      console.error('项目点赞失败:', error)
+      const message = error.response?.data?.message || '点赞失败'
+      showNotification.error(message)
+      throw error
+    }
+  }
+
+  // 取消项目点赞
+  const unlikeProject = async (projectId) => {
+    try {
+      const response = await axios.delete(`/api/projects/${projectId}/like`)
+      
+      // 更新本地项目列表中的点赞数
+      const projectIndex = projects.value.findIndex(p => p.id === projectId)
+      if (projectIndex !== -1) {
+        projects.value[projectIndex].likes_count = response.data.likes_count
+      }
+      
+      // 更新当前项目的点赞数
+      if (currentProject.value?.id === projectId) {
+        currentProject.value.likes_count = response.data.likes_count
+      }
+      
+      showNotification.success(response.data.message)
+      return response.data
+    } catch (error) {
+      console.error('取消点赞失败:', error)
+      const message = error.response?.data?.message || '取消点赞失败'
+      showNotification.error(message)
+      throw error
+    }
+  }
+
+  // 检查项目点赞状态
+  const checkLikeStatus = async (projectId) => {
+    try {
+      const response = await axios.get(`/api/projects/${projectId}/like-status`)
+      return response.data.is_liked
+    } catch (error) {
+      console.error('检查点赞状态失败:', error)
+      return false
+    }
+  }
+
   return {
     // 状态
     projects,
@@ -246,6 +313,9 @@ export const useProjectsStore = defineStore('projects', () => {
     updateProjectsOrder,
     setFilters,
     setPagination,
-    resetFilters
+    resetFilters,
+    likeProject,
+    unlikeProject,
+    checkLikeStatus
   }
 }) 

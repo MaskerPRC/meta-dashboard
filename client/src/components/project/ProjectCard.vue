@@ -74,6 +74,24 @@
       </div>
       
       <div class="footer-right">
+        <!-- 点赞按钮 -->
+        <div class="like-section">
+          <el-tooltip :content="isLiked ? '取消点赞' : '点赞'" placement="top">
+            <el-button 
+              size="small" 
+              circle 
+              :type="isLiked ? 'danger' : 'default'"
+              :loading="likeLoading"
+              @click.stop="handleLike"
+            >
+              <el-icon>
+                <component :is="isLiked ? 'StarFilled' : 'Star'" />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
+          <span class="like-count">{{ project.likes_count || 0 }}</span>
+        </div>
+        
         <!-- GitHub仓库链接 -->
         <el-tooltip v-if="project.github_repo" content="查看源码" placement="top">
           <el-button 
@@ -102,12 +120,14 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { Calendar, Link, View, Cpu } from '@element-plus/icons-vue'
+import { computed, ref, onMounted } from 'vue'
+import { Calendar, Link, View, Cpu, Star, StarFilled } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
+import { useProjectsStore } from '@/stores/projects'
 import dayjs from 'dayjs'
 
 const { t } = useI18n()
+const projectsStore = useProjectsStore()
 
 const props = defineProps({
   project: {
@@ -117,6 +137,35 @@ const props = defineProps({
 })
 
 defineEmits(['click'])
+
+// 点赞相关状态
+const isLiked = ref(false)
+const likeLoading = ref(false)
+
+// 组件挂载时检查点赞状态
+onMounted(async () => {
+  isLiked.value = await projectsStore.checkLikeStatus(props.project.id)
+})
+
+// 处理点赞/取消点赞
+const handleLike = async () => {
+  if (likeLoading.value) return
+  
+  likeLoading.value = true
+  try {
+    if (isLiked.value) {
+      await projectsStore.unlikeProject(props.project.id)
+      isLiked.value = false
+    } else {
+      await projectsStore.likeProject(props.project.id)
+      isLiked.value = true
+    }
+  } catch (error) {
+    // 错误处理已在store中完成
+  } finally {
+    likeLoading.value = false
+  }
+}
 
 // 获取状态名称
 const getStatusName = (status) => {
@@ -321,6 +370,21 @@ const openDemo = () => {
     .footer-right {
       display: flex;
       gap: 8px;
+      align-items: center;
+      
+      .like-section {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        
+        .like-count {
+          font-size: 0.75rem;
+          color: var(--ai-text-secondary);
+          font-weight: 500;
+          min-width: 16px;
+          text-align: center;
+        }
+      }
       
       .el-button {
         width: 28px;
@@ -328,6 +392,16 @@ const openDemo = () => {
         
         .el-icon {
           font-size: 14px;
+        }
+        
+        &.el-button--danger {
+          background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+          border: none;
+          color: white;
+          
+          &:hover {
+            background: linear-gradient(135deg, #ff5252, #e53935);
+          }
         }
       }
     }

@@ -240,14 +240,14 @@ const editPreviewContent = computed(() => {
 const canManageComment = (comment) => {
   return authStore.isAuthenticated && (
     authStore.isAdmin || 
-    comment.user.id === authStore.user?.id
+    String(comment.user.id) === String(authStore.user?.id)
   )
 }
 
 const canEditComment = (comment) => {
   if (!authStore.isAuthenticated) return false
   if (authStore.isAdmin) return true
-  if (comment.user.id !== authStore.user?.id) return false
+  if (String(comment.user.id) !== String(authStore.user?.id)) return false
   
   const commentTime = dayjs(comment.created_at)
   const now = dayjs()

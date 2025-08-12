@@ -185,12 +185,12 @@ function saveProjectToDatabase(projectData) {
 
 // 获取所有项目（公开接口）
 router.get('/', (req, res) => {
-  const { status, priority, search, page = 1, limit = 20 } = req.query;
+  const { status, priority, search, page = 1, limit = 12, sortBy = 'updated_at', sortOrder = 'desc' } = req.query;
 
   let sql = `
     SELECT id, title, description, status, priority, progress, 
            tech_stack, github_repo, demo_url, tags, order_index,
-           attachments, created_at, updated_at
+           attachments, created_at, updated_at, likes_count
     FROM projects 
     WHERE 1=1
   `;
@@ -217,7 +217,38 @@ router.get('/', (req, res) => {
   }
 
   // 排序
-  sql += ' ORDER BY order_index ASC, created_at DESC';
+  const allowedSortFields = ['created_at', 'updated_at', 'title', 'progress', 'likes_count', 'priority', 'status', 'order_index'];
+  const validSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'updated_at';
+  const validSortOrder = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+  
+  // 特殊排序处理
+  if (validSortBy === 'priority') {
+    // 优先级排序：critical > high > medium > low
+    sql += ` ORDER BY CASE priority 
+              WHEN 'critical' THEN 1 
+              WHEN 'high' THEN 2 
+              WHEN 'medium' THEN 3 
+              WHEN 'low' THEN 4 
+              ELSE 5 END ${validSortOrder}`;
+  } else if (validSortBy === 'status') {
+    // 状态排序：按完成度排序
+    sql += ` ORDER BY CASE status 
+              WHEN 'idea' THEN 1 
+              WHEN 'planning' THEN 2 
+              WHEN 'development' THEN 3 
+              WHEN 'testing' THEN 4 
+              WHEN 'deployed' THEN 5 
+              WHEN 'completed' THEN 6 
+              WHEN 'paused' THEN 7 
+              ELSE 8 END ${validSortOrder}`;
+  } else {
+    sql += ` ORDER BY ${validSortBy} ${validSortOrder}`;
+  }
+  
+  // 添加次要排序确保稳定性
+  if (validSortBy !== 'created_at') {
+    sql += ', created_at DESC';
+  }
 
   // 分页
   const offset = (page - 1) * limit;
@@ -578,13 +609,97 @@ router.put('/:id', requireAdmin, (req, res) => {
           return res.status(500).json({ message: '获取更新项目失败' });
         }
 
-        // 记录项目变更历史
+        // 记录项目变更历史和改动日志
         try {
+          const ChangelogService = require('../services/changelogService');
+          
+          // 原有的项目历史记录
           if (oldProject.status !== updatedProject.status) {
             await recordProjectChange(id, 'status_change', oldProject, updatedProject, req.user.id);
           }
           if (oldProject.progress !== updatedProject.progress) {
             await recordProjectChange(id, 'progress_update', oldProject, updatedProject, req.user.id);
+          }
+
+          // 新的改动日志记录
+          const fieldsToTrack = [
+            'title', 'description', 'content', 'status', 'priority',
+            'start_date', 'due_date', 'completion_date', 'progress',
+            'github_repo', 'demo_url', 'tags', 'order_index'
+          ];
+
+          // 处理新数据格式
+          const newProjectData = {
+            title: updatedProject.title,
+            description: updatedProject.description,
+            content: updatedProject.content,
+            status: updatedProject.status,
+            priority: updatedProject.priority,
+            start_date: updatedProject.start_date,
+            due_date: updatedProject.due_date,
+            completion_date: updatedProject.completion_date,
+            progress: updatedProject.progress,
+            github_repo: updatedProject.github_repo,
+            demo_url: updatedProject.demo_url,
+            tags: updatedProject.tags,
+            order_index: updatedProject.order_index,
+            tech_stack: updatedProject.tech_stack,
+            attachments: updatedProject.attachments
+          };
+
+          // 比较原数据和新数据，生成改动记录
+          const changes = ChangelogService.generateChanges(oldProject, newProjectData, fieldsToTrack);
+
+          // 处理tech_stack特殊字段
+          if (oldProject.tech_stack !== updatedProject.tech_stack) {
+            changes.push({
+              field_name: 'tech_stack',
+              old_value: oldProject.tech_stack,
+              new_value: updatedProject.tech_stack,
+              description: `修改技术栈：${oldProject.tech_stack || '无'} → ${updatedProject.tech_stack || '无'}`
+            });
+          }
+
+          // 处理attachments特殊字段
+          if (oldProject.attachments !== updatedProject.attachments) {
+            changes.push({
+              field_name: 'attachments',
+              old_value: oldProject.attachments,
+              new_value: updatedProject.attachments,
+              description: '更新项目附件'
+            });
+          }
+
+          // 批量记录改动
+          if (changes.length > 0) {
+            const recordPromises = changes.map(change => {
+              return ChangelogService.recordChange({
+                project_id: parseInt(id),
+                user_id: req.user.id,
+                change_type: 'updated',
+                field_name: change.field_name,
+                old_value: change.old_value,
+                new_value: change.new_value,
+                description: change.description,
+                ip_address: ChangelogService.getClientIP(req),
+                user_agent: req.headers['user-agent']
+              });
+            });
+
+            await Promise.all(recordPromises);
+            console.log(`✓ 记录了 ${changes.length} 个项目改动`);
+          }
+
+          // 如果有进展日志，记录到项目历史
+          if (req.body.progress_log && req.body.progress_log.trim()) {
+            await recordProjectChange(
+              id,
+              'progress_log',
+              { progress_log: req.body.progress_log.trim() },
+              { progress_log: req.body.progress_log.trim() },
+              req.user.id
+            );
+            console.log(`✓ 记录了项目进展日志`);
           }
         } catch (historyErr) {
           console.error('记录项目变更历史失败:', historyErr);
@@ -645,6 +760,184 @@ router.put('/reorder/batch', requireAdmin, (req, res) => {
     }
 
     res.json({ message: '排序更新成功' });
+  });
+});
+
+// 获取客户端IP地址的工具函数
+const getClientIP = (req) => {
+  return req.headers['x-forwarded-for'] ||
+         req.headers['x-real-ip'] ||
+         req.connection.remoteAddress ||
+         req.socket.remoteAddress ||
+         (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+         '127.0.0.1';
+};
+
+// 项目点赞（公开接口，无需登录）
+router.post('/:id/like', (req, res) => {
+  const { id } = req.params;
+  const clientIP = getClientIP(req);
+  const userAgent = req.headers['user-agent'] || '';
+
+  // 验证项目是否存在
+  db.get('SELECT id, likes_count FROM projects WHERE id = ?', [id], (err, project) => {
+    if (err) {
+      console.error('获取项目信息错误:', err);
+      return res.status(500).json({ message: '系统错误' });
+    }
+
+    if (!project) {
+      return res.status(404).json({ message: '项目不存在' });
+    }
+
+    // 检查该IP是否已经点赞过这个项目
+    db.get('SELECT id FROM project_likes WHERE project_id = ? AND ip_address = ?', 
+      [id, clientIP], (checkErr, existingLike) => {
+      
+      if (checkErr) {
+        console.error('检查点赞状态错误:', checkErr);
+        return res.status(500).json({ message: '系统错误' });
+      }
+
+      if (existingLike) {
+        return res.status(400).json({ message: '您已经点赞过这个项目了' });
+      }
+
+      // 开始事务：添加点赞记录 + 更新项目点赞数
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        // 插入点赞记录
+        db.run('INSERT INTO project_likes (project_id, ip_address, user_agent) VALUES (?, ?, ?)',
+          [id, clientIP, userAgent], function(insertErr) {
+          
+          if (insertErr) {
+            console.error('插入点赞记录错误:', insertErr);
+            db.run('ROLLBACK');
+            return res.status(500).json({ message: '点赞失败' });
+          }
+
+          // 更新项目点赞数
+          db.run('UPDATE projects SET likes_count = likes_count + 1 WHERE id = ?',
+            [id], function(updateErr) {
+            
+            if (updateErr) {
+              console.error('更新点赞数错误:', updateErr);
+              db.run('ROLLBACK');
+              return res.status(500).json({ message: '点赞失败' });
+            }
+
+            db.run('COMMIT');
+
+            // 获取更新后的点赞数
+            db.get('SELECT likes_count FROM projects WHERE id = ?', [id], (getErr, updatedProject) => {
+              if (getErr) {
+                console.error('获取更新后点赞数错误:', getErr);
+                return res.status(500).json({ message: '系统错误' });
+              }
+
+              res.json({
+                message: '点赞成功',
+                likes_count: updatedProject.likes_count
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+// 取消项目点赞（公开接口，无需登录）
+router.delete('/:id/like', (req, res) => {
+  const { id } = req.params;
+  const clientIP = getClientIP(req);
+
+  // 验证项目是否存在
+  db.get('SELECT id, likes_count FROM projects WHERE id = ?', [id], (err, project) => {
+    if (err) {
+      console.error('获取项目信息错误:', err);
+      return res.status(500).json({ message: '系统错误' });
+    }
+
+    if (!project) {
+      return res.status(404).json({ message: '项目不存在' });
+    }
+
+    // 检查该IP是否已经点赞过这个项目
+    db.get('SELECT id FROM project_likes WHERE project_id = ? AND ip_address = ?', 
+      [id, clientIP], (checkErr, existingLike) => {
+      
+      if (checkErr) {
+        console.error('检查点赞状态错误:', checkErr);
+        return res.status(500).json({ message: '系统错误' });
+      }
+
+      if (!existingLike) {
+        return res.status(400).json({ message: '您还没有点赞过这个项目' });
+      }
+
+      // 开始事务：删除点赞记录 + 更新项目点赞数
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        // 删除点赞记录
+        db.run('DELETE FROM project_likes WHERE project_id = ? AND ip_address = ?',
+          [id, clientIP], function(deleteErr) {
+          
+          if (deleteErr) {
+            console.error('删除点赞记录错误:', deleteErr);
+            db.run('ROLLBACK');
+            return res.status(500).json({ message: '取消点赞失败' });
+          }
+
+          // 更新项目点赞数
+          db.run('UPDATE projects SET likes_count = MAX(likes_count - 1, 0) WHERE id = ?',
+            [id], function(updateErr) {
+            
+            if (updateErr) {
+              console.error('更新点赞数错误:', updateErr);
+              db.run('ROLLBACK');
+              return res.status(500).json({ message: '取消点赞失败' });
+            }
+
+            db.run('COMMIT');
+
+            // 获取更新后的点赞数
+            db.get('SELECT likes_count FROM projects WHERE id = ?', [id], (getErr, updatedProject) => {
+              if (getErr) {
+                console.error('获取更新后点赞数错误:', getErr);
+                return res.status(500).json({ message: '系统错误' });
+              }
+
+              res.json({
+                message: '取消点赞成功',
+                likes_count: updatedProject.likes_count
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+// 检查用户是否已点赞项目（公开接口，无需登录）
+router.get('/:id/like-status', (req, res) => {
+  const { id } = req.params;
+  const clientIP = getClientIP(req);
+
+  db.get('SELECT COUNT(*) as is_liked FROM project_likes WHERE project_id = ? AND ip_address = ?',
+    [id, clientIP], (err, result) => {
+    
+    if (err) {
+      console.error('检查点赞状态错误:', err);
+      return res.status(500).json({ message: '系统错误' });
+    }
+
+    res.json({
+      is_liked: result.is_liked > 0
+    });
   });
 });
 

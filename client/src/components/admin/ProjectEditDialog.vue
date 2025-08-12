@@ -266,8 +266,15 @@
                       <div v-for="(image, index) in formData.attachments.images" :key="`img-${index}`" class="attachment-item image-item">
                         <img :src="image.url" :alt="image.filename" />
                         <div class="attachment-overlay">
-                          <span class="filename">{{ image.filename }}</span>
-                          <el-button type="danger" size="small" @click="removeAttachment('images', index)">
+                          <div class="image-caption-display">
+                            <span class="caption-text" :class="{ 'empty-caption': !image.caption }">
+                              {{ image.caption || '点击添加标注' }}
+                            </span>
+                            <el-button size="small" type="primary" @click="editImageCaption(index)" title="编辑标注">
+                              <el-icon><Edit /></el-icon>
+                            </el-button>
+                          </div>
+                          <el-button type="danger" size="small" @click="removeAttachment('images', index)" title="删除图片">
                             <el-icon><Delete /></el-icon>
                           </el-button>
                         </div>
@@ -298,12 +305,86 @@
       </el-row>
     </el-form>
 
+
+
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">{{ t('project.actions_buttons.cancel') }}</el-button>
         <el-button type="primary" @click="handleSave" :loading="saving">
           {{ project ? t('project.actions_buttons.save') : t('project.actions_buttons.create') }}
         </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 进展说明弹窗 -->
+  <el-dialog
+    v-model="showProgressDialog"
+    title="本次修改进展说明"
+    width="500px"
+    :close-on-click-modal="false"
+  >
+    <div class="progress-dialog-content">
+      <div class="progress-dialog-tip">
+        <el-icon color="#409EFF"><InfoFilled /></el-icon>
+        <span>{{ $t('project.progress_log.tip') }}</span>
+      </div>
+      
+      <el-form-item label="进展描述：" style="margin-top: 16px;">
+        <el-input
+          v-model="progressLog"
+          type="textarea"
+          :rows="4"
+          :placeholder="$t('project.placeholders.progress_log_placeholder')"
+          maxlength="500"
+          show-word-limit
+        />
+      </el-form-item>
+    </div>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="handleProgressCancel">跳过</el-button>
+        <el-button type="primary" @click="handleProgressSubmit" :loading="saving">
+          {{ progressLog.trim() ? '保存并记录进展' : '直接保存' }}
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 编辑图片标注弹窗 -->
+  <el-dialog
+    v-model="showImageCaptionDialog"
+    title="编辑图片标注"
+    width="500px"
+    :close-on-click-modal="false"
+  >
+    <div class="image-caption-edit">
+      <div class="image-preview">
+        <img v-if="editingImageIndex >= 0" :src="formData.attachments.images[editingImageIndex]?.url" alt="预览图片" />
+      </div>
+      
+      <el-form-item label="图片标注：" style="margin-top: 16px;">
+        <el-input
+          v-model="editingImageCaption"
+          type="textarea"
+          :rows="3"
+          placeholder="为这张图片添加描述或标注..."
+          maxlength="200"
+          show-word-limit
+        />
+      </el-form-item>
+      
+      <div class="caption-tip">
+        <el-icon><InfoFilled /></el-icon>
+        <span>留空将显示原始文件名。标注将在项目详情页面和图片预览中显示。</span>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="cancelImageCaptionEdit">取消</el-button>
+        <el-button type="primary" @click="saveImageCaptionEdit">保存标注</el-button>
       </div>
     </template>
   </el-dialog>
@@ -317,7 +398,7 @@ import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import hljs from 'highlight.js'
 import axios from '../../utils/axios'
 import {
-  Edit, View, Operation, Document, Picture, Delete
+  Edit, View, Operation, Document, Picture, Delete, InfoFilled
 } from '@element-plus/icons-vue'
 
 const { t } = useI18n()
@@ -347,6 +428,12 @@ const showTechInput = ref(false)
 const newTech = ref('')
 const showTagInput = ref(false)
 const newTag = ref('')
+const progressLog = ref('')
+const showProgressDialog = ref(false)
+const pendingSaveData = ref(null)
+const showImageCaptionDialog = ref(false)
+const editingImageIndex = ref(-1)
+const editingImageCaption = ref('')
 
 const formData = reactive({
   title: '',
@@ -408,6 +495,8 @@ const resetForm = () => {
     tags: [],
     attachments: { images: [], videos: [] }
   })
+
+  progressLog.value = ''
 
   if (formRef.value) {
     formRef.value.clearValidate()
@@ -477,7 +566,12 @@ const uploadFile = async (file) => {
     }
     
     if (images.length > 0) {
-      formData.attachments.images.push(...images)
+      // 为每个图片添加空的caption字段
+      const imagesWithEmptyCaption = images.map(image => ({
+        ...image,
+        caption: ''
+      }))
+      formData.attachments.images.push(...imagesWithEmptyCaption)
       showNotification.success(`${t('project.attachments.upload_success')} ${images.length} ${t('project.attachments.images')}`)
     }
     
@@ -541,7 +635,10 @@ const loadProjectData = () => {
       tech_stack: props.project.tech_stack ? [...props.project.tech_stack] : [],
       tags: props.project.tags ? [...props.project.tags] : [],
       attachments: props.project.attachments ? {
-        images: [...(props.project.attachments.images || [])],
+        images: (props.project.attachments.images || []).map(image => ({
+          ...image,
+          caption: image.caption || ''
+        })),
         videos: [...(props.project.attachments.videos || [])]
       } : { images: [], videos: [] }
     })
@@ -586,9 +683,25 @@ const handleSave = async () => {
   try {
     await formRef.value.validate()
 
-    saving.value = true
-
     const data = { ...formData }
+    
+    // 如果是编辑项目，先显示进展说明弹窗
+    if (props.project) {
+      pendingSaveData.value = data
+      showProgressDialog.value = true
+      return
+    }
+
+    // 新建项目直接保存
+    await performSave(data)
+  } catch (error) {
+    console.error('表单验证失败:', error)
+  }
+}
+
+const performSave = async (data) => {
+  try {
+    saving.value = true
 
     let response
     if (props.project) {
@@ -601,6 +714,7 @@ const handleSave = async () => {
 
     showNotification.success(props.project ? t('project.messages.project_update_success') : t('project.messages.project_create_success'))
     emit('saved', response.data.project)
+    handleClose()
   } catch (error) {
     console.error('保存项目失败:', error)
     showNotification.error(error.response?.data?.message || t('project.messages.save_project_failed'))
@@ -609,9 +723,47 @@ const handleSave = async () => {
   }
 }
 
+const handleProgressSubmit = async () => {
+  const data = pendingSaveData.value
+  
+  // 如果填写了进展日志，添加到请求数据中
+  if (progressLog.value.trim()) {
+    data.progress_log = progressLog.value.trim()
+  }
+
+  showProgressDialog.value = false
+  await performSave(data)
+}
+
+const handleProgressCancel = () => {
+  showProgressDialog.value = false
+  pendingSaveData.value = null
+  progressLog.value = ''
+}
+
 const handleClose = () => {
   emit('update:modelValue', false)
   resetForm()
+}
+
+// 图片标注编辑相关方法
+const editImageCaption = (index) => {
+  editingImageIndex.value = index
+  editingImageCaption.value = formData.attachments.images[index].caption || ''
+  showImageCaptionDialog.value = true
+}
+
+const saveImageCaptionEdit = () => {
+  if (editingImageIndex.value >= 0) {
+    formData.attachments.images[editingImageIndex.value].caption = editingImageCaption.value.trim()
+  }
+  cancelImageCaptionEdit()
+}
+
+const cancelImageCaptionEdit = () => {
+  showImageCaptionDialog.value = false
+  editingImageIndex.value = -1
+  editingImageCaption.value = ''
 }
 
 // 监听器
@@ -840,36 +992,133 @@ watch(showTagInput, (newVal) => {
       object-fit: cover;
     }
 
-    .attachment-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px;
-      opacity: 0;
-      transition: opacity 0.2s;
-      color: white;
+          .attachment-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        color: white;
 
-      .filename {
-        font-size: 12px;
-        text-align: center;
-        word-break: break-all;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        .image-caption-display {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          flex: 1;
+          
+          .caption-text {
+            font-size: 12px;
+            text-align: center;
+            word-break: break-all;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.2;
+
+            &.empty-caption {
+              opacity: 0.7;
+              font-style: italic;
+              color: rgba(255, 255, 255, 0.8);
+            }
+          }
+          
+          .el-button {
+            font-size: 10px;
+            padding: 2px 6px;
+            min-height: 20px;
+          }
+        }
+
+        .filename {
+          font-size: 12px;
+          text-align: center;
+          word-break: break-all;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
       }
-    }
 
     &:hover .attachment-overlay {
       opacity: 1;
     }
+  }
+}
+
+// 进展说明弹窗样式
+.progress-dialog-content {
+  .progress-dialog-tip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--el-color-primary-light-9);
+    border: 1px solid var(--el-color-primary-light-7);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--el-color-primary-dark-2);
+    line-height: 1.4;
+
+    .el-icon {
+      flex-shrink: 0;
+    }
+  }
+
+  .el-form-item {
+    margin-bottom: 0;
+  }
+}
+
+// 图片标注编辑弹窗样式
+.image-caption-edit {
+  .image-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    background: var(--el-bg-color-page);
+    border-radius: 8px;
+    border: 1px solid var(--el-border-color-lighter);
+    
+    img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+  }
+
+  .caption-tip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--el-color-info-light-9);
+    border: 1px solid var(--el-color-info-light-7);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--el-color-info-dark-2);
+
+    .el-icon {
+      color: var(--el-color-info);
+      flex-shrink: 0;
+    }
+  }
+
+  .el-form-item {
+    margin-bottom: 0;
   }
 }
 </style>
