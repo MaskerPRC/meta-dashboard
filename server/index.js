@@ -26,7 +26,7 @@ app.use(helmet());
 // 限流中间件
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
-  max: 100 // 每个IP最多100个请求
+  max: 1000 // 每个IP最多100个请求
 });
 app.use(limiter);
 
