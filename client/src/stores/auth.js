@@ -16,18 +16,40 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查登录状态
   const checkAuthStatus = async () => {
-    // 如果已经检查过且有用户信息，直接返回
-    if (hasCheckedAuth.value && user.value) {
+    console.log('checkAuthStatus 被调用, hasCheckedAuth:', hasCheckedAuth.value, 'loading:', loading.value)
+    
+    // 如果已经检查过，直接返回缓存的结果
+    if (hasCheckedAuth.value) {
+      console.log('使用缓存的认证状态:', !!user.value)
       return user.value
     }
     
+    // 如果正在加载中，等待加载完成
+    if (loading.value) {
+      console.log('认证检查正在进行中，等待完成...')
+      return new Promise((resolve) => {
+        const checkLoading = () => {
+          if (!loading.value) {
+            console.log('等待完成，返回结果:', !!user.value)
+            resolve(user.value)
+          } else {
+            setTimeout(checkLoading, 50)
+          }
+        }
+        checkLoading()
+      })
+    }
+    
     try {
+      console.log('发送认证状态检查请求...')
       loading.value = true
       const response = await axios.get('/api/auth/status')
       if (response.data.isAuthenticated) {
         user.value = response.data.user
+        console.log('用户已登录:', user.value.username)
       } else {
         user.value = null
+        console.log('用户未登录')
       }
       hasCheckedAuth.value = true
       return user.value

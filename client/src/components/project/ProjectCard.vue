@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Calendar, Link, View, Cpu, Star, StarFilled } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
@@ -139,12 +139,12 @@ const props = defineProps({
 defineEmits(['click'])
 
 // 点赞相关状态
-const isLiked = ref(false)
+const isLiked = ref(props.project.is_liked || false)
 const likeLoading = ref(false)
 
-// 组件挂载时检查点赞状态
-onMounted(async () => {
-  isLiked.value = await projectsStore.checkLikeStatus(props.project.id)
+// 监听项目点赞状态变化
+watch(() => props.project.is_liked, (newValue) => {
+  isLiked.value = newValue || false
 })
 
 // 处理点赞/取消点赞

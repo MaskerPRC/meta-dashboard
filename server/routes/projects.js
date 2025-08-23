@@ -186,32 +186,35 @@ function saveProjectToDatabase(projectData) {
 // 获取所有项目（公开接口）
 router.get('/', (req, res) => {
   const { status, priority, search, page = 1, limit = 12, sortBy = 'updated_at', sortOrder = 'desc' } = req.query;
+  const clientIP = getClientIP(req);
 
   let sql = `
-    SELECT id, title, description, status, priority, progress, 
-           tech_stack, github_repo, demo_url, tags, order_index,
-           attachments, created_at, updated_at, likes_count
-    FROM projects 
+    SELECT p.id, p.title, p.description, p.status, p.priority, p.progress, 
+           p.tech_stack, p.github_repo, p.demo_url, p.tags, p.order_index,
+           p.attachments, p.created_at, p.updated_at, p.likes_count,
+           CASE WHEN pl.id IS NOT NULL THEN 1 ELSE 0 END as is_liked
+    FROM projects p
+    LEFT JOIN project_likes pl ON p.id = pl.project_id AND pl.ip_address = ?
     WHERE 1=1
   `;
 
-  const params = [];
+  const params = [clientIP];
 
   // 状态筛选
   if (status) {
-    sql += ' AND status = ?';
+    sql += ' AND p.status = ?';
     params.push(status);
   }
 
   // 优先级筛选
   if (priority) {
-    sql += ' AND priority = ?';
+    sql += ' AND p.priority = ?';
     params.push(priority);
   }
 
   // 搜索
   if (search) {
-    sql += ' AND (title LIKE ? OR description LIKE ? OR tags LIKE ?)';
+    sql += ' AND (p.title LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)';
     const searchTerm = `%${search}%`;
     params.push(searchTerm, searchTerm, searchTerm);
   }
@@ -224,7 +227,7 @@ router.get('/', (req, res) => {
   // 特殊排序处理
   if (validSortBy === 'priority') {
     // 优先级排序：critical > high > medium > low
-    sql += ` ORDER BY CASE priority 
+    sql += ` ORDER BY CASE p.priority 
               WHEN 'critical' THEN 1 
               WHEN 'high' THEN 2 
               WHEN 'medium' THEN 3 
@@ -232,7 +235,7 @@ router.get('/', (req, res) => {
               ELSE 5 END ${validSortOrder}`;
   } else if (validSortBy === 'status') {
     // 状态排序：按完成度排序
-    sql += ` ORDER BY CASE status 
+    sql += ` ORDER BY CASE p.status 
               WHEN 'idea' THEN 1 
               WHEN 'planning' THEN 2 
               WHEN 'development' THEN 3 
@@ -242,12 +245,12 @@ router.get('/', (req, res) => {
               WHEN 'paused' THEN 7 
               ELSE 8 END ${validSortOrder}`;
   } else {
-    sql += ` ORDER BY ${validSortBy} ${validSortOrder}`;
+    sql += ` ORDER BY p.${validSortBy} ${validSortOrder}`;
   }
   
   // 添加次要排序确保稳定性
   if (validSortBy !== 'created_at') {
-    sql += ', created_at DESC';
+    sql += ', p.created_at DESC';
   }
 
   // 分页
@@ -292,7 +295,8 @@ router.get('/', (req, res) => {
           ...project,
           tech_stack: project.tech_stack ? project.tech_stack.split(',') : [],
           tags: project.tags ? project.tags.split(',') : [],
-          attachments: project.attachments ? JSON.parse(project.attachments) : { images: [], videos: [] }
+          attachments: project.attachments ? JSON.parse(project.attachments) : { images: [], videos: [] },
+          is_liked: Boolean(project.is_liked)
         })),
         pagination: {
           page: parseInt(page),
