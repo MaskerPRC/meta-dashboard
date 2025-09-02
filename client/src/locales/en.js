@@ -41,7 +41,8 @@ export default {
       ai_projects: 'AI Projects',
       overall_progress: 'Overall Progress',
       completed: 'Completed',
-      in_development: 'In Development'
+      in_development: 'In Development',
+      days_remaining: 'Days Left'
     },
 
     // Project status overview

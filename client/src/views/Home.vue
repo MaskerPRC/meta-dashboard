@@ -126,6 +126,12 @@
                 <div class="stat-number">{{ projectsStore.statusCounts.development || 0 }}</div>
                 <div class="stat-label">{{ $t('home.stats.in_development') }}</div>
               </div>
+              <!-- 年度倒计时卡片 -->
+              <div class="stat-card countdown-card">
+                <div class="stat-number countdown-number">{{ daysRemaining }}</div>
+                <div class="stat-label">{{ $t('home.stats.days_remaining') }}</div>
+                <div class="countdown-year">{{ currentYear }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -218,7 +224,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '../stores/projects'
@@ -239,6 +245,10 @@ const authStore = useAuthStore()
 // 数据
 const socialLinks = ref({})
 const startupArticle = ref({ url: '', title: '' })
+
+// 年度倒计时
+const currentYear = ref(new Date().getFullYear())
+const daysRemaining = ref(0)
 
 const recentProjects = computed(() => {
   return projectsStore.projects.slice(0, 6)
@@ -280,6 +290,19 @@ const getStatusName = (status) => {
 // 跳转到项目详情
 const goToProject = (id) => {
   router.push(`/project/${id}`)
+}
+
+// 计算年度倒计时
+const calculateDaysRemaining = () => {
+  const now = new Date()
+  const currentYearValue = now.getFullYear()
+  const endOfYear = new Date(currentYearValue, 11, 31, 23, 59, 59) // 12月31日23:59:59
+  
+  const timeDiff = endOfYear.getTime() - now.getTime()
+  const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
+  
+  currentYear.value = currentYearValue
+  daysRemaining.value = Math.max(0, days) // 确保不会显示负数
 }
 
 // 获取社交媒体链接配置
@@ -325,6 +348,19 @@ onMounted(async () => {
 
   // 获取社交媒体链接
   await loadSocialLinks()
+
+  // 计算年度倒计时
+  calculateDaysRemaining()
+
+  // 每天更新一次倒计时
+  const updateInterval = setInterval(() => {
+    calculateDaysRemaining()
+  }, 1000 * 60 * 60 * 24) // 24小时更新一次
+
+  // 组件卸载时清除定时器
+  onUnmounted(() => {
+    clearInterval(updateInterval)
+  })
 })
 </script>
 
@@ -550,7 +586,7 @@ onMounted(async () => {
     .hero-visual {
       .stats-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 20px;
 
         .stat-card {
@@ -570,6 +606,39 @@ onMounted(async () => {
           .stat-label {
             font-size: 0.875rem;
             opacity: 0.8;
+          }
+
+          // 倒计时卡片特殊样式
+          &.countdown-card {
+            background: linear-gradient(135deg, rgba(255, 165, 0, 0.2), rgba(255, 69, 0, 0.2));
+            border: 1px solid rgba(255, 140, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+              content: '';
+              position: absolute;
+              top: -50%;
+              left: -50%;
+              width: 200%;
+              height: 200%;
+              background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+              transform: rotate(45deg);
+              animation: shimmer 3s infinite;
+            }
+
+            .countdown-number {
+              color: #ffd700;
+              text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+              font-weight: 800;
+            }
+
+            .countdown-year {
+              font-size: 0.75rem;
+              opacity: 0.7;
+              margin-top: 4px;
+              color: #ffa500;
+            }
           }
         }
       }
@@ -925,6 +994,16 @@ onMounted(async () => {
         margin: 0;
       }
     }
+  }
+}
+
+// 动画关键帧
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
   }
 }
 </style>

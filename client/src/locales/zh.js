@@ -41,7 +41,8 @@ export default {
       ai_projects: 'AI项目',
       overall_progress: '整体进度',
       completed: '已完成',
-      in_development: '开发中'
+      in_development: '开发中',
+      days_remaining: '天倒计时'
     },
 
     // 项目状态概览
