@@ -66,8 +66,9 @@
       </a>
 
       <a 
-        v-if="project.demo_url" 
-        :href="project.demo_url" 
+        v-for="(link, index) in demoLinks"
+        :key="`demo-${index}`"
+        :href="link.url" 
         target="_blank" 
         class="link-card demo-link"
       >
@@ -75,8 +76,8 @@
           <el-icon><View /></el-icon>
         </div>
         <div class="link-content">
-          <div class="link-title">在线演示</div>
-          <div class="link-desc">体验项目效果</div>
+          <div class="link-title">{{ link.title }}</div>
+          <div class="link-desc">{{ getDemoLinkDescription(link, demoLinks.length) }}</div>
         </div>
         <div class="link-arrow">
           <el-icon><ArrowRight /></el-icon>
@@ -113,13 +114,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 import { Clock, Link, View, ArrowRight, Edit, Delete } from '@element-plus/icons-vue'
+import { parseDemoLinks, getDemoLinkTitle, getDemoLinkDescription } from '@/utils/demoLinks'
 
 const { t } = useI18n()
 
-defineProps({
+const props = defineProps({
   project: {
     type: Object,
     required: true
@@ -131,6 +134,15 @@ defineProps({
 })
 
 defineEmits(['edit-project', 'delete-project'])
+
+// 解析演示链接
+const demoLinks = computed(() => {
+  const links = parseDemoLinks(props.project.demo_url)
+  return links.map(link => ({
+    ...link,
+    title: getDemoLinkTitle(link)
+  }))
+})
 
 const getStatusName = (status) => {
   const statusMap = {

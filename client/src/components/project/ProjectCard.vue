@@ -104,16 +104,44 @@
         </el-tooltip>
         
         <!-- Demo链接 -->
-        <el-tooltip v-if="project.demo_url" content="在线演示" placement="top">
-          <el-button 
-            size="small" 
-            circle 
-            type="primary"
-            @click.stop="openDemo"
-          >
-            <el-icon><View /></el-icon>
-          </el-button>
-        </el-tooltip>
+        <template v-if="demoLinks.length > 0">
+          <!-- 单个演示链接 -->
+          <el-tooltip v-if="demoLinks.length === 1" :content="demoLinks[0].title" placement="top">
+            <el-button 
+              size="small" 
+              circle 
+              type="primary"
+              @click.stop="openDemoLink(demoLinks[0])"
+            >
+              <el-icon><View /></el-icon>
+            </el-button>
+          </el-tooltip>
+          
+          <!-- 多个演示链接 -->
+          <el-dropdown v-else @click.stop placement="bottom-end" trigger="click">
+            <el-button 
+              size="small" 
+              circle 
+              type="primary"
+            >
+              <el-icon><View /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item 
+                  v-for="(link, index) in demoLinks" 
+                  :key="index"
+                  @click="openDemoLink(link)"
+                >
+                  <div class="demo-link-item">
+                    <el-icon><View /></el-icon>
+                    <span>{{ link.title }}</span>
+                  </div>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
       </div>
     </div>
   </div>
@@ -125,6 +153,7 @@ import { Calendar, Link, View, Cpu, Star, StarFilled } from '@element-plus/icons
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import dayjs from 'dayjs'
+import { parseDemoLinks, getDemoLinkTitle } from '@/utils/demoLinks'
 
 const { t } = useI18n()
 const projectsStore = useProjectsStore()
@@ -145,6 +174,15 @@ const likeLoading = ref(false)
 // 监听项目点赞状态变化
 watch(() => props.project.is_liked, (newValue) => {
   isLiked.value = newValue || false
+})
+
+// 解析演示链接
+const demoLinks = computed(() => {
+  const links = parseDemoLinks(props.project.demo_url)
+  return links.map(link => ({
+    ...link,
+    title: getDemoLinkTitle(link)
+  }))
 })
 
 // 处理点赞/取消点赞
@@ -225,10 +263,10 @@ const openGithub = () => {
   }
 }
 
-// 打开Demo链接
-const openDemo = () => {
-  if (props.project.demo_url) {
-    window.open(props.project.demo_url, '_blank')
+// 打开演示链接
+const openDemoLink = (link) => {
+  if (link.url) {
+    window.open(link.url, '_blank')
   }
 }
 </script>
@@ -418,6 +456,21 @@ const openDemo = () => {
       align-items: flex-start;
       gap: 8px;
     }
+  }
+}
+
+.demo-link-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  .el-icon {
+    font-size: 14px;
+    color: var(--el-color-primary);
+  }
+  
+  span {
+    font-size: 13px;
   }
 }
 </style> 

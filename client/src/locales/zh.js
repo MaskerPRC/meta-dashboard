@@ -500,12 +500,18 @@ export default {
       enter_project_description: '请输入项目简短描述',
       github_repo_url: 'https://github.com/username/repo',
       demo_url: 'https://demo.example.com',
+      demo_url_multiple: '每行一个链接，支持格式：\n标题|链接\n或直接输入链接',
       select_start_time: '选择开始时间',
       select_completion_time: '选择预期完成时间',
       add_tech_stack: '添加技术栈',
       add_tag: '添加标签',
       enter_project_content: '请输入项目详细内容，支持Markdown格式...\n提示：可以直接粘贴图片或视频文件',
       progress_log_placeholder: '描述本次修改的进展情况，如新增功能、解决的问题、下一步计划等...'
+    },
+
+    // 提示文本
+    tips: {
+      demo_url_multiple: '支持多个演示链接，每行一个。格式：标题|链接 或直接输入链接'
     },
 
     // 编辑器相关

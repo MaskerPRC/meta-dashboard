@@ -94,8 +94,15 @@
           <el-form-item :label="t('project.form_labels.demo_link')">
             <el-input
               v-model="formData.demo_url"
-              :placeholder="t('project.placeholders.demo_url')"
+              type="textarea"
+              :rows="3"
+              :placeholder="t('project.placeholders.demo_url_multiple')"
+              resize="vertical"
             />
+            <div class="form-tip">
+              <el-icon><InfoFilled /></el-icon>
+              <span>{{ t('project.tips.demo_url_multiple') }}</span>
+            </div>
           </el-form-item>
         </el-col>
         <el-col :span="6">
@@ -1119,6 +1126,21 @@ watch(showTagInput, (newVal) => {
 
   .el-form-item {
     margin-bottom: 0;
+  }
+}
+
+.form-tip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--el-color-info);
+  line-height: 1.4;
+
+  .el-icon {
+    flex-shrink: 0;
+    font-size: 12px;
   }
 }
 </style>
