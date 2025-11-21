@@ -1,159 +1,77 @@
 <template>
-  <div class="project-card ai-card" @click="$emit('click')">
-    <!-- 项目状态和优先级 -->
-    <div class="card-header">
-      <div class="status-tags">
-        <el-tag 
-          :class="['status-tag', project.status]" 
-          size="small"
-        >
-          {{ getStatusName(project.status) }}
-        </el-tag>
-        <el-tag 
-          :class="['priority-tag', project.priority]" 
-          size="small"
-        >
-          {{ getPriorityName(project.priority) }}
-        </el-tag>
-      </div>
-      <!-- AI生成标识 -->
-      <el-tag 
-        v-if="isAIGenerated(project)"
-        type="success" 
-        size="small"
-        class="ai-generated-tag"
+  <div class="neo-card rounded-xl p-0 overflow-hidden flex flex-col h-full cursor-pointer" @click="$emit('click')">
+    <!-- Header with colored background -->
+    <div 
+      class="h-40 border-b-2 border-black flex items-center justify-center relative overflow-hidden"
+      :class="getStatusColorClass(project.status)"
+    >
+      <!-- Pattern inside header -->
+      <div 
+        class="absolute inset-0 opacity-20"
+        :style="getPatternStyle(project.status)"
+      ></div>
+        <i :class="[getStatusIcon(project.status), 'text-6xl', getIconColorClass(project.status)]"></i>
+      <div 
+        class="absolute top-3 right-3 border-2 border-black px-2 py-1 font-bold text-xs rounded shadow-[2px_2px_0_0_black]"
+        :class="getStatusBadgeClass(project.status)"
       >
-        <el-icon><Cpu /></el-icon>
-        AI生成
-      </el-tag>
+        {{ getStatusBadgeText(project.status) }}
+      </div>
     </div>
-
-    <!-- 项目标题和描述 -->
-    <div class="card-content">
-      <h3 class="project-title">{{ project.title }}</h3>
-      <p class="project-description">{{ project.description }}</p>
+    
+    <div class="p-6 flex-grow flex flex-col">
+      <h3 class="text-xl font-black mb-2 leading-tight">{{ project.title }}</h3>
+      <p class="text-sm font-medium text-gray-600 mb-4 flex-grow">
+        {{ project.description }}
+      </p>
       
-      <!-- 技术栈标签 -->
-      <div v-if="project.tech_stack && project.tech_stack.length" class="tech-tags">
-        <el-tag 
+      <!-- Tech Stack Tags -->
+      <div v-if="project.tech_stack && project.tech_stack.length" class="flex gap-2 mb-4 flex-wrap">
+        <span 
           v-for="tech in project.tech_stack.slice(0, 3)" 
           :key="tech"
-          size="small"
-          type="info"
-          class="tech-tag"
+          class="text-xs font-bold border border-black px-2 py-1 rounded-md bg-gray-100"
         >
           {{ tech }}
-        </el-tag>
-        <span v-if="project.tech_stack.length > 3" class="more-tech">
+        </span>
+        <span v-if="project.tech_stack.length > 3" class="text-xs font-bold text-gray-500">
           +{{ project.tech_stack.length - 3 }}
         </span>
       </div>
-    </div>
 
-    <!-- 进度条 -->
-    <div class="progress-section">
-      <div class="progress-header">
-        <span class="progress-label">进度</span>
-        <span class="progress-value">{{ project.progress }}%</span>
-      </div>
-      <el-progress 
-        :percentage="project.progress" 
-        :stroke-width="6"
-        :show-text="false"
-        :color="getProgressColor(project.progress)"
-      />
-    </div>
-
-    <!-- 卡片底部信息 -->
-    <div class="card-footer">
-      <div class="footer-left">
-        <div class="project-dates">
-          <el-icon><Calendar /></el-icon>
-          <span>{{ formatDate(project.created_at) }}</span>
+      <div class="mt-auto">
+        <!-- Progress Bar -->
+        <div class="flex justify-between text-xs font-bold mb-1">
+          <span>进度</span>
+          <span>{{ project.progress || 0 }}%</span>
         </div>
-      </div>
-      
-      <div class="footer-right">
-        <!-- 点赞按钮 -->
-        <div class="like-section">
-          <el-tooltip :content="isLiked ? '取消点赞' : '点赞'" placement="top">
-            <el-button 
-              size="small" 
-              circle 
-              :type="isLiked ? 'danger' : 'default'"
-              :loading="likeLoading"
-              @click.stop="handleLike"
-            >
-              <el-icon>
-                <component :is="isLiked ? 'StarFilled' : 'Star'" />
-              </el-icon>
-            </el-button>
-          </el-tooltip>
-          <span class="like-count">{{ project.likes_count || 0 }}</span>
+        <div class="h-5 w-full border-2 border-black rounded-full bg-white overflow-hidden p-[2px]">
+          <div 
+            class="h-full rounded-full stripe-progress" 
+            :class="getProgressColorClass(project.progress)"
+            :style="{ width: `${project.progress || 0}%` }"
+          ></div>
         </div>
         
-        <!-- GitHub仓库链接 -->
-        <el-tooltip v-if="project.github_repo" content="查看源码" placement="top">
-          <el-button 
-            size="small" 
-            circle 
-            @click.stop="openGithub"
+        <!-- Footer -->
+        <div class="mt-4 flex justify-between items-center">
+          <span class="text-xs font-bold text-gray-500">{{ formatDate(project.created_at) }}</span>
+          <button 
+            class="w-8 h-8 bg-white border-2 border-black rounded-full hover:bg-black hover:text-white transition flex items-center justify-center"
+            @click.stop="$emit('click')"
           >
-            <el-icon><Link /></el-icon>
-          </el-button>
-        </el-tooltip>
-        
-        <!-- Demo链接 -->
-        <template v-if="demoLinks.length > 0">
-          <!-- 单个演示链接 -->
-          <el-tooltip v-if="demoLinks.length === 1" :content="demoLinks[0].title" placement="top">
-            <el-button 
-              size="small" 
-              circle 
-              type="primary"
-              @click.stop="openDemoLink(demoLinks[0])"
-            >
-              <el-icon><View /></el-icon>
-            </el-button>
-          </el-tooltip>
-          
-          <!-- 多个演示链接 -->
-          <el-dropdown v-else @click.stop placement="bottom-end" trigger="click">
-            <el-button 
-              size="small" 
-              circle 
-              type="primary"
-            >
-              <el-icon><View /></el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item 
-                  v-for="(link, index) in demoLinks" 
-                  :key="index"
-                  @click="openDemoLink(link)"
-                >
-                  <div class="demo-link-item">
-                    <el-icon><View /></el-icon>
-                    <span>{{ link.title }}</span>
-                  </div>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </template>
+            <i class="fa-solid fa-arrow-right transform -rotate-45"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { Calendar, Link, View, Cpu, Star, StarFilled } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import dayjs from 'dayjs'
-import { parseDemoLinks, getDemoLinkTitle } from '@/utils/demoLinks'
 
 const { t } = useI18n()
 const projectsStore = useProjectsStore()
@@ -167,310 +85,106 @@ const props = defineProps({
 
 defineEmits(['click'])
 
-// 点赞相关状态
-const isLiked = ref(props.project.is_liked || false)
-const likeLoading = ref(false)
+// 获取状态颜色类
+const getStatusColorClass = (status) => {
+  const colorMap = {
+    idea: 'bg-gray-200',
+    planning: 'bg-blue-200',
+    development: 'bg-neo-purple',
+    testing: 'bg-red-200',
+    deployed: 'bg-green-200',
+    completed: 'bg-neo-green',
+    paused: 'bg-gray-300'
+  }
+  return colorMap[status] || 'bg-gray-200'
+}
 
-// 监听项目点赞状态变化
-watch(() => props.project.is_liked, (newValue) => {
-  isLiked.value = newValue || false
-})
+// 获取状态图标
+const getStatusIcon = (status) => {
+  const iconMap = {
+    idea: 'fa-solid fa-lightbulb',
+    planning: 'fa-solid fa-pen-ruler',
+    development: 'fa-solid fa-code',
+    testing: 'fa-solid fa-bug',
+    deployed: 'fa-solid fa-rocket',
+    completed: 'fa-solid fa-check-circle',
+    paused: 'fa-solid fa-pause-circle'
+  }
+  return iconMap[status] || 'fa-solid fa-star'
+}
 
-// 解析演示链接
-const demoLinks = computed(() => {
-  const links = parseDemoLinks(props.project.demo_url)
-  return links.map(link => ({
-    ...link,
-    title: getDemoLinkTitle(link)
-  }))
-})
+// 获取图标颜色类
+const getIconColorClass = (status) => {
+  if (status === 'development' || status === 'completed') {
+    return 'text-white drop-shadow-[3px_3px_0_#000]'
+  }
+  return 'text-black opacity-80'
+}
 
-// 处理点赞/取消点赞
-const handleLike = async () => {
-  if (likeLoading.value) return
-  
-  likeLoading.value = true
-  try {
-    if (isLiked.value) {
-      await projectsStore.unlikeProject(props.project.id)
-      isLiked.value = false
-    } else {
-      await projectsStore.likeProject(props.project.id)
-      isLiked.value = true
+// 获取状态徽章类
+const getStatusBadgeClass = (status) => {
+  const badgeMap = {
+    idea: 'bg-white',
+    planning: 'bg-blue-200',
+    development: 'bg-neo-yellow',
+    testing: 'bg-red-200',
+    deployed: 'bg-green-200',
+    completed: 'bg-white',
+    paused: 'bg-gray-200'
+  }
+  return badgeMap[status] || 'bg-white'
+}
+
+// 获取状态徽章文本
+const getStatusBadgeText = (status) => {
+  const textMap = {
+    idea: 'IDEA',
+    planning: 'PLAN',
+    development: 'DEV',
+    testing: 'TEST',
+    deployed: 'DEPLOY',
+    completed: 'DONE',
+    paused: 'PAUSE'
+  }
+  return textMap[status] || 'IDEA'
+}
+
+// 获取进度条颜色类
+const getProgressColorClass = (progress) => {
+  if (progress >= 100) return 'bg-neo-green'
+  if (progress >= 70) return 'bg-neo-blue'
+  if (progress >= 30) return 'bg-neo-purple'
+  return 'bg-neo-red'
+}
+
+// 获取背景图案样式
+const getPatternStyle = (status) => {
+  if (status === 'development') {
+    return {
+      backgroundImage: 'linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent)',
+      backgroundSize: '20px 20px'
     }
-  } catch (error) {
-    // 错误处理已在store中完成
-  } finally {
-    likeLoading.value = false
   }
-}
-
-// 获取状态名称
-const getStatusName = (status) => {
-  const statusMap = {
-    idea: 'brainstorming',
-    planning: 'planning',
-    development: 'development',
-    testing: 'testing',
-    deployed: 'deployed',
-    completed: 'completed',
-    paused: 'on_hold'
+  return {
+    backgroundImage: 'radial-gradient(#000 2px, transparent 2px)',
+    backgroundSize: '10px 10px'
   }
-  const translationKey = statusMap[status] || 'brainstorming'
-  return t(`project.status_options.${translationKey}`)
-}
-
-// 获取优先级名称
-const getPriorityName = (priority) => {
-  const priorityMap = {
-    low: 'low',
-    medium: 'medium',
-    high: 'high',
-    critical: 'urgent'
-  }
-  const translationKey = priorityMap[priority] || 'medium'
-  return t(`project.priority_options.${translationKey}`)
-}
-
-// 获取进度条颜色
-const getProgressColor = (progress) => {
-  if (progress < 30) return '#f56c6c'
-  if (progress < 70) return '#e6a23c'
-  return '#67c23a'
-}
-
-// 判断是否为AI生成项目
-const isAIGenerated = (project) => {
-  // 检查项目标签中是否包含"AI生成"
-  if (project.tags && Array.isArray(project.tags)) {
-    return project.tags.includes('AI生成')
-  }
-  if (typeof project.tags === 'string') {
-    return project.tags.includes('AI生成')
-  }
-  return false
 }
 
 // 格式化日期
 const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD')
 }
-
-// 打开GitHub仓库
-const openGithub = () => {
-  if (props.project.github_repo) {
-    window.open(props.project.github_repo, '_blank')
-  }
-}
-
-// 打开演示链接
-const openDemoLink = (link) => {
-  if (link.url) {
-    window.open(link.url, '_blank')
-  }
-}
 </script>
 
 <style lang="scss" scoped>
-.project-card {
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid var(--ai-border);
+// 确保卡片样式正确
+.neo-card {
+  transition: all 0.1s ease;
   
   &:hover {
-    border-color: var(--ai-primary);
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
-  }
-  
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    
-    .status-tags {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .ai-generated-tag {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: linear-gradient(135deg, #43e97b, #38f9d7);
-      border: none;
-      
-      .el-icon {
-        font-size: 12px;
-      }
-    }
-    
-    .status-tag, .priority-tag {
-      border: none;
-      font-weight: 500;
-      padding: 4px 8px;
-      border-radius: 6px;
-    }
-  }
-  
-  .card-content {
-    margin-bottom: 16px;
-    
-    .project-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      margin: 0 0 8px;
-      color: var(--ai-text-primary);
-      line-height: 1.4;
-      
-      // 限制两行显示
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    
-    .project-description {
-      font-size: 0.875rem;
-      color: var(--ai-text-secondary);
-      line-height: 1.5;
-      margin: 0 0 12px;
-      
-      // 限制三行显示
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    
-    .tech-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-      
-      .tech-tag {
-        font-size: 12px;
-        height: 20px;
-        line-height: 20px;
-        border-radius: 4px;
-      }
-      
-      .more-tech {
-        font-size: 12px;
-        color: var(--ai-text-secondary);
-      }
-    }
-  }
-  
-  .progress-section {
-    margin-bottom: 16px;
-    
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      
-      .progress-label {
-        font-size: 0.875rem;
-        color: var(--ai-text-secondary);
-      }
-      
-      .progress-value {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--ai-text-primary);
-      }
-    }
-  }
-  
-  .card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    .footer-left {
-      .project-dates {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 0.75rem;
-        color: var(--ai-text-secondary);
-        
-        .el-icon {
-          font-size: 12px;
-        }
-      }
-    }
-    
-    .footer-right {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      
-      .like-section {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        
-        .like-count {
-          font-size: 0.75rem;
-          color: var(--ai-text-secondary);
-          font-weight: 500;
-          min-width: 16px;
-          text-align: center;
-        }
-      }
-      
-      .el-button {
-        width: 28px;
-        height: 28px;
-        
-        .el-icon {
-          font-size: 14px;
-        }
-        
-        &.el-button--danger {
-          background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-          border: none;
-          color: white;
-          
-          &:hover {
-            background: linear-gradient(135deg, #ff5252, #e53935);
-          }
-        }
-      }
-    }
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px #000000;
   }
 }
-
-// 响应式设计
-@media (max-width: 768px) {
-  .project-card {
-    padding: 16px;
-    
-    .card-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-  }
-}
-
-.demo-link-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  
-  .el-icon {
-    font-size: 14px;
-    color: var(--el-color-primary);
-  }
-  
-  span {
-    font-size: 13px;
-  }
-}
-</style> 
+</style>

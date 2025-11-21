@@ -1,3 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
 // 全局重置和基础样式
 * {
   margin: 0;
@@ -7,44 +13,45 @@
 
 html, body {
   height: 100%;
-  font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-family: 'Noto Sans SC', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   line-height: 1.6;
-  color: var(--ai-text-primary);
-  background-color: var(--ai-bg-primary);
+  color: #18181b;
+  background-color: #FDFBF7;
+  background-image: radial-gradient(#18181b 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
-// 滚动条样式
+// 滚动条样式 (新布鲁塔主义风格)
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--ai-bg-secondary);
-  border-radius: 4px;
+  background: #eee;
+  border: 2px solid black;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--ai-primary);
-  border-radius: 4px;
+  background: black;
+}
+
+// 新布鲁塔主义卡片样式
+.neo-card {
+  background-color: white;
+  border: 3px solid black;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: all 0.1s ease;
   
   &:hover {
-    background: var(--el-color-primary-light-3);
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px #000000;
   }
 }
 
-// AI主题卡片样式
+// AI主题卡片样式 (保留兼容性)
 .ai-card {
-  background: var(--ai-bg-primary);
-  border: 1px solid var(--ai-border);
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-  }
+  @extend .neo-card;
 }
 
 // 渐变背景
@@ -137,36 +144,82 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
-// AI风格按钮
-.ai-button {
-  background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  color: white;
-  font-weight: 500;
+// 新布鲁塔主义按钮样式
+.neo-btn {
+  border: 2px solid black;
+  box-shadow: 3px 3px 0px 0px #000000;
+  transition: all 0.1s;
+  font-weight: 700;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-  }
   
   &:active {
-    transform: translateY(0);
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px 0px 0px #000000;
+  }
+}
+
+// AI风格按钮 (保留兼容性)
+.ai-button {
+  @extend .neo-btn;
+  background: white;
+  color: black;
+  padding: 12px 24px;
+  
+  &:hover {
+    background: #BEA7FF;
+    color: white;
   }
   
   &.secondary {
     background: transparent;
-    border: 2px solid var(--ai-primary);
-    color: var(--ai-primary);
+    border: 2px solid black;
+    color: black;
     
     &:hover {
-      background: var(--ai-primary);
+      background: black;
       color: white;
     }
   }
+}
+
+// 条纹进度条动画
+.stripe-progress {
+  background-image: linear-gradient(45deg, rgba(0,0,0,.1) 25%, transparent 25%, transparent 50%, rgba(0,0,0,.1) 50%, rgba(0,0,0,.1) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem;
+}
+
+// 高亮笔触
+.highlight-marker {
+  position: relative;
+  z-index: 1;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: -4px;
+    right: -4px;
+    height: 14px;
+    background-color: #BEA7FF;
+    z-index: -1;
+    opacity: 0.7;
+    transform: rotate(-1deg);
+  }
+}
+
+// 自定义滚动条
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #eee;
+  border: 2px solid black;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: black;
 }
 
 // 工具提示样式

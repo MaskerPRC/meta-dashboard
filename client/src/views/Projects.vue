@@ -1,269 +1,296 @@
 <template>
-  <div class="projects-page">
-    <div class="container">
-      <!-- 页面头部 -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">{{ $t('projects.title') }}</h1>
-          <p class="page-subtitle">{{ $t('projects.subtitle') }}</p>
-        </div>
-        
-        <!-- 管理员按钮 -->
-        <div v-if="authStore.isAdmin" class="header-actions">
-          <router-link to="/admin">
-            <el-button type="primary">
-              <el-icon><Setting /></el-icon>
-              {{ $t('admin.title') }}
-            </el-button>
-          </router-link>
-        </div>
+  <main class="flex-grow pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <!-- Page Header -->
+    <div class="mb-12 flex justify-between items-end border-b-4 border-black pb-4">
+      <div>
+        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">{{ $t('projects.title') }}</h1>
+        <p class="text-gray-600 font-medium">{{ $t('projects.subtitle') }}</p>
+      </div>
+      <router-link 
+        v-if="authStore.isAdmin"
+        to="/admin"
+        class="neo-btn bg-black text-white px-4 py-2 hover:bg-gray-800"
+      >
+        <i class="fa-solid fa-cog mr-2"></i>
+        {{ $t('admin.title') }}
+      </router-link>
+    </div>
+
+    <!-- Filter & Search Console -->
+    <div class="neo-card p-4 mb-8 bg-white flex flex-col md:flex-row justify-between items-center gap-4 rounded-lg relative">
+      <!-- Decorative Screw Heads -->
+      <div class="absolute top-2 left-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
+      </div>
+      <div class="absolute top-2 right-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
+      </div>
+      <div class="absolute bottom-2 left-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
+      </div>
+      <div class="absolute bottom-2 right-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
       </div>
 
-      <!-- 筛选和搜索工具栏 -->
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <!-- 状态筛选 -->
-          <el-select
+      <div class="flex flex-wrap items-center gap-4 w-full md:w-auto z-10">
+        <!-- Status Filter -->
+        <div class="relative">
+          <select 
             v-model="filters.status"
-            :placeholder="$t('projects.filter_by_status')"
-            clearable
-            style="width: 140px"
             @change="handleFilterChange"
+            class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer hover:shadow-neo-sm transition text-sm"
           >
-            <el-option :label="$t('project.status_options.brainstorming')" value="idea" />
-            <el-option :label="$t('project.status_options.planning')" value="planning" />
-            <el-option :label="$t('project.status_options.development')" value="development" />
-            <el-option :label="$t('project.status_options.testing')" value="testing" />
-            <el-option :label="$t('project.status_options.deployed')" value="deployed" />
-            <el-option :label="$t('project.status_options.completed')" value="completed" />
-            <el-option :label="$t('project.status_options.on_hold')" value="paused" />
-          </el-select>
+            <option value="">{{ $t('projects.filter_by_status') }}</option>
+            <option value="idea">{{ $t('project.status_options.brainstorming') }}</option>
+            <option value="planning">{{ $t('project.status_options.planning') }}</option>
+            <option value="development">{{ $t('project.status_options.development') }}</option>
+            <option value="testing">{{ $t('project.status_options.testing') }}</option>
+            <option value="deployed">{{ $t('project.status_options.deployed') }}</option>
+            <option value="completed">{{ $t('project.status_options.completed') }}</option>
+            <option value="paused">{{ $t('project.status_options.on_hold') }}</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+            <i class="fa-solid fa-caret-down text-xs"></i>
+          </div>
+        </div>
 
-          <!-- 优先级筛选 -->
-          <el-select
+        <!-- Priority Filter -->
+        <div class="relative">
+          <select 
             v-model="filters.priority"
-            :placeholder="$t('projects.filter_by_priority')"
-            clearable
-            style="width: 140px"
             @change="handleFilterChange"
+            class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer hover:shadow-neo-sm transition text-sm"
           >
-            <el-option :label="$t('project.priority_options.low')" value="low" />
-            <el-option :label="$t('project.priority_options.medium')" value="medium" />
-            <el-option :label="$t('project.priority_options.high')" value="high" />
-            <el-option :label="$t('project.priority_options.urgent')" value="critical" />
-          </el-select>
+            <option value="">{{ $t('projects.filter_by_priority') }}</option>
+            <option value="low">{{ $t('project.priority_options.low') }}</option>
+            <option value="medium">{{ $t('project.priority_options.medium') }}</option>
+            <option value="high">{{ $t('project.priority_options.high') }}</option>
+            <option value="critical">{{ $t('project.priority_options.urgent') }}</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+            <i class="fa-solid fa-caret-down text-xs"></i>
+          </div>
+        </div>
 
-          <!-- 搜索框 -->
-          <el-input
+        <!-- Search -->
+        <div class="relative flex-1 md:flex-initial md:w-64">
+          <input
             v-model="searchText"
-            :placeholder="$t('projects.search_placeholder')"
-            style="width: 300px"
-            clearable
             @keyup.enter="handleSearch"
-            @clear="handleSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
-
-          <el-button type="primary" @click="handleSearch">
-            {{ $t('form.search') }}
-          </el-button>
-        </div>
-
-        <div class="toolbar-right">
-          <!-- 排序选择器 -->
-          <el-select
-            v-model="sortBy"
-            placeholder="排序方式"
-            style="width: 140px"
-            @change="handleSortChange"
-          >
-            <el-option label="创建时间" value="created_at" />
-            <el-option label="最近更新" value="updated_at" />
-            <el-option label="项目名称" value="title" />
-            <el-option label="进度排序" value="progress" />
-            <el-option label="点赞数量" value="likes_count" />
-            <el-option label="优先级" value="priority" />
-            <el-option label="状态" value="status" />
-            <el-option label="自定义排序" value="order_index" />
-          </el-select>
-          
-          <!-- 排序方向 -->
-          <el-button
-            :type="sortOrder === 'desc' ? 'primary' : 'default'"
-            @click="toggleSortOrder"
-          >
-            <el-icon>
-              <component :is="sortOrder === 'desc' ? 'SortDown' : 'SortUp'" />
-            </el-icon>
-          </el-button>
-          <!-- 视图切换 -->
-          <el-button-group>
-            <el-button
-              :type="viewMode === 'grid' ? 'primary' : 'default'"
-              @click="viewMode = 'grid'"
-            >
-              <el-icon><Grid /></el-icon>
-            </el-button>
-            <el-button
-              :type="viewMode === 'list' ? 'primary' : 'default'"
-              @click="viewMode = 'list'"
-            >
-              <el-icon><List /></el-icon>
-            </el-button>
-          </el-button-group>
-
-          <!-- 重置筛选 -->
-          <el-button @click="resetFilters">
-            <el-icon><Refresh /></el-icon>
-            {{ $t('form.reset') }}
-          </el-button>
-        </div>
-      </div>
-
-      <!-- 统计信息 -->
-      <div class="stats-bar">
-        <div class="stats-item">
-          <span class="stats-label">{{ $t('projects.total_projects') }}：</span>
-          <span class="stats-value">{{ projectsStore.stats.totalProjects || projectsStore.pagination.total }}</span>
-        </div>
-        <div class="stats-item">
-          <span class="stats-label">{{ $t('projects.average_progress') }}：</span>
-          <span class="stats-value">{{ projectsStore.totalProgress }}%</span>
-        </div>
-      </div>
-
-      <!-- 项目列表 -->
-      <div v-if="!projectsStore.loading" class="projects-container">
-        <!-- 网格视图 -->
-        <div v-if="viewMode === 'grid'" class="projects-grid">
-          <ProjectCard
-            v-for="project in projectsStore.projects"
-            :key="project.id"
-            :project="project"
-            @click="goToProject(project.id)"
+            type="text"
+            :placeholder="$t('projects.search_placeholder')"
+            class="w-full bg-gray-100 border-2 border-black px-4 py-2 pr-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white hover:shadow-neo-sm transition text-sm"
           />
-        </div>
-
-        <!-- 列表视图 -->
-        <div v-else class="projects-list">
-          <el-table
-            :data="projectsStore.projects"
-            style="width: 100%"
-            @row-click="handleRowClick"
-            class="projects-table"
+          <button 
+            @click="handleSearch"
+            class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-neo-yellow border-2 border-black rounded flex items-center justify-center hover:bg-yellow-400 transition"
           >
-            <el-table-column prop="title" :label="$t('project.title')" min-width="200">
-              <template #default="scope">
-                <div class="project-title-cell">
-                  <h4>{{ scope.row.title }}</h4>
-                  <p class="description">{{ scope.row.description }}</p>
-                </div>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="status" :label="$t('project.status')" width="100">
-              <template #default="scope">
-                <el-tag :class="['status-tag', scope.row.status]" size="small">
-                  {{ getStatusName(scope.row.status) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="priority" :label="$t('project.priority')" width="100">
-              <template #default="scope">
-                <el-tag :class="['priority-tag', scope.row.priority]" size="small">
-                  {{ getPriorityName(scope.row.priority) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="progress" :label="$t('home.progress')" width="120">
-              <template #default="scope">
-                <el-progress 
-                  :percentage="scope.row.progress" 
-                  :stroke-width="6"
-                  :show-text="true"
-                  :format="(percentage) => `${percentage}%`"
-                />
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="tech_stack" label="技术栈" min-width="200">
-              <template #default="scope">
-                <div class="tech-stack-cell">
-                  <el-tag
-                    v-for="tech in scope.row.tech_stack.slice(0, 3)"
-                    :key="tech"
-                    size="small"
-                    type="info"
-                    class="tech-tag"
-                  >
-                    {{ tech }}
-                  </el-tag>
-                  <span v-if="scope.row.tech_stack.length > 3" class="more-tech">
-                    +{{ scope.row.tech_stack.length - 3 }}
-                  </span>
-                </div>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="created_at" :label="$t('project.created_at')" width="120">
-              <template #default="scope">
-                {{ formatDate(scope.row.created_at) }}
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-
-        <!-- 空状态 -->
-        <div v-if="projectsStore.projects.length === 0" class="empty-state">
-          <el-empty :description="$t('message.no_data')">
-            <el-button type="primary" @click="resetFilters">{{ $t('form.reset') }}</el-button>
-          </el-empty>
+            <i class="fa-solid fa-search text-xs"></i>
+          </button>
         </div>
       </div>
 
-      <!-- 加载状态 -->
-      <div v-else class="loading-container">
-        <el-skeleton :rows="6" animated />
-      </div>
+      <div class="flex items-center gap-4 z-10">
+        <!-- Sort -->
+        <div class="relative">
+          <select 
+            v-model="sortBy"
+            @change="handleSortChange"
+            class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer hover:shadow-neo-sm transition text-sm"
+          >
+            <option value="created_at">创建时间</option>
+            <option value="updated_at">最近更新</option>
+            <option value="title">项目名称</option>
+            <option value="progress">进度排序</option>
+            <option value="likes_count">点赞数量</option>
+            <option value="priority">优先级</option>
+            <option value="status">状态</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+            <i class="fa-solid fa-caret-down text-xs"></i>
+          </div>
+        </div>
 
-      <!-- 分页 -->
-      <div v-if="projectsStore.pagination.total > 0" class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="projectsStore.pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
+        <!-- Sort Order -->
+        <button 
+          @click="toggleSortOrder"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition shadow-neo-sm"
+        >
+          <i :class="sortOrder === 'desc' ? 'fa-solid fa-arrow-down' : 'fa-solid fa-arrow-up'" class="text-sm"></i>
+        </button>
+
+        <!-- View Toggle -->
+        <div class="flex border-2 border-black rounded overflow-hidden">
+          <button 
+            @click="viewMode = 'grid'"
+            :class="viewMode === 'grid' ? 'bg-black text-white' : 'bg-white text-black'"
+            class="px-3 py-2 font-bold text-sm transition"
+          >
+            <i class="fa-solid fa-grid-2"></i>
+          </button>
+          <button 
+            @click="viewMode = 'list'"
+            :class="viewMode === 'list' ? 'bg-black text-white' : 'bg-white text-black'"
+            class="px-3 py-2 font-bold text-sm border-l-2 border-black transition"
+          >
+            <i class="fa-solid fa-list"></i>
+          </button>
+        </div>
+
+        <!-- Reset -->
+        <button 
+          @click="resetFilters"
+          class="neo-btn bg-white px-4 py-2 text-black hover:bg-gray-100 text-sm"
+        >
+          <i class="fa-solid fa-rotate mr-1"></i>
+          {{ $t('form.reset') }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="flex gap-6 mb-8">
+      <div class="neo-card px-6 py-3 bg-white flex items-center gap-3">
+        <div class="w-10 h-10 bg-neo-blue border-2 border-black flex items-center justify-center text-xl">
+          <i class="fa-solid fa-folder"></i>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-gray-500 uppercase">Total</div>
+          <div class="font-mono font-black text-xl">{{ projectsStore.stats.totalProjects || projectsStore.pagination.total || 0 }}</div>
+        </div>
+      </div>
+      <div class="neo-card px-6 py-3 bg-white flex items-center gap-3">
+        <div class="w-10 h-10 bg-neo-green border-2 border-black flex items-center justify-center text-xl">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-gray-500 uppercase">Progress</div>
+          <div class="font-mono font-black text-xl">{{ projectsStore.totalProgress || 0 }}%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects Grid/List -->
+    <div v-if="!projectsStore.loading" class="mb-8">
+      <!-- Grid View -->
+      <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <ProjectCard
+          v-for="project in projectsStore.projects"
+          :key="project.id"
+          :project="project"
+          @click="goToProject(project.id)"
         />
       </div>
 
-      <!-- 微信交流群 -->
-      <div class="wechat-group-wrapper">
-        <WechatGroup :is-compact="true" />
+      <!-- List View -->
+      <div v-else class="space-y-4">
+        <div
+          v-for="project in projectsStore.projects"
+          :key="project.id"
+          class="neo-card p-6 bg-white cursor-pointer hover:translate-x-1 transition-transform"
+          @click="goToProject(project.id)"
+        >
+          <div class="flex flex-col md:flex-row md:items-center gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-xl font-black">{{ project.title }}</h3>
+                <span 
+                  class="px-2 py-1 text-xs font-bold border-2 border-black rounded"
+                  :class="getStatusBadgeClass(project.status)"
+                >
+                  {{ getStatusName(project.status) }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">{{ project.description }}</p>
+              <div class="flex flex-wrap gap-2">
+                <span 
+                  v-for="tech in (project.tech_stack || []).slice(0, 3)"
+                  :key="tech"
+                  class="text-xs font-bold border border-black px-2 py-1 rounded bg-gray-100"
+                >
+                  {{ tech }}
+                </span>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <div class="text-right">
+                <div class="text-xs font-bold text-gray-500 mb-1">进度</div>
+                <div class="font-mono font-black text-2xl">{{ project.progress || 0 }}%</div>
+              </div>
+              <div class="h-4 w-32 border-2 border-black rounded-full bg-white overflow-hidden p-[1px]">
+                <div 
+                  class="h-full rounded-full stripe-progress"
+                  :class="getProgressColorClass(project.progress)"
+                  :style="{ width: `${project.progress || 0}%` }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-if="projectsStore.projects.length === 0" class="text-center py-16">
+        <i class="fa-solid fa-inbox text-6xl text-gray-400 mb-4"></i>
+        <p class="text-lg font-bold text-gray-600 mb-4">{{ $t('message.no_data') }}</p>
+        <button 
+          v-if="authStore.isAdmin"
+          @click="$router.push('/admin')"
+          class="neo-btn bg-black text-white px-6 py-3"
+        >
+          创建新项目
+        </button>
+        <button 
+          v-else
+          @click="resetFilters"
+          class="neo-btn bg-white px-6 py-3"
+        >
+          {{ $t('form.reset') }}
+        </button>
       </div>
     </div>
-  </div>
+
+    <!-- Loading State -->
+    <div v-else class="neo-card p-12">
+      <div class="animate-pulse space-y-4">
+        <div class="h-8 bg-gray-200 rounded w-3/4"></div>
+        <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div class="h-32 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div v-if="projectsStore.pagination.total > 0" class="flex justify-center mb-8">
+      <div class="neo-card p-4 bg-white inline-flex items-center gap-4">
+        <button 
+          @click="handleCurrentChange(currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <span class="font-mono font-bold">
+          第 {{ currentPage }} / {{ Math.ceil(projectsStore.pagination.total / pageSize) }} 页
+        </span>
+        <button 
+          @click="handleCurrentChange(currentPage + 1)"
+          :disabled="currentPage >= Math.ceil(projectsStore.pagination.total / pageSize)"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </main>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '../stores/projects'
 import { useAuthStore } from '../stores/auth'
 import ProjectCard from '../components/project/ProjectCard.vue'
-import WechatGroup from '../components/common/WechatGroup.vue'
-import dayjs from 'dayjs'
-import {
-  Setting, Search, Grid, List, Refresh, SortDown, SortUp
-} from '@element-plus/icons-vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -282,11 +309,6 @@ const filters = ref({
   status: '',
   priority: '',
   search: ''
-})
-
-// 计算属性
-const searchPlaceholder = computed(() => {
-  return `${t('form.search')}${projectsStore.pagination.total}${t('projects.total_projects')}...`
 })
 
 // 方法
@@ -321,6 +343,7 @@ const handleSizeChange = (size) => {
 }
 
 const handleCurrentChange = (page) => {
+  if (page < 1 || page > Math.ceil(projectsStore.pagination.total / pageSize.value)) return
   currentPage.value = page
   fetchProjects()
 }
@@ -353,10 +376,6 @@ const goToProject = (id) => {
   router.push(`/project/${id}`)
 }
 
-const handleRowClick = (row) => {
-  goToProject(row.id)
-}
-
 const getStatusName = (status) => {
   const statusMap = {
     idea: 'brainstorming',
@@ -371,27 +390,29 @@ const getStatusName = (status) => {
   return t(`project.status_options.${translationKey}`)
 }
 
-const getPriorityName = (priority) => {
-  const priorityMap = {
-    low: 'low',
-    medium: 'medium',
-    high: 'high',
-    critical: 'urgent'
+const getStatusBadgeClass = (status) => {
+  const classMap = {
+    idea: 'bg-gray-200 text-gray-800',
+    planning: 'bg-blue-200 text-blue-800',
+    development: 'bg-neo-purple text-white',
+    testing: 'bg-red-200 text-red-800',
+    completed: 'bg-neo-green text-black',
+    deployed: 'bg-neo-blue text-white',
+    paused: 'bg-gray-300 text-gray-800'
   }
-  const translationKey = priorityMap[priority] || 'medium'
-  return t(`project.priority_options.${translationKey}`)
+  return classMap[status] || 'bg-gray-200 text-gray-800'
 }
 
-const formatDate = (date) => {
-  return dayjs(date).format('MM-DD')
+const getProgressColorClass = (progress) => {
+  if (progress >= 100) return 'bg-neo-green'
+  if (progress >= 70) return 'bg-neo-blue'
+  if (progress >= 30) return 'bg-neo-purple'
+  return 'bg-neo-red'
 }
 
 // 生命周期
 onMounted(async () => {
-  // 获取统计数据
   await projectsStore.fetchStats()
-  
-  // 获取项目列表
   fetchProjects()
 })
 
@@ -409,184 +430,10 @@ watch(() => router.currentRoute.value.query, (newQuery) => {
 </script>
 
 <style lang="scss" scoped>
-.projects-page {
-  min-height: calc(100vh - 70px);
-  background: var(--ai-bg-secondary);
-  
-  .container {
-    padding: 40px 20px;
-  }
-  
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    
-    .header-content {
-      .page-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0 0 8px;
-        color: var(--ai-text-primary);
-      }
-      
-      .page-subtitle {
-        font-size: 1.125rem;
-        color: var(--ai-text-secondary);
-        margin: 0;
-      }
-    }
-    
-    @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-      
-      .page-title {
-        font-size: 2rem !important;
-      }
-    }
-  }
-  
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 20px;
-    background: var(--ai-bg-primary);
-    border-radius: 12px;
-    border: 1px solid var(--ai-border);
-    
-    .toolbar-left {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    
-    .toolbar-right {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-    
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 16px;
-      
-      .toolbar-left,
-      .toolbar-right {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-  }
-  
-  .stats-bar {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
-    
-    .stats-item {
-      .stats-label {
-        color: var(--ai-text-secondary);
-        font-size: 0.875rem;
-      }
-      
-      .stats-value {
-        color: var(--ai-primary);
-        font-weight: 600;
-        font-size: 0.875rem;
-      }
-    }
-  }
-  
-  .projects-container {
-    margin-bottom: 32px;
-    
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 24px;
-      
-      @media (max-width: 768px) {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .projects-list {
-              .projects-table {
-          background: var(--ai-bg-primary);
-          border-radius: 12px;
-          overflow: hidden;
-          
-          :deep(.el-table__row) {
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            
-            &:hover {
-              background-color: var(--ai-bg-secondary) !important;
-            }
-          }
-          
-          .project-title-cell {
-          h4 {
-            margin: 0 0 4px;
-            font-size: 1rem;
-            color: var(--ai-text-primary);
-          }
-          
-          .description {
-            margin: 0;
-            font-size: 0.875rem;
-            color: var(--ai-text-secondary);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-        }
-        
-        .tech-stack-cell {
-          display: flex;
-          gap: 4px;
-          align-items: center;
-          flex-wrap: wrap;
-          
-          .tech-tag {
-            font-size: 12px;
-          }
-          
-          .more-tech {
-            font-size: 12px;
-            color: var(--ai-text-secondary);
-          }
-        }
-      }
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-    }
-  }
-  
-  .loading-container {
-    padding: 40px;
-  }
-  
-  .pagination-container {
-    display: flex;
-    justify-content: center;
-    padding: 20px 0;
-  }
-
-  .wechat-group-wrapper {
-    margin-top: 40px;
-    padding-top: 40px;
-    border-top: 1px solid var(--ai-border);
+// 响应式
+@media (max-width: 768px) {
+  main {
+    padding-top: 6rem;
   }
 }
-</style> 
+</style>

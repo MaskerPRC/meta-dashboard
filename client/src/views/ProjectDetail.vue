@@ -1,80 +1,185 @@
 <template>
-  <div class="project-detail-page">
-    <div class="container">
-      <!-- 返回按钮 -->
-      <div class="back-navigation">
-        <el-button @click="$router.push('/projects')" text>
-          <el-icon><ArrowLeft /></el-icon>
-          {{ t('project.back_to_list') }}
-        </el-button>
-      </div>
+  <main class="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+    <!-- Back Button & Breadcrumb -->
+    <div class="mb-6 flex items-center gap-2">
+      <router-link 
+        to="/projects" 
+        class="flex items-center gap-2 font-bold hover:underline bg-white border-2 border-black px-3 py-1 shadow-neo-hover"
+      >
+        <i class="fa-solid fa-arrow-left"></i> 返回列表
+      </router-link>
+      <span class="font-mono text-gray-500">/ Projects / {{ project?.id || 'loading' }}</span>
+    </div>
 
-      <!-- 加载状态 -->
-      <div v-if="loading" class="loading-container">
-        <el-skeleton :rows="8" animated />
-      </div>
-
-      <!-- 项目详情 -->
-      <div v-else-if="project" class="project-detail">
-        <!-- 项目头部信息 -->
-        <ProjectHeader 
-          :project="project"
-          :is-admin="authStore.isAdmin"
-          @edit-project="editProject"
-          @delete-project="deleteProject"
-        />
-
-        <!-- 项目附件（展示在内容前面） -->
-        <ProjectAttachments 
-          v-if="hasAttachments" 
-          :attachments="project.attachments"
-          @preview-image="previewImage"
-        />
-
-        <!-- 项目内容 -->
-        <div class="project-content ai-card">
-          <h2>{{ t('project.project_details') }}</h2>
-          <div v-if="project.content" class="markdown-content" v-html="renderedContent"></div>
-          <div v-else class="empty-content">
-            <el-empty description="暂无详细内容" />
-          </div>
-        </div>
-
-        <!-- 评论区域 -->
-        <CommentsSection :project-id="route.params.id" />
-      </div>
-
-      <!-- 项目不存在 -->
-      <div v-else class="not-found">
-        <el-result 
-          icon="warning" 
-          :title="t('project.not_found')" 
-          :sub-title="t('project.check_link')"
-        >
-          <template #extra>
-            <router-link to="/projects">
-              <el-button type="primary">{{ t('project.back_to_list') }}</el-button>
-            </router-link>
-          </template>
-        </el-result>
+    <!-- Loading State -->
+    <div v-if="loading" class="neo-card p-8">
+      <div class="animate-pulse space-y-4">
+        <div class="h-8 bg-gray-200 rounded w-3/4"></div>
+        <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div class="h-32 bg-gray-200 rounded"></div>
       </div>
     </div>
 
-    <!-- 项目编辑对话框 -->
+    <!-- Project Detail -->
+    <div v-else-if="project">
+      <!-- 1. Main Info Card -->
+      <div class="neo-card p-0 mb-8 relative overflow-hidden bg-white">
+        <!-- Top Bar (Status) -->
+        <div class="border-b-3 border-black bg-gray-100 p-4 flex flex-wrap justify-between items-center gap-4">
+          <div class="flex gap-3">
+            <div 
+              class="border-2 border-black font-black px-3 py-1 uppercase text-sm shadow-[2px_2px_0_0_black]"
+              :class="getStatusBadgeClass(project.status)"
+            >
+              <i :class="getStatusIcon(project.status)" class="mr-1"></i>
+              {{ getStatusName(project.status) }}
+            </div>
+            <div 
+              v-if="project.priority"
+              class="bg-neo-yellow text-black border-2 border-black font-black px-3 py-1 uppercase text-sm shadow-[2px_2px_0_0_black]"
+            >
+              {{ getPriorityName(project.priority) }}
+            </div>
+          </div>
+          <div class="flex gap-4 font-mono text-xs font-bold text-gray-500">
+            <span><i class="fa-regular fa-clock"></i> Created: {{ formatDate(project.created_at) }}</span>
+            <span><i class="fa-solid fa-rotate"></i> Updated: {{ formatDate(project.updated_at) }}</span>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+          <!-- Title -->
+          <h1 class="text-4xl md:text-5xl font-display font-black mb-4 leading-tight">
+            {{ project.title }}
+          </h1>
+          <p class="text-lg font-medium text-gray-600 border-l-4 border-black pl-4 mb-8">
+            {{ project.description }}
+          </p>
+
+          <!-- Action Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <!-- History Button -->
+            <router-link 
+              :to="`/project/${project.id}/history`"
+              class="neo-btn-secondary p-4 flex items-center justify-between group"
+            >
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-neo-purple border-2 border-black flex items-center justify-center rounded-full text-white text-lg">
+                  <i class="fa-solid fa-history"></i>
+                </div>
+                <div class="text-left">
+                  <div class="font-bold text-lg group-hover:text-neo-purple transition-colors">进展历史</div>
+                  <div class="text-xs text-gray-500 font-mono">查看项目发展轨迹</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right"></i>
+            </router-link>
+
+            <!-- Demo Button -->
+            <a 
+              v-if="demoLinks.length > 0"
+              :href="demoLinks[0].url" 
+              target="_blank"
+              class="neo-btn-primary p-4 flex items-center justify-between group"
+            >
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-black border-2 border-white flex items-center justify-center rounded-full text-neo-green text-lg animate-pulse">
+                  <i class="fa-solid fa-play"></i>
+                </div>
+                <div class="text-left">
+                  <div class="font-black text-lg">在线演示</div>
+                  <div class="text-xs text-black font-mono font-bold">体验项目效果</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-arrow-up-right-from-square font-bold text-xl"></i>
+            </a>
+            <div v-else class="neo-btn-secondary p-4 flex items-center justify-center opacity-50">
+              <div class="text-center">
+                <div class="font-bold text-lg text-gray-400">暂无演示</div>
+                <div class="text-xs text-gray-500 font-mono">Demo链接未配置</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tech Stack -->
+          <div v-if="project.tech_stack && project.tech_stack.length" class="pt-6 border-t-2 border-dashed border-gray-300">
+            <div class="text-xs font-black uppercase text-gray-400 mb-3 tracking-widest">Tech Stack</div>
+            <div class="flex flex-wrap gap-3">
+              <span 
+                v-for="tech in project.tech_stack" 
+                :key="tech"
+                class="tech-tag"
+              >
+                {{ tech }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Detail Content (The "Readme") -->
+      <div class="neo-card p-0 mb-8 bg-white">
+        <!-- Fake Window Header -->
+        <div class="bg-black text-white border-b-3 border-black px-4 py-2 flex justify-between items-center">
+          <span class="font-mono font-bold text-sm"><i class="fa-solid fa-file-lines mr-2"></i>README.md</span>
+          <div class="flex gap-2">
+            <div class="w-3 h-3 bg-neo-red rounded-full border border-white"></div>
+            <div class="w-3 h-3 bg-neo-yellow rounded-full border border-white"></div>
+            <div class="w-3 h-3 bg-neo-green rounded-full border border-white"></div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-10 prose max-w-none text-gray-800">
+          <div v-if="renderedContent" v-html="renderedContent"></div>
+          <div v-else class="text-center py-12 text-gray-400">
+            <i class="fa-solid fa-file-lines text-4xl mb-4"></i>
+            <p class="font-bold">暂无详细内容</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Discussion Section -->
+      <div class="neo-card p-0 bg-white relative">
+        <div class="px-6 py-4 border-b-3 border-black bg-neo-purple/20 flex justify-between items-center">
+          <h2 class="font-display font-bold text-xl flex items-center">
+            <i class="fa-regular fa-comments mr-2"></i> 项目讨论 ({{ commentsCount || 0 }})
+          </h2>
+          <button 
+            v-if="!authStore.isAuthenticated"
+            class="bg-black text-white px-3 py-1 text-xs font-bold hover:bg-gray-800 transition"
+            @click="$router.push('/login')"
+          >
+            LOGIN TO POST
+          </button>
+        </div>
+
+        <div class="p-8 bg-gray-50 flex flex-col items-center justify-center text-center min-h-[200px] dashed-pattern">
+          <!-- Comments Section -->
+          <CommentsSection 
+            :project-id="route.params.id" 
+            @comments-updated="handleCommentsUpdated"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Project Not Found -->
+    <div v-else class="neo-card p-12 text-center">
+      <i class="fa-solid fa-exclamation-triangle text-6xl text-gray-400 mb-4"></i>
+      <h2 class="text-2xl font-black mb-2">项目不存在</h2>
+      <p class="text-gray-600 mb-6">请检查链接是否正确</p>
+      <router-link to="/projects" class="neo-btn bg-black text-white px-6 py-3 inline-block">
+        返回项目列表
+      </router-link>
+    </div>
+
+    <!-- Project Edit Dialog -->
     <ProjectEditDialog
       v-model="showEditDialog"
       :project="project"
       @saved="handleProjectSaved"
     />
-
-    <!-- 图片查看器 -->
-    <ProjectImageViewer
-      :show="showImageViewer"
-      :images="project?.attachments?.images || []"
-      :initial-index="currentImageIndex"
-      @close="closeImageViewer"
-    />
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -83,15 +188,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox } from 'element-plus'
 import { showNotification } from '../utils/notification'
-import { ArrowLeft } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
 import CommentsSection from '@/components/comment/CommentsSection.vue'
 import ProjectEditDialog from '@/components/admin/ProjectEditDialog.vue'
-import ProjectHeader from '@/components/project/ProjectHeader.vue'
-import ProjectAttachments from '@/components/project/ProjectAttachments.vue'
-import ProjectImageViewer from '@/components/project/ProjectImageViewer.vue'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
+import { parseDemoLinks, getDemoLinkTitle } from '@/utils/demoLinks'
+import dayjs from 'dayjs'
 
 const route = useRoute()
 const router = useRouter()
@@ -102,8 +205,7 @@ const { t } = useI18n()
 const project = ref(null)
 const loading = ref(false)
 const showEditDialog = ref(false)
-const currentImageIndex = ref(0)
-const showImageViewer = ref(false)
+const commentsCount = ref(0)
 
 // 计算属性
 const renderedContent = computed(() => {
@@ -111,24 +213,77 @@ const renderedContent = computed(() => {
   return renderEnhancedMarkdown(project.value.content)
 })
 
-const hasAttachments = computed(() => {
-  return project.value?.attachments && 
-         (project.value.attachments.images?.length > 0 || project.value.attachments.videos?.length > 0)
+const demoLinks = computed(() => {
+  if (!project.value?.demo_url) return []
+  const links = parseDemoLinks(project.value.demo_url)
+  return links.map(link => ({
+    ...link,
+    title: getDemoLinkTitle(link)
+  }))
 })
 
-// 方法
-const previewImage = (image, index) => {
-  currentImageIndex.value = index
-  showImageViewer.value = true
+// 获取状态名称
+const getStatusName = (status) => {
+  const statusMap = {
+    idea: '构思中',
+    planning: '规划中',
+    development: '开发中',
+    testing: '测试中',
+    completed: '已完成',
+    deployed: '已部署',
+    paused: '已暂停'
+  }
+  return statusMap[status] || '未知'
 }
 
-const closeImageViewer = () => {
-  showImageViewer.value = false
+// 获取状态图标
+const getStatusIcon = (status) => {
+  const iconMap = {
+    idea: 'fa-solid fa-lightbulb',
+    planning: 'fa-solid fa-pen-ruler',
+    development: 'fa-solid fa-code',
+    testing: 'fa-solid fa-bug',
+    completed: 'fa-solid fa-check',
+    deployed: 'fa-solid fa-rocket',
+    paused: 'fa-solid fa-pause'
+  }
+  return iconMap[status] || 'fa-solid fa-circle'
 }
 
+// 获取状态徽章类
+const getStatusBadgeClass = (status) => {
+  const classMap = {
+    idea: 'bg-gray-200 text-gray-800',
+    planning: 'bg-blue-200 text-blue-800',
+    development: 'bg-neo-purple text-white',
+    testing: 'bg-red-200 text-red-800',
+    completed: 'bg-neo-green text-black',
+    deployed: 'bg-neo-blue text-white',
+    paused: 'bg-gray-300 text-gray-800'
+  }
+  return classMap[status] || 'bg-gray-200 text-gray-800'
+}
 
+// 获取优先级名称
+const getPriorityName = (priority) => {
+  const priorityMap = {
+    low: '低',
+    medium: '中等',
+    high: '高',
+    urgent: '紧急'
+  }
+  return priorityMap[priority] || '中等'
+}
 
+// 格式化日期
+const formatDate = (dateString) => {
+  return dayjs(dateString).format('YYYY-MM-DD')
+}
 
+// 处理评论更新
+const handleCommentsUpdated = (count) => {
+  commentsCount.value = count
+}
 
 // API方法
 const fetchProject = async () => {
@@ -153,41 +308,11 @@ const fetchProject = async () => {
   }
 }
 
-
-
-const editProject = () => {
-  // 直接在当前页面打开编辑对话框
-  showEditDialog.value = true
-}
-
 // 处理项目保存
 const handleProjectSaved = async (savedProject) => {
-  // 更新当前页面的项目数据
   project.value = savedProject
   showEditDialog.value = false
   showNotification.success(t('admin.project_saved'))
-}
-
-const deleteProject = async () => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要删除项目"${project.value.title}"吗？此操作不可恢复。`,
-      '删除确认',
-      {
-        type: 'warning',
-        confirmButtonText: '确定删除',
-        confirmButtonClass: 'el-button--danger'
-      }
-    )
-    
-    await axios.delete(`/api/projects/${route.params.id}`)
-    showNotification.success('项目删除成功')
-    router.push('/projects')
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('删除项目失败:', error)
-    }
-  }
 }
 
 // 生命周期
@@ -197,97 +322,100 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.project-detail-page {
-  min-height: calc(100vh - 60px);
-  padding: 20px 0;
-}
-
-.back-navigation {
-  margin-bottom: 20px;
-}
-
-.loading-container {
-  padding: 40px;
-}
-
-.project-content {
-  margin-bottom: 24px;
-  padding: 32px;
-
-  h2 {
-    margin: 0 0 20px 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--el-text-color-primary);
+.neo-btn-primary {
+  background-color: #4ADE80;
+  border: 2px solid black;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: all 0.1s;
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  
+  &:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px #000000;
   }
-
-  .markdown-content {
-    line-height: 1.7;
-    color: var(--el-text-color-primary);
-
-    :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
-      margin: 20px 0 12px 0;
-      font-weight: 600;
-    }
-
-    :deep(p) {
-      margin: 12px 0;
-    }
-
-    :deep(ul), :deep(ol) {
-      margin: 12px 0;
-      padding-left: 24px;
-    }
-
-    :deep(code) {
-      background: var(--el-bg-color-page);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'Fira Code', monospace;
-    }
-
-    :deep(pre) {
-      background: var(--el-bg-color-page);
-      padding: 16px;
-      border-radius: 8px;
-      overflow-x: auto;
-      margin: 16px 0;
-
-      code {
-        background: none;
-        padding: 0;
-      }
-    }
-
-    :deep(blockquote) {
-      border-left: 4px solid var(--ai-primary);
-      margin: 16px 0;
-      padding: 8px 16px;
-      background: var(--el-bg-color-page);
-      border-radius: 0 8px 8px 0;
-    }
-  }
-
-  .empty-content {
-    text-align: center;
-    padding: 40px;
+  
+  &:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px 0px #000000;
   }
 }
 
-.not-found {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-@media (max-width: 768px) {
-  .project-content {
-    padding: 20px;
-
-    .markdown-content {
-      :deep(pre) {
-        font-size: 14px;
-      }
-    }
+.neo-btn-secondary {
+  background-color: white;
+  border: 2px solid black;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: all 0.1s;
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  
+  &:hover {
+    background-color: #f3f4f6;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px #000000;
   }
 }
-</style> 
+
+.tech-tag {
+  border: 2px solid black;
+  padding: 4px 12px;
+  font-weight: bold;
+  font-size: 0.875rem;
+  background: #BEA7FF;
+  box-shadow: 2px 2px 0px 0px #000000;
+}
+
+.dashed-pattern {
+  background-image: linear-gradient(to right, black 50%, transparent 50%);
+  background-position: bottom;
+  background-size: 16px 2px;
+  background-repeat: repeat-x;
+}
+
+.prose {
+  h3 {
+    font-weight: 900;
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+    background: linear-gradient(120deg, #FFD600 0%, #FFD600 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 40%;
+    background-position: 0 88%;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.6rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: black;
+    }
+  }
+  
+  :deep(p) {
+    margin: 1em 0;
+  }
+  
+  :deep(strong) {
+    background: #fef3c7;
+    padding: 2px 4px;
+    border: 1px solid black;
+  }
+}
+</style>

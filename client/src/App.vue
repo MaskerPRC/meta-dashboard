@@ -1,10 +1,10 @@
 <template>
-  <div id="app" class="ai-dashboard">
+  <div id="app" class="ai-dashboard antialiased min-h-screen flex flex-col">
     <!-- 顶部导航栏 -->
     <Header />
     
     <!-- 主要内容区域 -->
-    <main class="main-content">
+    <main class="main-content flex-grow">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -53,11 +53,14 @@ onUnmounted(() => {
 <style lang="scss">
 #app {
   min-height: 100vh;
-  background: var(--ai-bg-primary);
+  background-color: #FDFBF7;
+  background-image: radial-gradient(#18181b 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: #18181b;
   
   .main-content {
-    min-height: calc(100vh - 70px);
-    padding-top: 70px;
+    min-height: calc(100vh - 64px);
+    padding-top: 64px;
     
     .fade-enter-active,
     .fade-leave-active {
@@ -71,7 +74,7 @@ onUnmounted(() => {
   }
 }
 
-// 自定义Element Plus主题色彩
+// 自定义Element Plus主题色彩 (保持兼容性)
 :root {
   --el-color-primary: #6366f1;
   --el-color-primary-light-3: #8b87f7;
@@ -82,7 +85,7 @@ onUnmounted(() => {
   --el-color-primary-dark-2: #5045e5;
 }
 
-// AI主题配色
+// AI主题配色 (保持兼容性)
 :root {
   --ai-primary: #6366f1;
   --ai-secondary: #8b5cf6;
@@ -90,19 +93,10 @@ onUnmounted(() => {
   --ai-success: #10b981;
   --ai-warning: #f59e0b;
   --ai-error: #ef4444;
-  --ai-bg-primary: #ffffff;
+  --ai-bg-primary: #FDFBF7;
   --ai-bg-secondary: #f8fafc;
-  --ai-text-primary: #1e293b;
+  --ai-text-primary: #18181b;
   --ai-text-secondary: #64748b;
   --ai-border: #e2e8f0;
-}
-
-// 暗色主题
-html.dark {
-  --ai-bg-primary: #0f172a;
-  --ai-bg-secondary: #1e293b;
-  --ai-text-primary: #f1f5f9;
-  --ai-text-secondary: #94a3b8;
-  --ai-border: #334155;
 }
 </style> 

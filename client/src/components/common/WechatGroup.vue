@@ -16,29 +16,31 @@
             class="qr-image"
             @error="handleImageError"
           />
-          <div class="qr-overlay">
-            <el-icon class="qr-icon"><ChatDotSquare /></el-icon>
-            <span class="qr-hint">扫码加群</span>
-          </div>
         </div>
       </div>
 
       <div v-else class="placeholder-container">
         <div class="placeholder-qr">
-          <el-icon class="placeholder-icon"><ChatDotSquare /></el-icon>
+          <i class="fa-solid fa-qrcode placeholder-icon"></i>
           <p class="placeholder-text">二维码加载中...</p>
         </div>
       </div>
+      
+      <div v-if="showContactInfo && !hideDescription" class="text-center mt-2">
+        <p class="text-xs font-bold">
+          也可添加微信号：<span class="wechat-id cursor-pointer hover:underline" @click="copyWechat">QQTommer</span>
+        </p>
+      </div>
 
-      <div class="wechat-group-tips">
+      <div v-if="!isCompact" class="wechat-group-tips">
         <p class="tip-text">
-          <el-icon><ChatDotSquare /></el-icon>
+          <i class="fa-solid fa-info-circle mr-2"></i>
           扫描上方二维码，或长按保存到相册后用微信扫一扫
         </p>
         <div v-if="showContactInfo" class="contact-fallback">
           <p class="fallback-text">
-            也可添加微信号：<span class="wechat-id" @click="copyWechat">QQTommer</span>
-            <el-tag size="small" class="action-hint">点击复制</el-tag>
+            也可添加微信号：<span class="wechat-id cursor-pointer hover:underline" @click="copyWechat">QQTommer</span>
+            <span class="text-xs bg-gray-200 px-2 py-1 rounded border border-black ml-2">点击复制</span>
           </p>
         </div>
       </div>
@@ -47,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps } from 'vue'
+import { ref, onMounted } from 'vue'
 import { showNotification } from '../../utils/notification'
 import { ChatDotSquare } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
@@ -162,50 +164,22 @@ onMounted(() => {
         position: relative;
         width: 200px;
         height: 200px;
-        border-radius: 12px;
+        border: 2px solid black;
+        border-radius: 0;
         overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        box-shadow: 2px 2px 0px 0px #000000;
+        transition: all 0.1s ease;
+        background: white;
 
         &:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-          .qr-overlay {
-            opacity: 1;
-          }
+          transform: translate(2px, 2px);
+          box-shadow: 0px 0px 0px 0px #000000;
         }
 
         .qr-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
-        }
-
-        .qr-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.7);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-
-          .qr-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-          }
-
-          .qr-hint {
-            font-size: 14px;
-            font-weight: 500;
-          }
         }
       }
     }
@@ -218,14 +192,14 @@ onMounted(() => {
       .placeholder-qr {
         width: 200px;
         height: 200px;
-        border: 2px dashed var(--ai-border);
-        border-radius: 12px;
+        border: 2px solid black;
+        border-radius: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        color: var(--ai-text-secondary);
-        background: var(--ai-bg-secondary);
+        color: #18181b;
+        background: #f3f4f6;
 
         .placeholder-icon {
           font-size: 48px;
@@ -292,35 +266,16 @@ onMounted(() => {
   // 紧凑模式样式
   &.compact {
     .wechat-group-card {
-      padding: 24px;
-
-      .wechat-group-title {
-        font-size: 1.25rem;
-        margin-bottom: 12px;
-      }
-
-      .wechat-group-description {
-        font-size: 0.875rem;
-        margin-bottom: 20px;
-      }
+      padding: 0;
+      max-width: 128px;
+      margin: 0;
 
       .qr-container, .placeholder-container {
-        margin-bottom: 16px;
+        margin-bottom: 0;
 
         .qr-image-wrapper, .placeholder-qr {
-          width: 150px;
-          height: 150px;
-        }
-      }
-
-      .wechat-group-tips {
-        .tip-text {
-          font-size: 0.8rem;
-          margin-bottom: 8px;
-        }
-
-        .contact-fallback .fallback-text {
-          font-size: 0.8rem;
+          width: 128px;
+          height: 128px;
         }
       }
     }

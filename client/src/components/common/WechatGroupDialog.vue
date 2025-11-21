@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, watch } from 'vue'
 import { showNotification } from '../../utils/notification'
 import WechatGroup from './WechatGroup.vue'
 import {
@@ -114,8 +114,6 @@ const handleJoined = () => {
   emit('joined')
   showNotification.success('欢迎加入AI项目交流群！期待您的参与和分享')
 }
-
-import { watch } from 'vue'
 </script>
 
 <style lang="scss" scoped>

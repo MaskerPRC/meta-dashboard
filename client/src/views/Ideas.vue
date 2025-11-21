@@ -1,230 +1,243 @@
 <template>
-  <div class="ideas-page">
-    <div class="container">
-      <!-- 页面头部 -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">想法征集</h1>
-          <p class="page-subtitle">分享你的创意想法，参与投票，一起推动AI项目发展</p>
-        </div>
-        
-        <!-- 操作按钮 -->
-        <div class="header-actions">
-          <el-button 
-            v-if="authStore.isAuthenticated" 
-            type="primary" 
-            @click="showSubmitDialog = true"
-          >
-            <el-icon><Plus /></el-icon>
-            提交想法
-          </el-button>
-          <el-button v-else @click="$router.push('/login')">
-            <el-icon><User /></el-icon>
-            登录提交想法
-          </el-button>
-        </div>
+  <main class="flex-grow pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <!-- Page Header -->
+    <div class="mb-12 flex justify-between items-end border-b-4 border-black pb-4">
+      <div>
+        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">想法征集</h1>
+        <p class="text-gray-600 font-medium">分享你的创意想法，参与投票，一起推动AI项目发展</p>
+      </div>
+      <button 
+        v-if="authStore.isAuthenticated" 
+        @click="showSubmitDialog = true"
+        class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
+      >
+        <i class="fa-solid fa-plus mr-2"></i>
+        提交想法
+      </button>
+      <router-link 
+        v-else
+        to="/login"
+        class="neo-btn bg-white px-6 py-3 hover:bg-neo-purple hover:text-white"
+      >
+        <i class="fa-solid fa-user mr-2"></i>
+        登录提交想法
+      </router-link>
+    </div>
+
+    <!-- Filter Console -->
+    <div class="neo-card p-4 mb-8 bg-white flex flex-col md:flex-row justify-between items-center gap-4 rounded-lg relative">
+      <!-- Decorative Screw Heads -->
+      <div class="absolute top-2 left-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
+      </div>
+      <div class="absolute top-2 right-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
+      </div>
+      <div class="absolute bottom-2 left-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
+      </div>
+      <div class="absolute bottom-2 right-2 w-2 h-2 border border-black rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-black transform rotate-45"></div>
       </div>
 
-      <!-- 筛选和搜索工具栏 -->
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <!-- 状态筛选 -->
-          <el-select
+      <div class="flex flex-wrap items-center gap-4 w-full md:w-auto z-10">
+        <!-- Status Filter -->
+        <div class="relative">
+          <select 
             v-model="filters.status"
-            placeholder="状态筛选"
-            clearable
-            style="width: 140px"
             @change="handleFilterChange"
+            class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer hover:shadow-neo-sm transition text-sm"
           >
-            <el-option label="待审核" value="pending" />
-            <el-option label="已采纳" value="adopted" />
-            <el-option label="已拒绝" value="rejected" />
-          </el-select>
-
-          <!-- 排序方式 -->
-          <el-select
-            v-model="sortBy"
-            placeholder="排序方式"
-            style="width: 140px"
-            @change="handleSortChange"
-          >
-            <el-option label="投票数" value="vote_count" />
-            <el-option label="最新创建" value="created_at" />
-            <el-option label="标题" value="title" />
-          </el-select>
-
-          <!-- 搜索框 -->
-          <el-input
-            v-model="searchText"
-            placeholder="搜索想法标题或描述..."
-            style="width: 300px"
-            clearable
-            @keyup.enter="handleSearch"
-            @clear="handleSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
-
-          <el-button type="primary" @click="handleSearch">
-            搜索
-          </el-button>
-        </div>
-
-        <div class="toolbar-right">
-          <!-- 升序降序切换 -->
-          <el-button @click="toggleSortOrder">
-            <el-icon v-if="sortOrder === 'desc'"><ArrowDown /></el-icon>
-            <el-icon v-else><ArrowUp /></el-icon>
-            {{ sortOrder === 'desc' ? '降序' : '升序' }}
-          </el-button>
-
-          <!-- 重置筛选 -->
-          <el-button @click="resetFilters">
-            <el-icon><Refresh /></el-icon>
-            重置
-          </el-button>
-        </div>
-      </div>
-
-      <!-- 统计信息 -->
-      <div class="stats-cards">
-        <div class="stat-card">
-          <div class="stat-value">{{ totalIdeas }}</div>
-          <div class="stat-label">总想法数</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ pendingIdeas }}</div>
-          <div class="stat-label">待审核</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ adoptedIdeas }}</div>
-          <div class="stat-label">已采纳</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ userVotesToday }}</div>
-          <div class="stat-label">我今日投票</div>
-        </div>
-      </div>
-
-      <!-- 想法列表 -->
-      <div class="ideas-content" v-loading="loading">
-        <div v-if="ideas.length === 0 && !loading" class="empty-state">
-          <el-empty description="暂无想法数据">
-            <el-button 
-              v-if="authStore.isAuthenticated" 
-              type="primary" 
-              @click="showSubmitDialog = true"
-            >
-              提交第一个想法
-            </el-button>
-          </el-empty>
-        </div>
-
-        <div v-else class="ideas-grid">
-          <div
-            v-for="idea in ideas"
-            :key="idea.id"
-            class="idea-card"
-            @click="viewIdeaDetail(idea)"
-          >
-            <!-- 想法状态标签 -->
-            <div class="idea-header">
-              <el-tag :class="['status-tag', idea.status]" size="small">
-                {{ getStatusName(idea.status) }}
-              </el-tag>
-              <div class="vote-info">
-                <el-icon><Star /></el-icon>
-                <span>{{ idea.vote_count || 0 }}</span>
-              </div>
-            </div>
-
-            <!-- 想法内容 -->
-            <div class="idea-content">
-              <h3 class="idea-title">{{ idea.title }}</h3>
-              <p class="idea-description">{{ idea.description }}</p>
-            </div>
-
-            <!-- 作者信息 -->
-            <div class="idea-footer">
-              <div class="author-info">
-                <el-avatar :size="24" :src="idea.author_avatar" />
-                <span class="author-name">{{ idea.author_name }}</span>
-              </div>
-              <div class="idea-meta">
-                <span class="create-time">{{ formatDate(idea.created_at) }}</span>
-                <span class="voters-count">{{ idea.voters_count || 0 }}人投票</span>
-              </div>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="idea-actions">
-              <!-- 编辑按钮 -->
-              <div v-if="canEditIdea(idea)" class="edit-actions">
-                <el-button 
-                  size="small" 
-                  type="warning" 
-                  @click.stop="editIdea(idea)"
-                >
-                  <el-icon><Edit /></el-icon>
-                  编辑
-                </el-button>
-              </div>
-
-              <!-- 投票按钮 -->
-              <div v-if="idea.status === 'pending' && authStore.isAuthenticated" class="vote-actions">
-                <el-button 
-                  size="small" 
-                  type="success" 
-                  @click.stop="voteForIdea(idea, 1)"
-                  :disabled="hasVoted(idea.id)"
-                >
-                  <el-icon><Check /></el-icon>
-                  投1票
-                </el-button>
-                <el-button 
-                  size="small" 
-                  type="primary" 
-                  @click.stop="voteForIdea(idea, 2)"
-                  :disabled="hasVoted(idea.id) || userVotesToday >= 10"
-                >
-                  <el-icon><Star /></el-icon>
-                  投2票
-                </el-button>
-              </div>
-            </div>
-
-            <!-- 项目关联信息 -->
-            <div v-if="idea.project_id" class="project-link">
-              <el-button 
-                size="small" 
-                type="info" 
-                @click.stop="viewProject(idea.project_id)"
-              >
-                <el-icon><Link /></el-icon>
-                查看项目
-              </el-button>
-            </div>
+            <option value="">状态筛选</option>
+            <option value="pending">待审核</option>
+            <option value="adopted">已采纳</option>
+            <option value="rejected">已拒绝</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+            <i class="fa-solid fa-caret-down text-xs"></i>
           </div>
         </div>
 
-        <!-- 分页 -->
-        <div class="pagination-container">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[12, 24, 48]"
-            :total="totalCount"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
+        <!-- Sort -->
+        <div class="relative">
+          <select 
+            v-model="sortBy"
+            @change="handleSortChange"
+            class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer hover:shadow-neo-sm transition text-sm"
+          >
+            <option value="vote_count">投票数</option>
+            <option value="created_at">最新创建</option>
+            <option value="title">标题</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+            <i class="fa-solid fa-caret-down text-xs"></i>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="relative flex-1 md:flex-initial md:w-64">
+          <input
+            v-model="searchText"
+            @keyup.enter="handleSearch"
+            type="text"
+            placeholder="搜索想法标题或描述..."
+            class="w-full bg-gray-100 border-2 border-black px-4 py-2 pr-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white hover:shadow-neo-sm transition text-sm"
           />
+          <button 
+            @click="handleSearch"
+            class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-neo-yellow border-2 border-black rounded flex items-center justify-center hover:bg-yellow-400 transition"
+          >
+            <i class="fa-solid fa-search text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 z-10">
+        <!-- Sort Order -->
+        <button 
+          @click="toggleSortOrder"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition shadow-neo-sm"
+        >
+          <i :class="sortOrder === 'desc' ? 'fa-solid fa-arrow-down' : 'fa-solid fa-arrow-up'" class="text-sm"></i>
+        </button>
+
+        <!-- Reset -->
+        <button 
+          @click="resetFilters"
+          class="neo-btn bg-white px-4 py-2 text-black hover:bg-gray-100 text-sm"
+        >
+          <i class="fa-solid fa-rotate mr-1"></i>
+          重置
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="neo-card p-5 bg-white text-center">
+        <div class="text-4xl font-black mb-1">{{ totalIdeas }}</div>
+        <div class="text-xs font-bold text-gray-500">总想法数</div>
+      </div>
+      <div class="neo-card p-5 bg-yellow-50 text-center">
+        <div class="text-4xl font-black mb-1">{{ pendingIdeas }}</div>
+        <div class="text-xs font-bold text-gray-500">待审核</div>
+      </div>
+      <div class="neo-card p-5 bg-green-50 text-center">
+        <div class="text-4xl font-black mb-1">{{ adoptedIdeas }}</div>
+        <div class="text-xs font-bold text-gray-500">已采纳</div>
+      </div>
+      <div class="neo-card p-5 bg-blue-50 text-center">
+        <div class="text-4xl font-black mb-1">{{ userVotesToday }}</div>
+        <div class="text-xs font-bold text-gray-500">我今日投票</div>
+      </div>
+    </div>
+
+    <!-- Ideas Grid -->
+    <div v-loading="loading" class="mb-8">
+      <div v-if="ideas.length === 0 && !loading" class="text-center py-16">
+        <i class="fa-solid fa-lightbulb text-6xl text-gray-400 mb-4"></i>
+        <p class="text-lg font-bold text-gray-600 mb-4">暂无想法数据</p>
+        <button 
+          v-if="authStore.isAuthenticated" 
+          @click="showSubmitDialog = true"
+          class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
+        >
+          提交第一个想法
+        </button>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          v-for="idea in ideas"
+          :key="idea.id"
+          class="neo-card p-6 bg-white cursor-pointer hover:translate-x-1 transition-transform"
+          @click="viewIdeaDetail(idea)"
+        >
+          <!-- Header -->
+          <div class="flex justify-between items-center mb-4">
+            <span 
+              class="px-3 py-1 text-xs font-bold border-2 border-black rounded shadow-[2px_2px_0_0_black]"
+              :class="getStatusBadgeClass(idea.status)"
+            >
+              {{ getStatusName(idea.status) }}
+            </span>
+            <div class="flex items-center gap-1 text-gray-500">
+              <i class="fa-solid fa-star text-sm"></i>
+              <span class="font-bold text-sm">{{ idea.vote_count || 0 }}</span>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <h3 class="text-xl font-black mb-2 leading-tight">{{ idea.title }}</h3>
+          <p class="text-sm text-gray-600 mb-4 line-clamp-3">{{ idea.description }}</p>
+
+          <!-- Footer -->
+          <div class="flex justify-between items-center pt-4 border-t-2 border-gray-100">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-black rounded-full border border-black"></div>
+              <span class="font-bold text-xs">{{ idea.author_name }}</span>
+            </div>
+            <span class="text-xs font-bold text-gray-500">{{ formatDate(idea.created_at) }}</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-4 flex gap-2" @click.stop>
+            <button 
+              v-if="idea.status === 'pending' && authStore.isAuthenticated"
+              @click.stop="voteForIdea(idea, 1)"
+              :disabled="hasVoted(idea.id)"
+              class="flex-1 neo-btn bg-neo-green text-black px-3 py-2 text-sm hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fa-solid fa-check mr-1"></i>
+              投1票
+            </button>
+            <button 
+              v-if="idea.status === 'pending' && authStore.isAuthenticated"
+              @click.stop="voteForIdea(idea, 2)"
+              :disabled="hasVoted(idea.id) || userVotesToday >= 10"
+              class="flex-1 neo-btn bg-neo-blue text-white px-3 py-2 text-sm hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fa-solid fa-star mr-1"></i>
+              投2票
+            </button>
+            <router-link 
+              v-if="idea.project_id"
+              :to="`/project/${idea.project_id}`"
+              @click.stop
+              class="neo-btn bg-neo-purple text-white px-3 py-2 text-sm hover:bg-purple-400"
+            >
+              <i class="fa-solid fa-link mr-1"></i>
+              查看项目
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 提交想法对话框 -->
+    <!-- Pagination -->
+    <div v-if="totalCount > 0" class="flex justify-center mb-8">
+      <div class="neo-card p-4 bg-white inline-flex items-center gap-4">
+        <button 
+          @click="handleCurrentChange(currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <span class="font-mono font-bold">
+          第 {{ currentPage }} / {{ Math.ceil(totalCount / pageSize) }} 页
+        </span>
+        <button 
+          @click="handleCurrentChange(currentPage + 1)"
+          :disabled="currentPage >= Math.ceil(totalCount / pageSize)"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Submit Dialog -->
     <el-dialog
       v-model="showSubmitDialog"
       title="提交想法"
@@ -278,25 +291,15 @@
         </div>
       </template>
     </el-dialog>
-
-    <!-- 微信交流群 -->
-    <div class="wechat-group-wrapper">
-      <WechatGroup :is-compact="true" />
-    </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { showNotification } from '../utils/notification'
-import {
-  Plus, User, Search, ArrowDown, ArrowUp, Refresh, Star,
-  Check, Link, Edit
-} from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
-import WechatGroup from '../components/common/WechatGroup.vue'
 import axios from '../utils/axios'
 
 const router = useRouter()
@@ -349,12 +352,6 @@ const submitRules = {
     { max: 10000, message: '详细内容不能超过10000字符', trigger: 'blur' }
   ]
 }
-
-// 计算属性
-const filteredIdeas = computed(() => {
-  // 这里可以添加客户端过滤逻辑
-  return ideas.value
-})
 
 // 方法
 const fetchIdeas = async () => {
@@ -436,23 +433,14 @@ const resetFilters = () => {
   fetchIdeas()
 }
 
-const handleSizeChange = (val) => {
-  pageSize.value = val
-  currentPage.value = 1
-  fetchIdeas()
-}
-
-const handleCurrentChange = (val) => {
-  currentPage.value = val
+const handleCurrentChange = (page) => {
+  if (page < 1 || page > Math.ceil(totalCount.value / pageSize.value)) return
+  currentPage.value = page
   fetchIdeas()
 }
 
 const viewIdeaDetail = (idea) => {
   router.push(`/idea/${idea.id}`)
-}
-
-const viewProject = (projectId) => {
-  router.push(`/project/${projectId}`)
 }
 
 const hasVoted = (ideaId) => {
@@ -531,33 +519,17 @@ const getStatusName = (status) => {
   return statusMap[status] || status
 }
 
+const getStatusBadgeClass = (status) => {
+  const classMap = {
+    pending: 'bg-neo-yellow text-black',
+    adopted: 'bg-neo-green text-black',
+    rejected: 'bg-neo-red text-white'
+  }
+  return classMap[status] || 'bg-gray-200 text-gray-800'
+}
+
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString()
-}
-
-// 编辑想法相关方法
-const canEditIdea = (idea) => {
-  if (!authStore.isAuthenticated) return false
-  
-  // 管理员可以编辑任何想法
-  if (authStore.isAdmin) return true
-  
-  // 作者只能编辑自己的想法
-  if (idea.author_id !== authStore.user.id) return false
-  
-  // 只能编辑pending状态的想法
-  if (idea.status !== 'pending') return false
-  
-  // 检查时间限制（24小时内）
-  const createdAt = new Date(idea.created_at)
-  const now = new Date()
-  const timeDiff = (now - createdAt) / (1000 * 60 * 60) // 小时
-  
-  return timeDiff <= 24
-}
-
-const editIdea = (idea) => {
-  router.push(`/idea/${idea.id}`)
 }
 
 // 组件挂载时获取数据
@@ -570,271 +542,10 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.ideas-page {
-  min-height: calc(100vh - 70px);
-  background: var(--ai-bg-secondary);
-
-  .container {
-    padding: 40px 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-
-    .header-content {
-      .page-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0 0 8px;
-        color: var(--ai-text-primary);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .page-subtitle {
-        font-size: 1.125rem;
-        color: var(--ai-text-secondary);
-        margin: 0;
-      }
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-
-      .page-title {
-        font-size: 2rem !important;
-      }
-    }
-  }
-
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 16px;
-    background: var(--ai-bg-primary);
-    border-radius: 8px;
-    border: 1px solid var(--ai-border);
-
-    .toolbar-left {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .toolbar-right {
-      display: flex;
-      gap: 12px;
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 12px;
-
-      .toolbar-left,
-      .toolbar-right {
-        width: 100%;
-        justify-content: space-between;
-      }
-    }
-  }
-
-  .stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-
-    .stat-card {
-      background: var(--ai-bg-primary);
-      border: 1px solid var(--ai-border);
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
-
-      .stat-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: var(--ai-primary);
-        margin-bottom: 8px;
-      }
-
-      .stat-label {
-        color: var(--ai-text-secondary);
-        font-size: 0.875rem;
-      }
-    }
-  }
-
-  .ideas-content {
-    background: var(--ai-bg-primary);
-    border-radius: 12px;
-    padding: 24px;
-    border: 1px solid var(--ai-border);
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-    }
-
-    .ideas-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-      gap: 24px;
-    }
-
-    .idea-card {
-      background: var(--ai-bg-secondary);
-      border: 1px solid var(--ai-border);
-      border-radius: 8px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border-color: var(--ai-primary);
-      }
-
-      .idea-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-
-        .vote-info {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          color: var(--ai-text-secondary);
-          font-size: 14px;
-        }
-      }
-
-      .idea-content {
-        margin-bottom: 16px;
-
-        .idea-title {
-          font-size: 1.25rem;
-          font-weight: 600;
-          margin: 0 0 8px;
-          color: var(--ai-text-primary);
-          line-height: 1.4;
-        }
-
-        .idea-description {
-          color: var(--ai-text-secondary);
-          line-height: 1.6;
-          margin: 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      }
-
-      .idea-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        font-size: 0.875rem;
-
-        .author-info {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-
-          .author-name {
-            color: var(--ai-text-secondary);
-          }
-        }
-
-        .idea-meta {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 2px;
-          color: var(--ai-text-secondary);
-        }
-      }
-
-      .idea-actions {
-        margin-top: 12px;
-        
-        .edit-actions {
-          margin-bottom: 8px;
-        }
-        
-        .vote-actions {
-          display: flex;
-          gap: 8px;
-        }
-      }
-
-      .project-link {
-        margin-top: 8px;
-      }
-    }
-
-    .pagination-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 32px;
-    }
-  }
-
-  .status-tag {
-    &.pending {
-      background-color: #ffd04b;
-      color: #ad6800;
-      border-color: #ffd04b;
-    }
-
-    &.adopted {
-      background-color: #67c23a;
-      color: white;
-      border-color: #67c23a;
-    }
-
-    &.rejected {
-      background-color: #f56c6c;
-      color: white;
-      border-color: #f56c6c;
-    }
-  }
-
-  .wechat-group-wrapper {
-    margin-top: 40px;
-    padding-top: 40px;
-    border-top: 1px solid var(--ai-border);
-  }
-}
-
-@media (max-width: 768px) {
-  .ideas-grid {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .idea-card {
-    .vote-actions {
-      flex-direction: column;
-      
-      .el-button {
-        width: 100%;
-      }
-    }
-  }
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>
