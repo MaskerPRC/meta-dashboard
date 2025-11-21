@@ -9,36 +9,36 @@
   >
     <div class="welcome-content">
       <div class="welcome-header">
-        <el-icon class="welcome-icon" size="64" color="#67c23a">
-          <SuccessFilled />
-        </el-icon>
-        <h3 class="welcome-title">登录成功！</h3>
-        <p class="welcome-subtitle">
+        <div class="w-20 h-20 bg-neo-green border-4 border-black rounded-lg flex items-center justify-center mx-auto mb-4 shadow-neo">
+          <i class="fa-solid fa-check text-4xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-black mb-2">登录成功！</h3>
+        <p class="text-gray-600 font-medium">
           恭喜您成为AI项目挑战的一员，快来加入我们的交流群吧！
         </p>
       </div>
 
-      <div class="group-benefits">
-        <h4 class="benefits-title">
-          <el-icon><ChatDotSquare /></el-icon>
+      <div class="neo-card p-6 bg-white mb-6">
+        <h4 class="text-lg font-black mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-comments text-neo-green"></i>
           交流群福利
         </h4>
-        <ul class="benefits-list">
-          <li>
-            <el-icon class="benefit-icon"><Star /></el-icon>
-            第一时间获取项目更新和技术分享
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <i class="fa-solid fa-star text-neo-yellow mt-1"></i>
+            <span class="text-sm text-gray-700">第一时间获取项目更新和技术分享</span>
           </li>
-          <li>
-            <el-icon class="benefit-icon"><User /></el-icon>
-            与志同道合的开发者交流经验
+          <li class="flex items-start gap-3">
+            <i class="fa-solid fa-users text-neo-blue mt-1"></i>
+            <span class="text-sm text-gray-700">与志同道合的开发者交流经验</span>
           </li>
-          <li>
-            <el-icon class="benefit-icon"><Trophy /></el-icon>
-            参与技术讨论和项目合作机会
+          <li class="flex items-start gap-3">
+            <i class="fa-solid fa-trophy text-neo-purple mt-1"></i>
+            <span class="text-sm text-gray-700">参与技术讨论和项目合作机会</span>
           </li>
-          <li>
-            <el-icon class="benefit-icon"><Connection /></el-icon>
-            获得AI工具使用技巧和最佳实践
+          <li class="flex items-start gap-3">
+            <i class="fa-solid fa-network-wired text-neo-green mt-1"></i>
+            <span class="text-sm text-gray-700">获得AI工具使用技巧和最佳实践</span>
           </li>
         </ul>
       </div>
@@ -52,12 +52,20 @@
     </div>
 
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="handleLater">稍后再说</el-button>
-        <el-button type="primary" @click="handleJoined">
-          <el-icon><ChatDotSquare /></el-icon>
+      <div class="dialog-footer flex gap-4 justify-center">
+        <button 
+          @click="handleLater"
+          class="neo-btn bg-white px-6 py-3 hover:bg-gray-100"
+        >
+          稍后再说
+        </button>
+        <button 
+          @click="handleJoined"
+          class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
+        >
+          <i class="fa-solid fa-comments mr-2"></i>
           我已加入群聊
-        </el-button>
+        </button>
       </div>
     </template>
   </el-dialog>
@@ -67,9 +75,6 @@
 import { ref, watch } from 'vue'
 import { showNotification } from '../../utils/notification'
 import WechatGroup from './WechatGroup.vue'
-import {
-  SuccessFilled, ChatDotSquare, Star, User, Trophy, Connection
-} from '@element-plus/icons-vue'
 
 // 定义 props
 const props = defineProps({
@@ -118,106 +123,37 @@ const handleJoined = () => {
 
 <style lang="scss" scoped>
 .wechat-group-dialog {
+  :deep(.el-dialog) {
+    border: 4px solid black;
+    border-radius: 0;
+    box-shadow: 8px 8px 0 0 black;
+  }
+
   :deep(.el-dialog__header) {
     text-align: center;
     padding: 24px 24px 0;
-    border-bottom: none;
+    border-bottom: 3px solid black;
 
     .el-dialog__title {
-      font-weight: 600;
-      color: var(--ai-text-primary);
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: black;
     }
   }
 
   :deep(.el-dialog__body) {
-    padding: 20px 24px;
+    padding: 24px;
   }
 
   :deep(.el-dialog__footer) {
-    padding: 0 24px 24px;
-    text-align: center;
+    padding: 20px 24px;
+    border-top: 3px solid black;
   }
 
   .welcome-content {
     .welcome-header {
       text-align: center;
       margin-bottom: 24px;
-
-      .welcome-icon {
-        margin-bottom: 12px;
-      }
-
-      .welcome-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0 0 8px;
-        color: var(--ai-text-primary);
-      }
-
-      .welcome-subtitle {
-        font-size: 1rem;
-        color: var(--ai-text-secondary);
-        margin: 0;
-        line-height: 1.5;
-      }
-    }
-
-    .group-benefits {
-      margin-bottom: 24px;
-      padding: 20px;
-      background: var(--ai-bg-secondary);
-      border-radius: 8px;
-      border: 1px solid var(--ai-border);
-
-      .benefits-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 1.125rem;
-        font-weight: 600;
-        margin: 0 0 16px;
-        color: var(--ai-text-primary);
-
-        .el-icon {
-          color: #07c160;
-        }
-      }
-
-      .benefits-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-
-        li {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 12px;
-          color: var(--ai-text-secondary);
-          font-size: 0.875rem;
-          line-height: 1.5;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-
-          .benefit-icon {
-            color: var(--ai-primary);
-            font-size: 16px;
-            flex-shrink: 0;
-          }
-        }
-      }
-    }
-  }
-
-  .dialog-footer {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-
-    .el-button {
-      min-width: 120px;
     }
   }
 }
@@ -228,45 +164,6 @@ const handleJoined = () => {
     :deep(.el-dialog) {
       width: 90% !important;
       margin: 5vh auto !important;
-    }
-
-    :deep(.el-dialog__header),
-    :deep(.el-dialog__body),
-    :deep(.el-dialog__footer) {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
-
-    .welcome-content {
-      .welcome-header {
-        .welcome-title {
-          font-size: 1.25rem;
-        }
-
-        .welcome-subtitle {
-          font-size: 0.875rem;
-        }
-      }
-
-      .group-benefits {
-        padding: 16px;
-
-        .benefits-title {
-          font-size: 1rem;
-        }
-
-        .benefits-list li {
-          font-size: 0.8rem;
-        }
-      }
-    }
-
-    .dialog-footer {
-      flex-direction: column;
-
-      .el-button {
-        width: 100%;
-      }
     }
   }
 }

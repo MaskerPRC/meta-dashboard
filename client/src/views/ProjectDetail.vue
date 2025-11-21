@@ -117,7 +117,72 @@
         </div>
       </div>
 
-      <!-- 2. Detail Content (The "Readme") -->
+      <!-- 2. Attachments (Images & Videos) -->
+      <div v-if="projectAttachments.images.length > 0 || projectAttachments.videos.length > 0" class="neo-card p-0 mb-8 bg-white">
+        <div class="px-6 py-4 border-b-3 border-black bg-gray-100">
+          <h2 class="font-display font-black text-xl flex items-center gap-2">
+            <i class="fa-solid fa-images"></i>
+            项目附件
+          </h2>
+        </div>
+
+        <div class="p-6">
+          <!-- Images -->
+          <div v-if="projectAttachments.images.length > 0" class="mb-8">
+            <h3 class="text-sm font-black uppercase text-gray-500 mb-4 tracking-widest">图片 ({{ projectAttachments.images.length }})</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div
+                v-for="(image, index) in projectAttachments.images"
+                :key="`img-${index}`"
+                class="neo-card p-0 bg-white cursor-pointer hover:translate-x-1 transition-transform overflow-hidden"
+                @click="openImageViewer(index)"
+              >
+                <div class="aspect-square relative">
+                  <img 
+                    :src="image.url" 
+                    :alt="image.caption || image.filename" 
+                    class="w-full h-full object-cover"
+                  />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                    <p class="text-white text-xs font-bold truncate">
+                      {{ image.caption || image.filename }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Videos -->
+          <div v-if="projectAttachments.videos.length > 0">
+            <h3 class="text-sm font-black uppercase text-gray-500 mb-4 tracking-widest">视频 ({{ projectAttachments.videos.length }})</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div
+                v-for="(video, index) in projectAttachments.videos"
+                :key="`vid-${index}`"
+                class="neo-card p-0 bg-white overflow-hidden"
+              >
+                <video
+                  :src="video.url"
+                  controls
+                  preload="metadata"
+                  :poster="video.poster"
+                  class="w-full border-b-2 border-black"
+                >
+                  您的浏览器不支持视频播放。
+                </video>
+                <div class="p-4 bg-gray-50">
+                  <p class="text-sm font-bold text-gray-700">
+                    {{ video.filename }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Detail Content (The "Readme") -->
       <div class="neo-card p-0 mb-8 bg-white">
         <!-- Fake Window Header -->
         <div class="bg-black text-white border-b-3 border-black px-4 py-2 flex justify-between items-center">
@@ -138,7 +203,7 @@
         </div>
       </div>
 
-      <!-- 3. Discussion Section -->
+      <!-- 4. Discussion Section -->
       <div class="neo-card p-0 bg-white relative">
         <div class="px-6 py-4 border-b-3 border-black bg-neo-purple/20 flex justify-between items-center">
           <h2 class="font-display font-bold text-xl flex items-center">
@@ -179,6 +244,14 @@
       :project="project"
       @saved="handleProjectSaved"
     />
+
+    <!-- Image Viewer -->
+    <ProjectImageViewer
+      :show="showImageViewer"
+      :images="projectAttachments.images"
+      :initial-index="imageViewerIndex"
+      @close="closeImageViewer"
+    />
   </main>
 </template>
 
@@ -192,6 +265,7 @@ import { useAuthStore } from '@/stores/auth'
 import axios from '@/utils/axios'
 import CommentsSection from '@/components/comment/CommentsSection.vue'
 import ProjectEditDialog from '@/components/admin/ProjectEditDialog.vue'
+import ProjectImageViewer from '@/components/project/ProjectImageViewer.vue'
 import { renderEnhancedMarkdown } from '@/utils/markdownRenderer'
 import { parseDemoLinks, getDemoLinkTitle } from '@/utils/demoLinks'
 import dayjs from 'dayjs'
@@ -206,6 +280,8 @@ const project = ref(null)
 const loading = ref(false)
 const showEditDialog = ref(false)
 const commentsCount = ref(0)
+const showImageViewer = ref(false)
+const imageViewerIndex = ref(0)
 
 // 计算属性
 const renderedContent = computed(() => {
@@ -220,6 +296,28 @@ const demoLinks = computed(() => {
     ...link,
     title: getDemoLinkTitle(link)
   }))
+})
+
+const projectAttachments = computed(() => {
+  if (!project.value?.attachments) {
+    return { images: [], videos: [] }
+  }
+  
+  // 如果attachments是字符串，尝试解析
+  if (typeof project.value.attachments === 'string') {
+    try {
+      return JSON.parse(project.value.attachments)
+    } catch (e) {
+      return { images: [], videos: [] }
+    }
+  }
+  
+  // 如果已经是对象，直接返回
+  if (typeof project.value.attachments === 'object') {
+    return project.value.attachments
+  }
+  
+  return { images: [], videos: [] }
 })
 
 // 获取状态名称
@@ -283,6 +381,17 @@ const formatDate = (dateString) => {
 // 处理评论更新
 const handleCommentsUpdated = (count) => {
   commentsCount.value = count
+}
+
+// 打开图片查看器
+const openImageViewer = (index) => {
+  imageViewerIndex.value = index
+  showImageViewer.value = true
+}
+
+// 关闭图片查看器
+const closeImageViewer = () => {
+  showImageViewer.value = false
 }
 
 // API方法

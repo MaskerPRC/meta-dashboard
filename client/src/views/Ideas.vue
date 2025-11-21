@@ -243,51 +243,79 @@
       title="提交想法"
       width="600px"
       :before-close="closeSubmitDialog"
+      class="submit-idea-dialog"
     >
       <el-form
         ref="submitFormRef"
         :model="submitForm"
         :rules="submitRules"
-        label-width="80px"
+        class="submit-form"
       >
-        <el-form-item label="想法标题" prop="title">
-          <el-input
-            v-model="submitForm.title"
-            placeholder="简明扼要地描述你的想法（最多200字符）"
-            maxlength="200"
-            show-word-limit
-          />
-        </el-form-item>
+        <div class="form-group mb-4">
+          <label class="block text-sm font-bold mb-2">
+            <span class="text-red-500">*</span>想法标题
+          </label>
+          <div class="relative">
+            <input
+              v-model="submitForm.title"
+              type="text"
+              placeholder="简明扼要地描述你的想法（最多200字符）"
+              maxlength="200"
+              class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
+            />
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">
+              {{ submitForm.title.length }}/200
+            </span>
+          </div>
+        </div>
 
-        <el-form-item label="想法描述" prop="description">
-          <el-input
+        <div class="form-group mb-4">
+          <label class="block text-sm font-bold mb-2">
+            <span class="text-red-500">*</span>想法描述
+          </label>
+          <textarea
             v-model="submitForm.description"
-            type="textarea"
             :rows="4"
             placeholder="详细描述你的想法（最多1000字符）"
             maxlength="1000"
-            show-word-limit
-          />
-        </el-form-item>
+            class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white resize-none"
+          ></textarea>
+          <div class="text-right text-xs font-bold text-gray-500 mt-1">
+            {{ submitForm.description.length }}/1000
+          </div>
+        </div>
 
-        <el-form-item label="详细内容" prop="content">
-          <el-input
+        <div class="form-group mb-4">
+          <label class="block text-sm font-bold mb-2">详细内容</label>
+          <textarea
             v-model="submitForm.content"
-            type="textarea"
             :rows="6"
             placeholder="可选：提供更详细的实现思路、技术方案等（支持Markdown格式，最多10000字符）"
             maxlength="10000"
-            show-word-limit
-          />
-        </el-form-item>
+            class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white resize-none"
+          ></textarea>
+          <div class="text-right text-xs font-bold text-gray-500 mt-1">
+            {{ submitForm.content.length }}/10000
+          </div>
+        </div>
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="closeSubmitDialog">取消</el-button>
-          <el-button type="primary" @click="submitIdea" :loading="submitting">
-            提交想法
-          </el-button>
+        <div class="dialog-footer flex gap-4 justify-end">
+          <button 
+            @click="closeSubmitDialog"
+            class="neo-btn bg-white px-6 py-3 hover:bg-gray-100"
+          >
+            取消
+          </button>
+          <button 
+            @click="submitIdea" 
+            :disabled="submitting"
+            class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400 disabled:opacity-50"
+          >
+            <span v-if="!submitting">提交想法</span>
+            <span v-else>提交中...</span>
+          </button>
         </div>
       </template>
     </el-dialog>
@@ -547,5 +575,39 @@ onMounted(() => {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.submit-idea-dialog {
+  :deep(.el-dialog) {
+    border: 4px solid black;
+    border-radius: 0;
+    box-shadow: 8px 8px 0 0 black;
+  }
+
+  :deep(.el-dialog__header) {
+    text-align: center;
+    padding: 24px 24px 0;
+    border-bottom: 3px solid black;
+
+    .el-dialog__title {
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: black;
+    }
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 24px;
+  }
+
+  :deep(.el-dialog__footer) {
+    padding: 20px 24px;
+    border-top: 3px solid black;
+  }
+}
+
+.submit-form {
+  padding: 0;
+  margin: 0;
 }
 </style>

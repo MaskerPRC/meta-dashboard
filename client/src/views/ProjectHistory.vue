@@ -1,33 +1,53 @@
 <template>
-  <div class="project-history">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-left">
-        <button @click="goBack" class="back-btn">
-          <i class="fas fa-arrow-left"></i>
+  <main class="flex-grow pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+    <!-- Page Header -->
+    <div class="mb-8 flex justify-between items-end border-b-4 border-black pb-4">
+      <div class="flex items-center gap-4">
+        <button 
+          @click="goBack" 
+          class="neo-btn bg-white px-4 py-2 hover:bg-gray-100"
+        >
+          <i class="fa-solid fa-arrow-left mr-2"></i>
           返回项目详情
         </button>
-        <div class="project-info" v-if="project">
-          <h1>{{ project.title }} - {{ t('project.progress_history') }}</h1>
-          <p class="project-status">
-            状态: <span :class="`status-${project.status}`">{{ getStatusText(project.status) }}</span>
-            进度: <span class="progress">{{ project.progress }}%</span>
-          </p>
+        <div v-if="project">
+          <h1 class="text-3xl font-black mb-2">{{ project.title }} - {{ t('project.progress_history') }}</h1>
+          <div class="flex items-center gap-4 text-sm font-bold">
+            <span>
+              状态: 
+              <span 
+                class="px-2 py-1 border-2 border-black rounded"
+                :class="getStatusBadgeClass(project.status)"
+              >
+                {{ getStatusText(project.status) }}
+              </span>
+            </span>
+            <span>
+              进度: 
+              <span class="font-mono text-neo-blue">{{ project.progress }}%</span>
+            </span>
+          </div>
         </div>
       </div>
       
-      <div class="header-actions" v-if="canWrite">
-        <button @click="showAddDialog" class="btn btn-primary">
-          <i class="fas fa-plus"></i>
-          添加进展记录
-        </button>
-      </div>
+      <button 
+        v-if="canWrite"
+        @click="showAddDialog" 
+        class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
+      >
+        <i class="fa-solid fa-plus mr-2"></i>
+        添加进展记录
+      </button>
     </div>
 
-    <!-- 筛选和统计 -->
-    <div class="filter-section">
-      <div class="filter-left">
-        <select v-model="selectedType" @change="loadHistories">
+    <!-- Filter Section -->
+    <div class="neo-card p-4 mb-8 bg-white flex justify-between items-center">
+      <div class="relative">
+        <select 
+          v-model="selectedType" 
+          @change="loadHistories"
+          class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer"
+        >
           <option value="">所有类型</option>
           <option value="progress_update">进度更新</option>
           <option value="status_change">状态变更</option>
@@ -35,215 +55,269 @@
           <option value="manual_note">手动记录</option>
           <option value="milestone">里程碑</option>
         </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+          <i class="fa-solid fa-caret-down text-xs"></i>
+        </div>
       </div>
       
-      <div class="filter-right">
-        <span class="total-count">共 {{ pagination.total }} 条记录</span>
+      <div class="font-bold text-gray-600">
+        共 {{ pagination.total }} 条记录
       </div>
     </div>
 
-    <!-- 历史记录列表 -->
-    <div class="history-list" v-if="histories.length > 0">
+    <!-- History List -->
+    <div v-if="histories.length > 0" class="mb-8">
+      <div class="flex flex-col gap-4">
       <div 
         v-for="history in histories" 
         :key="history.id" 
-        class="history-item"
-        :class="`type-${history.type}`"
+        class="neo-card p-6 bg-white"
       >
-        <div class="history-icon">
-          <i :class="getTypeIcon(history.type)"></i>
-        </div>
-        
-        <div class="history-content">
-          <div class="history-header">
-            <h3 class="history-title">{{ history.title }}</h3>
-            <div class="history-meta">
-              <span class="history-type">{{ getTypeText(history.type) }}</span>
-              <span class="history-author">{{ history.creator_name || '系统' }}</span>
-              <span class="history-time">{{ formatTime(history.created_at) }}</span>
-            </div>
+        <div class="flex gap-4">
+          <div 
+            class="w-12 h-12 border-4 border-black rounded-lg flex items-center justify-center flex-shrink-0"
+            :class="getTypeIconBgClass(history.type)"
+          >
+            <i :class="[getTypeIcon(history.type), 'text-xl']"></i>
           </div>
           
-          <div class="history-body">
-            <div v-if="history.type === 'progress_update'" class="progress-change">
-              <div class="progress-bar-container">
-                <span class="progress-label">进度变化:</span>
-                <div class="progress-comparison">
-                  <div class="progress-before">
-                    <span>{{ history.progress_before }}%</span>
-                    <div class="mini-progress-bar">
-                      <div class="progress-fill" :style="{ width: history.progress_before + '%' }"></div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start mb-3">
+              <h3 class="text-xl font-black">{{ history.title }}</h3>
+              <div class="flex items-center gap-3 text-xs font-bold text-gray-500">
+                <span class="px-2 py-1 bg-gray-100 border border-black rounded">
+                  {{ getTypeText(history.type) }}
+                </span>
+                <span>{{ history.creator_name || '系统' }}</span>
+                <span>{{ formatTime(history.created_at) }}</span>
+              </div>
+            </div>
+          
+            <div class="history-body">
+              <div v-if="history.type === 'progress_update'" class="neo-card p-4 bg-gray-50 mb-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex-1">
+                    <div class="text-xs font-bold text-gray-500 mb-2">进度变化</div>
+                    <div class="flex items-center gap-3">
+                      <div class="flex-1">
+                        <div class="text-sm font-bold mb-1">{{ history.progress_before }}%</div>
+                        <div class="h-3 border-2 border-black rounded-full bg-white overflow-hidden p-[1px]">
+                          <div 
+                            class="h-full bg-neo-blue rounded-full stripe-progress"
+                            :style="{ width: history.progress_before + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                      <i class="fa-solid fa-arrow-right text-gray-500"></i>
+                      <div class="flex-1">
+                        <div class="text-sm font-bold mb-1">{{ history.progress_after }}%</div>
+                        <div class="h-3 border-2 border-black rounded-full bg-white overflow-hidden p-[1px]">
+                          <div 
+                            class="h-full bg-neo-green rounded-full stripe-progress"
+                            :style="{ width: history.progress_after + '%' }"
+                          ></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <i class="fas fa-arrow-right progress-arrow"></i>
-                  <div class="progress-after">
-                    <span>{{ history.progress_after }}%</span>
-                    <div class="mini-progress-bar">
-                      <div class="progress-fill" :style="{ width: history.progress_after + '%' }"></div>
-                    </div>
+                </div>
+              </div>
+              
+              <div v-if="history.type === 'status_change'" class="neo-card p-4 bg-gray-50 mb-4">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-gray-500">状态变化:</span>
+                  <span 
+                    class="px-3 py-1 text-xs font-bold border-2 border-black rounded"
+                    :class="getStatusBadgeClass(history.status_before)"
+                  >
+                    {{ getStatusText(history.status_before) }}
+                  </span>
+                  <i class="fa-solid fa-arrow-right text-gray-500"></i>
+                  <span 
+                    class="px-3 py-1 text-xs font-bold border-2 border-black rounded"
+                    :class="getStatusBadgeClass(history.status_after)"
+                  >
+                    {{ getStatusText(history.status_after) }}
+                  </span>
+                </div>
+              </div>
+              
+              <div v-if="history.type === 'progress_log'" class="neo-card p-4 bg-blue-50 mb-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <i class="fa-solid fa-clipboard-list text-neo-blue"></i>
+                  <span class="font-bold text-sm">项目进展更新</span>
+                </div>
+                <div class="text-sm" v-html="renderMarkdown(history.content)"></div>
+              </div>
+              
+              <div 
+                v-if="history.type !== 'progress_update' && history.type !== 'status_change' && history.type !== 'progress_log'" 
+                class="text-sm mb-4" 
+                v-html="renderMarkdown(history.content)"
+              ></div>
+              
+              <!-- Attachments -->
+              <div v-if="history.attachments && history.attachments.length > 0" class="mb-4">
+                <div class="text-xs font-bold text-gray-500 mb-2">附件:</div>
+                <div class="flex flex-wrap gap-3">
+                  <div 
+                    v-for="attachment in history.attachments" 
+                    :key="attachment.id"
+                    class="neo-card p-2 bg-gray-50"
+                  >
+                    <img 
+                      v-if="attachment.type && attachment.type.startsWith('image/')"
+                      :src="attachment.url" 
+                      :alt="attachment.filename"
+                      class="max-w-[200px] max-h-[150px] border-2 border-black rounded cursor-pointer hover:opacity-80"
+                      @click="openImagePreview(attachment.url)"
+                    />
+                    <video 
+                      v-else-if="attachment.type && attachment.type.startsWith('video/')"
+                      :src="attachment.url" 
+                      controls
+                      class="max-w-[300px] border-2 border-black rounded"
+                    ></video>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div v-if="history.type === 'status_change'" class="status-change">
-              <div class="status-comparison">
-                <span class="status-label">状态变化:</span>
-                <span :class="`status-badge status-${history.status_before}`">
-                  {{ getStatusText(history.status_before) }}
-                </span>
-                <i class="fas fa-arrow-right status-arrow"></i>
-                <span :class="`status-badge status-${history.status_after}`">
-                  {{ getStatusText(history.status_after) }}
-                </span>
-              </div>
+            <div class="flex gap-2 mt-4 pt-4 border-t-2 border-gray-100" v-if="canEdit(history)">
+              <button 
+                @click="editHistory(history)" 
+                class="neo-btn bg-white px-4 py-2 text-sm hover:bg-gray-100"
+              >
+                <i class="fa-solid fa-edit mr-1"></i>
+                编辑
+              </button>
+              <button 
+                @click="deleteHistory(history)" 
+                class="neo-btn bg-neo-red text-white px-4 py-2 text-sm hover:bg-red-500"
+              >
+                <i class="fa-solid fa-trash mr-1"></i>
+                删除
+              </button>
             </div>
-            
-            <div v-if="history.type === 'progress_log'" class="progress-log-display">
-              <div class="progress-log-header">
-                <i class="fas fa-clipboard-list"></i>
-                <span>项目进展更新</span>
-              </div>
-              <div class="progress-log-content" v-html="renderMarkdown(history.content)"></div>
-            </div>
-            
-            <div v-if="history.type !== 'progress_update' && history.type !== 'status_change' && history.type !== 'progress_log'" class="content-text" v-html="renderMarkdown(history.content)"></div>
-            
-            <!-- 附件展示 -->
-            <div v-if="history.attachments && history.attachments.length > 0" class="attachments">
-              <h4>附件:</h4>
-              <div class="attachment-list">
-                <div 
-                  v-for="attachment in history.attachments" 
-                  :key="attachment.id"
-                  class="attachment-item"
-                >
-                  <img 
-                    v-if="attachment.type && attachment.type.startsWith('image/')"
-                    :src="attachment.url" 
-                    :alt="attachment.filename"
-                    class="attachment-image"
-                    @click="openImagePreview(attachment.url)"
-                  />
-                  <video 
-                    v-else-if="attachment.type && attachment.type.startsWith('video/')"
-                    :src="attachment.url" 
-                    controls
-                    class="attachment-video"
-                  ></video>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="history-actions" v-if="canEdit(history)">
-            <button @click="editHistory(history)" class="action-btn edit-btn">
-              <i class="fas fa-edit"></i>
-              编辑
-            </button>
-            <button @click="deleteHistory(history)" class="action-btn delete-btn">
-              <i class="fas fa-trash"></i>
-              删除
-            </button>
           </div>
         </div>
       </div>
+      </div>
     </div>
 
-    <!-- 空状态 -->
-    <div v-else class="empty-state">
-      <i class="fas fa-history empty-icon"></i>
-      <h3>暂无进展记录</h3>
-      <p>开始记录项目的每一步进展吧</p>
-      <button v-if="canWrite" @click="showAddDialog" class="btn btn-primary">
+    <!-- Empty State -->
+    <div v-else class="text-center py-16">
+      <i class="fa-solid fa-history text-6xl text-gray-400 mb-4"></i>
+      <h3 class="text-xl font-black mb-2">暂无进展记录</h3>
+      <p class="text-gray-600 mb-6">开始记录项目的每一步进展吧</p>
+      <button 
+        v-if="canWrite" 
+        @click="showAddDialog" 
+        class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
+      >
         添加第一条记录
       </button>
     </div>
 
-    <!-- 分页 -->
-    <div v-if="pagination.pages > 1" class="pagination-wrapper">
-      <div class="pagination">
+    <!-- Pagination -->
+    <div v-if="pagination.pages > 1" class="flex justify-center mb-8">
+      <div class="neo-card p-4 bg-white inline-flex items-center gap-4">
         <button 
           @click="changePage(pagination.page - 1)"
           :disabled="pagination.page <= 1"
-          class="page-btn"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <i class="fas fa-chevron-left"></i>
+          <i class="fa-solid fa-chevron-left"></i>
         </button>
-        
-        <span class="page-info">
+        <span class="font-mono font-bold">
           {{ pagination.page }} / {{ pagination.pages }}
         </span>
-        
         <button 
           @click="changePage(pagination.page + 1)"
           :disabled="pagination.page >= pagination.pages"
-          class="page-btn"
+          class="w-10 h-10 bg-white border-2 border-black rounded flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <i class="fas fa-chevron-right"></i>
+          <i class="fa-solid fa-chevron-right"></i>
         </button>
       </div>
     </div>
 
-    <!-- 添加/编辑对话框 -->
-    <div v-if="showDialog" class="dialog-overlay" @click="closeDialog">
-      <div class="dialog" @click.stop>
-        <div class="dialog-header">
-          <h3>{{ editingHistory ? '编辑进展记录' : '添加进展记录' }}</h3>
-          <button @click="closeDialog" class="close-btn">
-            <i class="fas fa-times"></i>
-          </button>
+    <!-- Add/Edit Dialog -->
+    <el-dialog
+      v-model="showDialog"
+      :title="editingHistory ? '编辑进展记录' : '添加进展记录'"
+      width="700px"
+      :before-close="closeDialog"
+      class="history-dialog"
+    >
+      <form @submit.prevent="saveHistory">
+        <div class="form-group mb-4">
+          <label class="block text-sm font-bold mb-2">记录类型</label>
+          <div class="relative">
+            <select 
+              v-model="historyForm.type" 
+              required
+              class="appearance-none bg-gray-100 border-2 border-black px-4 py-3 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer w-full"
+            >
+              <option value="manual_note">手动记录</option>
+              <option value="milestone">里程碑</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+              <i class="fa-solid fa-caret-down text-xs"></i>
+            </div>
+          </div>
         </div>
         
-        <div class="dialog-body">
-          <form @submit.prevent="saveHistory">
-            <div class="form-group">
-              <label>记录类型</label>
-              <select v-model="historyForm.type" required>
-                <option value="manual_note">手动记录</option>
-                <option value="milestone">里程碑</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>标题</label>
-              <input 
-                v-model="historyForm.title" 
-                type="text" 
-                placeholder="请输入记录标题"
-                required
-              />
-            </div>
-            
-            <div class="form-group">
-              <label>内容（支持Markdown）</label>
-              <MarkdownEditor 
-                v-model="historyForm.content"
-                :height="'300px'"
-                placeholder="记录项目进展、遇到的问题、解决方案、心得体会等..."
-                @upload-success="handleUploadSuccess"
-              />
-            </div>
-            
-            <div class="form-actions">
-              <button type="button" @click="closeDialog" class="btn btn-secondary">
-                取消
-              </button>
-              <button type="submit" :disabled="saving" class="btn btn-primary">
-                <i v-if="saving" class="fas fa-spinner fa-spin"></i>
-                {{ saving ? '保存中...' : '保存' }}
-              </button>
-            </div>
-          </form>
+        <div class="form-group mb-4">
+          <label class="block text-sm font-bold mb-2">标题</label>
+          <input 
+            v-model="historyForm.title" 
+            type="text" 
+            placeholder="请输入记录标题"
+            required
+            class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
+          />
         </div>
-      </div>
-    </div>
+        
+        <div class="form-group mb-4">
+          <label class="block text-sm font-bold mb-2">内容（支持Markdown）</label>
+          <MarkdownEditor 
+            v-model="historyForm.content"
+            :height="'300px'"
+            placeholder="记录项目进展、遇到的问题、解决方案、心得体会等..."
+            @upload-success="handleUploadSuccess"
+          />
+        </div>
+        
+        <div class="flex gap-4 justify-end mt-6">
+          <button 
+            type="button" 
+            @click="closeDialog" 
+            class="neo-btn bg-white px-6 py-3 hover:bg-gray-100"
+          >
+            取消
+          </button>
+          <button 
+            type="submit" 
+            :disabled="saving" 
+            class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400 disabled:opacity-50"
+          >
+            <i v-if="saving" class="fa-solid fa-spinner fa-spin mr-2"></i>
+            {{ saving ? '保存中...' : '保存' }}
+          </button>
+        </div>
+      </form>
+    </el-dialog>
 
-    <!-- 图片预览 -->
-    <div v-if="previewImage" class="image-preview-overlay" @click="closeImagePreview">
-      <img :src="previewImage" alt="预览" class="preview-image" />
+    <!-- Image Preview -->
+    <div 
+      v-if="previewImage" 
+      class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center cursor-pointer"
+      @click="closeImagePreview"
+    >
+      <img :src="previewImage" alt="预览" class="max-w-[90%] max-h-[90%] border-4 border-white" />
     </div>
-  </div>
+  </main>
 </template>
 
 <script>
@@ -442,12 +516,13 @@ export default {
     
     getTypeIcon(type) {
       const icons = {
-        progress_update: 'fas fa-chart-line',
-        status_change: 'fas fa-exchange-alt',
-        manual_note: 'fas fa-sticky-note',
-        milestone: 'fas fa-flag'
+        progress_update: 'fa-solid fa-chart-line',
+        status_change: 'fa-solid fa-exchange-alt',
+        manual_note: 'fa-solid fa-sticky-note',
+        milestone: 'fa-solid fa-flag',
+        progress_log: 'fa-solid fa-clipboard-list'
       };
-      return icons[type] || 'fas fa-sticky-note';
+      return icons[type] || 'fa-solid fa-sticky-note';
     },
     
     getTypeText(type) {
@@ -455,7 +530,8 @@ export default {
         progress_update: '进度更新',
         status_change: '状态变更',
         manual_note: '手动记录',
-        milestone: '里程碑'
+        milestone: '里程碑',
+        progress_log: '进展日志'
       };
       return texts[type] || '记录';
     },
@@ -474,6 +550,30 @@ export default {
       return this.t(`project.status_options.${translationKey}`);
     },
     
+    getStatusBadgeClass(status) {
+      const classMap = {
+        idea: 'bg-gray-200 text-gray-800',
+        planning: 'bg-blue-200 text-blue-800',
+        development: 'bg-neo-purple text-white',
+        testing: 'bg-red-200 text-red-800',
+        completed: 'bg-neo-green text-black',
+        deployed: 'bg-neo-blue text-white',
+        paused: 'bg-gray-300 text-gray-800'
+      };
+      return classMap[status] || 'bg-gray-200 text-gray-800';
+    },
+    
+    getTypeIconBgClass(type) {
+      const classMap = {
+        progress_update: 'bg-neo-green',
+        status_change: 'bg-neo-yellow',
+        manual_note: 'bg-neo-purple',
+        milestone: 'bg-neo-red',
+        progress_log: 'bg-neo-blue'
+      };
+      return classMap[type] || 'bg-gray-200';
+    },
+    
     formatTime(timestamp) {
       return new Date(timestamp).toLocaleString('zh-CN');
     }
@@ -482,10 +582,28 @@ export default {
 </script>
 
 <style scoped>
-.project-history {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+.history-dialog {
+  :deep(.el-dialog) {
+    border: 4px solid black;
+    border-radius: 0;
+    box-shadow: 8px 8px 0 0 black;
+  }
+
+  :deep(.el-dialog__header) {
+    text-align: center;
+    padding: 24px 24px 0;
+    border-bottom: 3px solid black;
+
+    .el-dialog__title {
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: black;
+    }
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 24px;
+  }
 }
 
 .page-header {
@@ -594,9 +712,6 @@ export default {
   font-size: 14px;
 }
 
-.history-list {
-  space-y: 16px;
-}
 
 .history-item {
   display: flex;

@@ -1,154 +1,183 @@
 <template>
-  <div class="resume-page">
-    <div class="container">
-      <!-- 页面头部 -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">我的简历</h1>
-          <p class="page-subtitle">编辑和管理您的个人简历</p>
+  <main class="flex-grow pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+    <!-- Page Header -->
+    <div class="mb-12 flex justify-between items-end border-b-4 border-black pb-4">
+      <div>
+        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">我的简历</h1>
+        <p class="text-gray-600 font-medium">编辑和管理您的个人简历</p>
+      </div>
+      <div class="flex gap-4">
+        <button 
+          @click="showVersionHistory = true" 
+          :disabled="!resumeData.id"
+          class="neo-btn bg-white px-6 py-3 hover:bg-gray-100 disabled:opacity-50"
+        >
+          <i class="fa-solid fa-clock mr-2"></i>
+          版本历史
+        </button>
+        <button 
+          @click="handleSave" 
+          :disabled="saving"
+          class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400 disabled:opacity-50"
+        >
+          <i class="fa-solid fa-save mr-2"></i>
+          {{ saving ? '保存中...' : '保存简历' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Edit Card -->
+      <div class="neo-card p-6 bg-white">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b-3 border-black">
+          <h2 class="text-2xl font-black">编辑简历</h2>
+          <div class="flex items-center gap-3">
+            <span 
+              class="px-3 py-1 text-xs font-bold border-2 border-black rounded"
+              :class="getStatusBadgeClass(resumeData.status)"
+            >
+              {{ getStatusText(resumeData.status) }}
+            </span>
+            <span 
+              v-if="resumeData.current_version"
+              class="px-3 py-1 text-xs font-bold bg-black text-white rounded"
+            >
+              v{{ resumeData.current_version }}
+            </span>
+          </div>
         </div>
-        <div class="header-actions">
-          <el-button @click="showVersionHistory = true" :disabled="!resumeData.id">
-            <el-icon><Clock /></el-icon>
-            版本历史
-          </el-button>
-          <el-button type="primary" @click="handleSave" :loading="saving">
-            <el-icon><DocumentAdd /></el-icon>
-            保存简历
-          </el-button>
+
+        <div class="space-y-6">
+          <!-- Title -->
+          <div>
+            <label class="block text-sm font-bold mb-2">简历标题</label>
+            <div class="relative">
+              <input
+                v-model="resumeData.title"
+                type="text"
+                placeholder="输入简历标题..."
+                maxlength="200"
+                class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
+              />
+              <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">
+                {{ resumeData.title.length }}/200
+              </span>
+            </div>
+          </div>
+
+          <!-- Content Editor -->
+          <div>
+            <label class="block text-sm font-bold mb-2">简历内容</label>
+            <MarkdownEditor
+              v-model="resumeData.content"
+              :height="'500px'"
+              placeholder="在这里编写您的简历内容，支持Markdown格式..."
+            />
+          </div>
+
+          <!-- Settings -->
+          <div>
+            <label class="block text-sm font-bold mb-2">简历设置</label>
+            <div class="flex flex-col gap-4">
+              <div class="relative">
+                <select 
+                  v-model="resumeData.status"
+                  class="appearance-none bg-gray-100 border-2 border-black px-4 py-3 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer w-full"
+                >
+                  <option value="draft">草稿</option>
+                  <option value="published">发布</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
+                  <i class="fa-solid fa-caret-down text-xs"></i>
+                </div>
+              </div>
+              
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input
+                  v-model="resumeData.is_public"
+                  type="checkbox"
+                  class="w-5 h-5 border-2 border-black rounded focus:ring-0 focus:ring-offset-0"
+                />
+                <span class="font-bold text-sm">公开简历（其他用户可以查看）</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 主要内容区域 -->
-      <div class="content-layout">
-        <div class="main-content">
-          <!-- 简历编辑卡片 -->
-          <el-card class="resume-card" shadow="never">
-            <template #header>
-              <div class="card-header">
-                <span class="card-title">编辑简历</span>
-                <div class="card-actions">
-                  <el-tag 
-                    :type="getStatusTagType(resumeData.status)" 
-                    size="small"
-                  >
-                    {{ getStatusText(resumeData.status) }}
-                  </el-tag>
-                  <span class="version-info" v-if="resumeData.current_version">
-                    v{{ resumeData.current_version }}
-                  </span>
-                </div>
-              </div>
-            </template>
+      <!-- Preview Card -->
+      <div v-if="resumeData.content" class="neo-card p-6 bg-white">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b-3 border-black">
+          <h2 class="text-2xl font-black">简历预览</h2>
+          <button 
+            @click="showFullPreview = true"
+            class="neo-btn bg-white px-4 py-2 text-sm hover:bg-gray-100"
+          >
+            <i class="fa-solid fa-expand mr-2"></i>
+            全屏预览
+          </button>
+        </div>
 
-            <div class="resume-form">
-              <!-- 简历标题 -->
-              <div class="form-group">
-                <label class="form-label">简历标题</label>
-                <el-input
-                  v-model="resumeData.title"
-                  placeholder="输入简历标题..."
-                  maxlength="200"
-                  show-word-limit
-                  clearable
-                />
-              </div>
-
-              <!-- 简历内容编辑器 -->
-              <div class="form-group">
-                <label class="form-label">简历内容</label>
-                <MarkdownEditor
-                  v-model="resumeData.content"
-                  :height="'500px'"
-                  placeholder="在这里编写您的简历内容，支持Markdown格式..."
-                />
-              </div>
-
-              <!-- 简历设置 -->
-              <div class="form-group">
-                <label class="form-label">简历设置</label>
-                <div class="settings-row">
-                  <el-select v-model="resumeData.status" placeholder="选择状态">
-                    <el-option label="草稿" value="draft" />
-                    <el-option label="发布" value="published" />
-                  </el-select>
-                  
-                  <el-checkbox v-model="resumeData.is_public" style="margin-left: 16px">
-                    公开简历（其他用户可以查看）
-                  </el-checkbox>
-                </div>
-              </div>
+        <div class="resume-preview">
+          <div class="preview-header mb-4 pb-4 border-b-2 border-gray-200">
+            <h2 class="text-2xl font-black mb-2">{{ resumeData.title || '简历标题' }}</h2>
+            <div class="text-xs font-bold text-gray-500">
+              最后更新: {{ formatDate(new Date()) }}
             </div>
-          </el-card>
-
-          <!-- 简历预览卡片 -->
-          <el-card class="preview-card" shadow="never" v-if="resumeData.content">
-            <template #header>
-              <div class="card-header">
-                <span class="card-title">简历预览</span>
-                <div class="card-actions">
-                  <el-button size="small" @click="showFullPreview = true">
-                    <el-icon><FullScreen /></el-icon>
-                    全屏预览
-                  </el-button>
-                </div>
-              </div>
-            </template>
-
-            <div class="resume-preview">
-              <div class="preview-header">
-                <h2>{{ resumeData.title || '简历标题' }}</h2>
-                <div class="preview-meta">
-                  <span class="last-updated">
-                    最后更新: {{ formatDate(new Date()) }}
-                  </span>
-                </div>
-              </div>
-              <div class="preview-content">
-                <div class="markdown-preview" v-html="renderedContent"></div>
-              </div>
-            </div>
-          </el-card>
+          </div>
+          <div class="preview-content max-h-[600px] overflow-y-auto custom-scrollbar">
+            <div class="markdown-preview" v-html="renderedContent"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 版本历史对话框 -->
+    <!-- Version History Dialog -->
     <el-dialog
       v-model="showVersionHistory"
       title="版本历史"
       width="70%"
       class="version-history-dialog"
     >
-      <div v-if="versions.length > 0">
-        <el-timeline>
-          <el-timeline-item
-            v-for="version in versions"
-            :key="version.id"
-            :timestamp="formatDate(version.created_at)"
-            placement="top"
-          >
-            <div class="version-item">
-              <div class="version-header">
-                <span class="version-number">v{{ version.version }}</span>
-                <span class="version-title">{{ version.title }}</span>
-                <span class="version-current" v-if="version.version === resumeData.current_version">
-                  （当前版本）
-                </span>
-              </div>
-              <div class="version-actions">
-                <el-button size="small" @click="viewVersionContent(version)">
-                  查看内容
-                </el-button>
-              </div>
+      <div v-if="versions.length > 0" class="space-y-4">
+        <div
+          v-for="version in versions"
+          :key="version.id"
+          class="neo-card p-4 bg-white"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 text-xs font-bold bg-black text-white rounded">
+                v{{ version.version }}
+              </span>
+              <span class="font-bold">{{ version.title }}</span>
+              <span 
+                v-if="version.version === resumeData.current_version"
+                class="px-2 py-1 text-xs font-bold bg-neo-green text-black rounded"
+              >
+                当前版本
+              </span>
             </div>
-          </el-timeline-item>
-        </el-timeline>
+            <button 
+              @click="viewVersionContent(version)"
+              class="neo-btn bg-white px-4 py-2 text-sm hover:bg-gray-100"
+            >
+              查看内容
+            </button>
+          </div>
+          <div class="text-xs font-bold text-gray-500">
+            {{ formatDate(version.created_at) }}
+          </div>
+        </div>
       </div>
-      <el-empty v-else description="暂无版本历史" />
+      <div v-else class="text-center py-12">
+        <i class="fa-solid fa-inbox text-6xl text-gray-400 mb-4"></i>
+        <p class="text-lg font-bold text-gray-600">暂无版本历史</p>
+      </div>
     </el-dialog>
 
-    <!-- 全屏预览对话框 -->
+    <!-- Full Preview Dialog -->
     <el-dialog
       v-model="showFullPreview"
       title="简历预览"
@@ -156,32 +185,12 @@
       class="full-preview-dialog"
       :fullscreen="isFullscreen"
     >
-      <template #header="{ close, titleId, titleClass }">
-        <div class="preview-dialog-header">
-          <span :id="titleId" :class="titleClass">简历预览</span>
-          <div class="preview-dialog-actions">
-            <el-button @click="isFullscreen = !isFullscreen" text>
-              <el-icon>
-                <component :is="isFullscreen ? 'CopyDocument' : 'FullScreen'" />
-              </el-icon>
-            </el-button>
-            <el-button @click="exportPDF" text>
-              <el-icon><Download /></el-icon>
-              导出PDF
-            </el-button>
-            <el-button @click="close" text>
-              <el-icon><Close /></el-icon>
-            </el-button>
-          </div>
-        </div>
-      </template>
-
       <div class="full-preview-content">
-        <div class="preview-header">
-          <h1>{{ resumeData.title || '简历标题' }}</h1>
-          <div class="preview-meta">
-            <span class="version">版本 v{{ resumeData.current_version }}</span>
-            <span class="date">{{ formatDate(new Date()) }}</span>
+        <div class="preview-header mb-6 pb-4 border-b-3 border-black">
+          <h1 class="text-4xl font-black mb-2">{{ resumeData.title || '简历标题' }}</h1>
+          <div class="flex gap-4 text-sm font-bold text-gray-500">
+            <span>版本 v{{ resumeData.current_version }}</span>
+            <span>{{ formatDate(new Date()) }}</span>
           </div>
         </div>
         <div class="preview-content">
@@ -190,7 +199,7 @@
       </div>
     </el-dialog>
 
-    <!-- 版本内容查看对话框 -->
+    <!-- Version Content Dialog -->
     <el-dialog
       v-model="showVersionContent"
       title="版本内容"
@@ -198,11 +207,11 @@
       class="version-content-dialog"
     >
       <div v-if="selectedVersion" class="version-content">
-        <div class="version-content-header">
-          <h3>{{ selectedVersion.title }}</h3>
-          <div class="version-content-meta">
-            <span class="version">v{{ selectedVersion.version }}</span>
-            <span class="date">{{ formatDate(selectedVersion.created_at) }}</span>
+        <div class="version-content-header mb-6 pb-4 border-b-3 border-black">
+          <h3 class="text-2xl font-black mb-2">{{ selectedVersion.title }}</h3>
+          <div class="flex gap-4 text-sm font-bold text-gray-500">
+            <span class="px-3 py-1 bg-black text-white rounded">v{{ selectedVersion.version }}</span>
+            <span>{{ formatDate(selectedVersion.created_at) }}</span>
           </div>
         </div>
         <div class="version-content-body">
@@ -210,7 +219,7 @@
         </div>
       </div>
     </el-dialog>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -322,15 +331,6 @@ const exportPDF = () => {
   showNotification.info('PDF导出功能开发中...')
 }
 
-const getStatusTagType = (status) => {
-  const statusTypes = {
-    draft: 'warning',
-    published: 'success',
-    archived: 'info'
-  }
-  return statusTypes[status] || 'primary'
-}
-
 const getStatusText = (status) => {
   const statusTexts = {
     draft: '草稿',
@@ -338,6 +338,15 @@ const getStatusText = (status) => {
     archived: '已归档'
   }
   return statusTexts[status] || status
+}
+
+const getStatusBadgeClass = (status) => {
+  const classMap = {
+    draft: 'bg-neo-yellow text-black',
+    published: 'bg-neo-green text-black',
+    archived: 'bg-gray-200 text-gray-800'
+  }
+  return classMap[status] || 'bg-gray-200 text-gray-800'
 }
 
 const formatDate = (dateString) => {
@@ -356,8 +365,7 @@ onMounted(async () => {
   await fetchResume()
 
   // 监听版本历史对话框打开
-  const unwatchVersionDialog = computed(() => showVersionHistory.value)
-  watch(unwatchVersionDialog, (newVal) => {
+  watch(showVersionHistory, (newVal) => {
     if (newVal && resumeData.value.id) {
       fetchVersions()
     }
@@ -365,308 +373,63 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
-.resume-page {
-  min-height: 100vh;
-  background: var(--ai-bg-primary);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 30px 0;
-  border-bottom: 1px solid var(--ai-border);
-  margin-bottom: 30px;
-}
-
-.header-content h1 {
-  margin: 0 0 8px 0;
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--ai-text-primary);
-}
-
-.header-content p {
-  margin: 0;
-  color: var(--ai-text-secondary);
-  font-size: 16px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.content-layout {
-  display: grid;
-  gap: 24px;
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.resume-card, .preview-card {
-  border: 1px solid var(--ai-border);
-  border-radius: 12px;
-  background: var(--ai-bg-primary);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ai-text-primary);
-}
-
-.card-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.version-info {
-  background: var(--ai-bg-secondary);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--ai-text-secondary);
-}
-
-.resume-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-label {
-  font-weight: 500;
-  color: var(--ai-text-primary);
-  font-size: 14px;
-}
-
-.settings-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
+<style lang="scss" scoped>
 .resume-preview {
-  border: 1px solid var(--ai-border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.preview-header {
-  padding: 20px;
-  background: var(--ai-bg-secondary);
-  border-bottom: 1px solid var(--ai-border);
-}
-
-.preview-header h2 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  color: var(--ai-text-primary);
-}
-
-.preview-meta {
-  color: var(--ai-text-secondary);
-  font-size: 14px;
-}
-
-.preview-content {
-  padding: 20px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.markdown-preview {
-  line-height: 1.6;
-  color: var(--ai-text-primary);
-}
-
-.markdown-preview h1,
-.markdown-preview h2,
-.markdown-preview h3,
-.markdown-preview h4,
-.markdown-preview h5,
-.markdown-preview h6 {
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 600;
-  color: var(--ai-text-primary);
-}
-
-.markdown-preview p {
-  margin-bottom: 16px;
-}
-
-.markdown-preview ul,
-.markdown-preview ol {
-  margin-bottom: 16px;
-  padding-left: 24px;
-}
-
-.markdown-preview code {
-  background: var(--ai-bg-secondary);
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-family: 'Monaco', 'Consolas', monospace;
-}
-
-.markdown-preview pre {
-  background: var(--ai-bg-secondary);
-  padding: 16px;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin-bottom: 16px;
-}
-
-.markdown-preview blockquote {
-  border-left: 4px solid var(--ai-primary);
-  padding-left: 16px;
-  margin: 16px 0;
-  color: var(--ai-text-secondary);
-}
-
-.version-item {
-  background: var(--ai-bg-secondary);
-  padding: 12px 16px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
-
-.version-header {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.version-number {
-  background: var(--ai-primary);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.version-title {
-  font-weight: 500;
-  color: var(--ai-text-primary);
-}
-
-.version-current {
-  color: var(--ai-success);
-  font-size: 13px;
-}
-
-.version-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.preview-dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.preview-dialog-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.full-preview-content {
-  padding: 20px;
-}
-
-.full-preview-content .preview-header h1 {
-  font-size: 32px;
-  margin-bottom: 12px;
-}
-
-.full-preview-content .preview-meta {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--ai-border);
-}
-
-.version-content-header {
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid var(--ai-border);
-}
-
-.version-content-header h3 {
-  margin: 0 0 10px 0;
-  color: var(--ai-text-primary);
-}
-
-.version-content-meta {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.version-content-meta .version {
-  background: var(--ai-bg-secondary);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.version-content-meta .date {
-  color: var(--ai-text-secondary);
-  font-size: 13px;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+  .markdown-preview {
+    line-height: 1.6;
+    color: #333;
   }
 
-  .header-actions {
-    width: 100%;
-    justify-content: flex-end;
+  .markdown-preview h1,
+  .markdown-preview h2,
+  .markdown-preview h3 {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: 700;
   }
 
-  .settings-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+  .markdown-preview p {
+    margin-bottom: 16px;
   }
 
-  .preview-content {
-    max-height: 300px;
+  .markdown-preview ul,
+  .markdown-preview ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
   }
 }
-</style> 
+
+.version-history-dialog,
+.full-preview-dialog,
+.version-content-dialog {
+  :deep(.el-dialog) {
+    border: 4px solid black;
+    border-radius: 0;
+    box-shadow: 8px 8px 0 0 black;
+  }
+
+  :deep(.el-dialog__header) {
+    text-align: center;
+    padding: 24px 24px 0;
+    border-bottom: 3px solid black;
+
+    .el-dialog__title {
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: black;
+    }
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 24px;
+  }
+}
+
+.full-preview-content,
+.version-content {
+  .markdown-preview {
+    line-height: 1.8;
+    color: #333;
+  }
+}
+</style>
