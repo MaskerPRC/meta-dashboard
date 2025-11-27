@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="mb-12 flex justify-between items-end border-b-4 border-black pb-4">
       <div>
-        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">我的简历</h1>
-        <p class="text-gray-600 font-medium">编辑和管理您的个人简历</p>
+        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">{{ $t('resume.title') }}</h1>
+        <p class="text-gray-600 font-medium">{{ $t('resume.subtitle') }}</p>
       </div>
       <div class="flex gap-4">
         <button 
@@ -13,7 +13,7 @@
           class="neo-btn bg-white px-6 py-3 hover:bg-gray-100 disabled:opacity-50"
         >
           <i class="fa-solid fa-clock mr-2"></i>
-          版本历史
+          {{ $t('resume.version_history') }}
         </button>
         <button 
           @click="handleSave" 
@@ -21,7 +21,7 @@
           class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400 disabled:opacity-50"
         >
           <i class="fa-solid fa-save mr-2"></i>
-          {{ saving ? '保存中...' : '保存简历' }}
+          {{ saving ? $t('common.saving') : $t('resume.save') }}
         </button>
       </div>
     </div>
@@ -31,7 +31,7 @@
       <!-- Edit Card -->
       <div class="neo-card p-6 bg-white">
         <div class="flex justify-between items-center mb-6 pb-4 border-b-3 border-black">
-          <h2 class="text-2xl font-black">编辑简历</h2>
+          <h2 class="text-2xl font-black">{{ $t('resume.edit') }}</h2>
           <div class="flex items-center gap-3">
             <span 
               class="px-3 py-1 text-xs font-bold border-2 border-black rounded"
@@ -51,12 +51,12 @@
         <div class="space-y-6">
           <!-- Title -->
           <div>
-            <label class="block text-sm font-bold mb-2">简历标题</label>
+            <label class="block text-sm font-bold mb-2">{{ $t('resume.form.title_label') }}</label>
             <div class="relative">
               <input
                 v-model="resumeData.title"
                 type="text"
-                placeholder="输入简历标题..."
+                :placeholder="$t('resume.form.title_placeholder')"
                 maxlength="200"
                 class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
               />
@@ -68,25 +68,25 @@
 
           <!-- Content Editor -->
           <div>
-            <label class="block text-sm font-bold mb-2">简历内容</label>
+            <label class="block text-sm font-bold mb-2">{{ $t('resume.form.content_label') }}</label>
             <MarkdownEditor
               v-model="resumeData.content"
               :height="'500px'"
-              placeholder="在这里编写您的简历内容，支持Markdown格式..."
+              :placeholder="$t('resume.form.content_placeholder')"
             />
           </div>
 
           <!-- Settings -->
           <div>
-            <label class="block text-sm font-bold mb-2">简历设置</label>
+            <label class="block text-sm font-bold mb-2">{{ $t('resume.form.settings_label') }}</label>
             <div class="flex flex-col gap-4">
               <div class="relative">
                 <select 
                   v-model="resumeData.status"
                   class="appearance-none bg-gray-100 border-2 border-black px-4 py-3 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer w-full"
                 >
-                  <option value="draft">草稿</option>
-                  <option value="published">发布</option>
+                  <option value="draft">{{ $t('resume.status.draft') }}</option>
+                  <option value="published">{{ $t('resume.status.published') }}</option>
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
                   <i class="fa-solid fa-caret-down text-xs"></i>
@@ -99,7 +99,7 @@
                   type="checkbox"
                   class="w-5 h-5 border-2 border-black rounded focus:ring-0 focus:ring-offset-0"
                 />
-                <span class="font-bold text-sm">公开简历（其他用户可以查看）</span>
+                <span class="font-bold text-sm">{{ $t('resume.form.public_label') }}</span>
               </label>
             </div>
           </div>
@@ -109,21 +109,21 @@
       <!-- Preview Card -->
       <div v-if="resumeData.content" class="neo-card p-6 bg-white">
         <div class="flex justify-between items-center mb-6 pb-4 border-b-3 border-black">
-          <h2 class="text-2xl font-black">简历预览</h2>
+          <h2 class="text-2xl font-black">{{ $t('resume.preview.title') }}</h2>
           <button 
             @click="showFullPreview = true"
             class="neo-btn bg-white px-4 py-2 text-sm hover:bg-gray-100"
           >
             <i class="fa-solid fa-expand mr-2"></i>
-            全屏预览
+            {{ $t('resume.actions.full_preview') }}
           </button>
         </div>
 
         <div class="resume-preview">
           <div class="preview-header mb-4 pb-4 border-b-2 border-gray-200">
-            <h2 class="text-2xl font-black mb-2">{{ resumeData.title || '简历标题' }}</h2>
+            <h2 class="text-2xl font-black mb-2">{{ resumeData.title || $t('resume.form.title_label') }}</h2>
             <div class="text-xs font-bold text-gray-500">
-              最后更新: {{ formatDate(new Date()) }}
+              {{ $t('resume.preview.last_updated') }}: {{ formatDate(new Date()) }}
             </div>
           </div>
           <div class="preview-content max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -136,7 +136,7 @@
     <!-- Version History Dialog -->
     <el-dialog
       v-model="showVersionHistory"
-      title="版本历史"
+      :title="$t('resume.version.history')"
       width="70%"
       class="version-history-dialog"
     >
@@ -156,14 +156,14 @@
                 v-if="version.version === resumeData.current_version"
                 class="px-2 py-1 text-xs font-bold bg-neo-green text-black rounded"
               >
-                当前版本
+                {{ $t('resume.version.current') }}
               </span>
             </div>
             <button 
               @click="viewVersionContent(version)"
               class="neo-btn bg-white px-4 py-2 text-sm hover:bg-gray-100"
             >
-              查看内容
+              {{ $t('resume.version.view_content') }}
             </button>
           </div>
           <div class="text-xs font-bold text-gray-500">
@@ -173,23 +173,23 @@
       </div>
       <div v-else class="text-center py-12">
         <i class="fa-solid fa-inbox text-6xl text-gray-400 mb-4"></i>
-        <p class="text-lg font-bold text-gray-600">暂无版本历史</p>
+        <p class="text-lg font-bold text-gray-600">{{ $t('resume.version.no_history') }}</p>
       </div>
     </el-dialog>
 
     <!-- Full Preview Dialog -->
     <el-dialog
       v-model="showFullPreview"
-      title="简历预览"
+      :title="$t('resume.preview.title')"
       width="90%"
       class="full-preview-dialog"
       :fullscreen="isFullscreen"
     >
       <div class="full-preview-content">
         <div class="preview-header mb-6 pb-4 border-b-3 border-black">
-          <h1 class="text-4xl font-black mb-2">{{ resumeData.title || '简历标题' }}</h1>
+          <h1 class="text-4xl font-black mb-2">{{ resumeData.title || $t('resume.form.title_label') }}</h1>
           <div class="flex gap-4 text-sm font-bold text-gray-500">
-            <span>版本 v{{ resumeData.current_version }}</span>
+            <span>{{ $t('resume.preview.version_label') }} v{{ resumeData.current_version }}</span>
             <span>{{ formatDate(new Date()) }}</span>
           </div>
         </div>
@@ -202,7 +202,7 @@
     <!-- Version Content Dialog -->
     <el-dialog
       v-model="showVersionContent"
-      title="版本内容"
+      :title="$t('resume.version.view_content')"
       width="80%"
       class="version-content-dialog"
     >
@@ -224,6 +224,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
@@ -236,13 +237,14 @@ import axios from '../utils/axios'
 import dayjs from 'dayjs'
 import { renderEnhancedMarkdown } from '../utils/markdownRenderer'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 
 // 响应式数据
 const resumeData = ref({
   id: null,
-  title: '我的简历',
+  title: t('resume.title'),
   content: '',
   status: 'draft',
   current_version: 1,
@@ -280,7 +282,7 @@ const fetchResume = async () => {
     }
   } catch (error) {
     console.error('获取简历失败:', error)
-    showNotification.error('获取简历失败')
+    showNotification.error(t('resume.messages.fetch_failed'))
   } finally {
     loading.value = false
   }
@@ -288,7 +290,7 @@ const fetchResume = async () => {
 
 const handleSave = async () => {
   if (!resumeData.value.title.trim()) {
-    showNotification.error('请输入简历标题')
+    showNotification.error(t('resume.messages.title_required'))
     return
   }
 
@@ -302,10 +304,10 @@ const handleSave = async () => {
     })
 
     resumeData.value = { ...response.data.resume }
-    showNotification.success('简历保存成功')
+    showNotification.success(t('resume.messages.save_success'))
   } catch (error) {
     console.error('保存简历失败:', error)
-    showNotification.error(error.response?.data?.message || '保存简历失败')
+    showNotification.error(error.response?.data?.message || t('resume.messages.save_failed'))
   } finally {
     saving.value = false
   }
@@ -317,7 +319,7 @@ const fetchVersions = async () => {
     versions.value = response.data.versions
   } catch (error) {
     console.error('获取版本历史失败:', error)
-    showNotification.error('获取版本历史失败')
+    showNotification.error(t('resume.messages.fetch_versions_failed'))
   }
 }
 
@@ -328,14 +330,14 @@ const viewVersionContent = async (version) => {
 }
 
 const exportPDF = () => {
-  showNotification.info('PDF导出功能开发中...')
+  showNotification.info(t('resume.messages.pdf_export_developing'))
 }
 
 const getStatusText = (status) => {
   const statusTexts = {
-    draft: '草稿',
-    published: '已发布',
-    archived: '已归档'
+    draft: t('resume.status.draft'),
+    published: t('resume.status.published'),
+    archived: t('resume.status.archived')
   }
   return statusTexts[status] || status
 }
@@ -357,7 +359,7 @@ const formatDate = (dateString) => {
 onMounted(async () => {
   // 检查登录状态
   if (!authStore.isAuthenticated) {
-    showNotification.warning('请先登录')
+    showNotification.warning(t('resume.messages.login_required'))
     router.push('/login')
     return
   }

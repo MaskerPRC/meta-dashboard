@@ -2,6 +2,7 @@ export default {
   // Navigation and layout
   nav: {
     title: 'Navigation Menu',
+    menu: 'Menu',
     home: 'Home',
     projects: 'Projects',
     ideas: 'Ideas',
@@ -26,6 +27,23 @@ export default {
     not_found: 'Page Not Found'
   },
 
+  // 404 Page
+  not_found: {
+    title: 'Page Not Found',
+    description: 'Sorry, the page you are looking for may have been deleted, renamed, or is temporarily unavailable. Let us help you find the right path!',
+    search_placeholder: 'Search AI projects, tags or keywords...',
+    suggestions_title: 'You might want to visit:',
+    home: 'Home',
+    home_desc: 'View AI challenge overview and latest projects',
+    projects: 'Projects',
+    projects_desc: 'Browse the complete list of all AI projects',
+    about: 'About Challenge',
+    about_desc: 'Learn about the 100 AI products challenge',
+    random_project: 'Random Project',
+    recent_projects: 'Latest AI Projects',
+    back_to_home: 'Back to Home'
+  },
+
   // Homepage
   home: {
     title: 'AI Project Dashboard',
@@ -42,7 +60,8 @@ export default {
       overall_progress: 'Overall Progress',
       completed: 'Completed',
       in_development: 'In Development',
-      days_remaining: 'Days Left'
+      days_remaining: 'Days until end of {year}',
+      days: 'days'
     },
 
     // Project status overview
@@ -59,7 +78,28 @@ export default {
 
     // Latest projects
     latest_projects: 'Latest Projects',
+    view_all_projects: 'View All Projects',
     progress: 'Progress',
+
+    // WeChat group
+    join_wechat_group: 'Join WeChat Group',
+    join_wechat_description: 'Scan QR code to join 1000+ developers!',
+
+    // Social platforms
+    social_platforms: {
+      x: 'X (Twitter)',
+      xiaohongshu: 'Xiaohongshu',
+      bilibili: 'Bilibili',
+      wechat_official: 'WeChat Official Account',
+      zhihu: 'Zhihu',
+      csdn: 'CSDN'
+    },
+
+    // Startup article
+    startup_article: {
+      title: 'Startup Article',
+      read_article: 'Read Article'
+    },
 
     // Challenge manifesto
     challenge_manifesto: {
@@ -101,17 +141,63 @@ export default {
     project_inception: 'Project Inception Completed',
     technical_research: 'Technical Research Completed',
     records_count: 'records',
+    total_records: 'Total Records',
+    progress_leap: 'Progress Leap',
     previous: 'Previous',
     current: 'Current',
-
-    // Record content
+    view_details: 'View Details',
+    load_earlier: 'Load Earlier Records',
+    system: 'System',
+    project_completed: 'Project Completed',
+    // Record types
     record_types: {
       milestone: 'Milestone',
       progress_update: 'Progress Update',
       status_change: 'Status Change',
       progress_log: 'Progress Log',
-      manual_record: 'Manual Record'
+      manual_note: 'Manual Note',
+      unknown: 'Record'
     }
+  },
+
+  // Record content
+  record_types: {
+    milestone: 'Milestone',
+    progress_update: 'Progress Update',
+    status_change: 'Status Change',
+    progress_log: 'Progress Log',
+    manual_record: 'Manual Record'
+  },
+
+  // Project history page
+  project_history: {
+    back_to_detail: 'Back to Project Detail',
+    status: 'Status',
+    progress: 'Progress',
+    add_record: 'Add Progress Record',
+    all_types: 'All Types',
+    total_records: 'Total {count} records',
+    progress_change: 'Progress Change',
+    status_change: 'Status Change:',
+    project_progress_update: 'Project Progress Update',
+    attachments: 'Attachments:',
+    edit: 'Edit',
+    delete: 'Delete',
+    no_records: 'No Progress Records',
+    start_recording: 'Start recording every step of project progress',
+    add_first_record: 'Add First Record',
+    edit_record: 'Edit Progress Record',
+    add_record_title: 'Add Progress Record',
+    record_type: 'Record Type',
+    title: 'Title',
+    title_placeholder: 'Enter record title',
+    content: 'Content (Markdown supported)',
+    content_placeholder: 'Record project progress, issues encountered, solutions, insights, etc...',
+    cancel: 'Cancel',
+    saving: 'Saving...',
+    save: 'Save',
+    system: 'System',
+    preview: 'Preview'
   },
 
   // About challenge page
@@ -469,11 +555,21 @@ export default {
      back_to_list: 'Back to Project List',
      edit_project: 'Edit Project',
      delete_project: 'Delete Project',
-     progress_history: 'Progress History',
-     view_development_timeline: 'View Development Timeline',
-         project_details: 'Project Details',
+    progress_history: 'Progress History',
+    view_development_timeline: 'View Development Timeline',
+    project_details: 'Project Details',
     not_found: 'Project Not Found',
     check_link: 'Please check if the link is correct',
+    online_demo: 'Online Demo',
+    experience_project: 'Experience Project',
+    no_demo: 'No Demo',
+    demo_not_configured: 'Demo link not configured',
+    images: 'Images',
+    videos: 'Videos',
+    no_content: 'No detailed content',
+    discussion: 'Project Discussion',
+    login_to_post: 'LOGIN TO POST',
+    browser_not_support_video: 'Your browser does not support video playback.',
     select_status: 'Select Project Status',
     select_priority: 'Select Priority',
     status_filter: 'Status Filter',
@@ -484,6 +580,7 @@ export default {
       project_description: 'Project Description',
       progress_percentage: 'Progress Percentage',
       github_repo: 'GitHub Repository',
+      view_source_code: 'View Source Code',
       demo_link: 'Demo Link',
       start_time: 'Start Time',
       expected_completion: 'Expected Completion',
@@ -548,7 +645,25 @@ export default {
     // Progress log
     progress_log: {
       title: 'Progress Log Input',
-      tip: 'Filling in progress logs helps the team understand project progress. This content will be displayed in the project progress history.'
+      tip: 'Filling in progress logs helps the team understand project progress. This content will be displayed in the project progress history.',
+      dialog_title: 'Progress Description for This Update',
+      description_label: 'Progress Description:',
+      skip: 'Skip',
+      save_with_log: 'Save and Record Progress',
+      save_directly: 'Save Directly'
+    },
+
+    // Image caption
+    image_caption: {
+      click_to_add: 'Click to Add Caption',
+      edit: 'Edit Caption',
+      delete_image: 'Delete Image',
+      dialog_title: 'Edit Image Caption',
+      preview_image: 'Preview Image',
+      label: 'Image Caption:',
+      placeholder: 'Add a description or caption for this image...',
+      tip: 'Leave empty to display the original filename. Captions will be displayed on the project detail page and in image previews.',
+      save: 'Save Caption'
     },
 
     // Project template
@@ -663,6 +778,17 @@ Brief description of this AI project's functionality and goals.
   },
 
   // Messages
+  common: {
+    unknown: 'Unknown',
+    page_info: 'Page {current} / {total}',
+    submitting: 'Submitting...',
+    saving: 'Saving...',
+    language: 'Language',
+    close: 'Close',
+    close_hint: 'Press ESC or click outside to close',
+    unnamed_image: 'Unnamed Image'
+  },
+
   message: {
     success: 'Operation successful',
     error: 'Operation failed',
@@ -676,12 +802,27 @@ Brief description of this AI project's functionality and goals.
     welcome_back: 'Welcome Back',
     login_description: 'Choose your preferred way to login and join the AI product challenge journey',
     username: 'Username',
+    username_or_email: 'Username or Email',
     email: 'Email',
     password: 'Password',
+    password_placeholder: 'Password (at least 6 characters)',
+    confirm_password: 'Confirm Password',
+    phone_optional: 'Phone (optional)',
     login_button: 'Login',
+    logging_in: 'Logging in...',
     register_button: 'Register',
+    registering: 'Registering...',
     github_login: 'Login with GitHub',
     google_login: 'Login with Google',
+    wechat_login: 'Login with WeChat',
+    wechat_scan_login: 'Login with WeChat QR Code',
+    oauth_login_note: 'Third-party Login Notes:',
+    oauth_note_1: 'First login will automatically create an account',
+    oauth_note_wechat: 'Supports WeChat web authorization login, secure and convenient',
+    oauth_note_scan: 'Supports GitHub, Google and WeChat QR code login',
+    oauth_note_2: 'Secure and fast, no need to remember password',
+    terms_notice: 'By continuing, you agree to our Terms of Service and Privacy Policy',
+    back_to_home: 'Back to Home',
     forgot_password: 'Forgot password?',
     no_account: "Don't have an account?",
     has_account: 'Already have an account?',
@@ -700,7 +841,43 @@ Brief description of this AI project's functionality and goals.
     current_password_placeholder: 'Enter current password',
     new_password_placeholder: 'Enter new password (at least 6 characters)',
     profile_updated_success: 'Profile updated successfully',
-    password_updated_success: 'Password updated successfully'
+    password_updated_success: 'Password updated successfully',
+
+    // Form validation messages
+    validation: {
+      username_required: 'Please enter username or email',
+      password_required: 'Please enter password',
+      username_required_register: 'Please enter username',
+      username_length: 'Username length should be 3-20 characters',
+      username_pattern: 'Username can only contain letters, numbers and underscores',
+      email_required: 'Please enter email address',
+      email_invalid: 'Please enter a valid email address',
+      phone_invalid: 'Please enter a valid phone number',
+      password_min: 'Password must be at least 6 characters',
+      confirm_password_required: 'Please confirm password',
+      confirm_password_again: 'Please enter password again',
+      confirm_password_mismatch: 'Passwords do not match',
+      display_name_length: 'Display name length should be 1-50 characters'
+    },
+
+    // Login/Register messages
+    messages: {
+      login_success: 'Login successful',
+      login_failed: 'Login failed',
+      welcome_back: 'Welcome back!',
+      register_success: 'Registration successful',
+      register_success_auto_login: 'Account created successfully, automatically logged in',
+      register_failed: 'Registration failed',
+      network_error: 'Network error',
+      check_network: 'Please check your network connection and try again',
+      github_login_failed: 'GitHub login failed, please try again',
+      google_login_failed: 'Google login failed, please try again',
+      wechat_login_failed: 'WeChat login failed, please try again',
+      wechat_scan_login_failed: 'WeChat QR code login failed, please try again',
+      auth_failed: 'Authentication failed',
+      session_error: 'Session error',
+      session_save_failed: 'Failed to save login status'
+    }
   },
 
   // Comment system
@@ -718,8 +895,54 @@ Brief description of this AI project's functionality and goals.
     load_more: 'Load More',
     upload_image: 'Upload Image',
     upload_video: 'Upload Video',
+    attachments: 'Attachments',
+    images: 'Images',
+    videos: 'Videos',
     paste_support: 'Support pasting images and videos directly',
-    paste_hint: 'Supports Markdown syntax, you can paste image files directly (Ctrl+V)...'
+    paste_hint: 'Supports Markdown syntax, you can paste image files directly (Ctrl+V)...',
+    login_to_comment: 'Please login to participate in discussion',
+    empty_comments: 'No comments yet, be the first to comment!',
+    no_content: 'No content',
+    markdown_syntax: 'Markdown Syntax',
+    uploading: 'File is uploading, please wait...',
+    markdown: {
+      bold: 'Bold',
+      italic: 'Italic',
+      code: 'Code',
+      code_block: 'Code Block',
+      link: 'Link',
+      list_item: 'List Item',
+      quote: 'Quote'
+    },
+    upload_success: {
+      images: 'Successfully uploaded {count} image(s)',
+      videos: 'Successfully uploaded {count} video(s)'
+    },
+    errors: {
+      image_format: 'Only JPG, PNG, GIF, WebP image formats are supported',
+      image_size: 'Image size cannot exceed 5MB',
+      video_format: 'Only MP4, WebM video formats are supported',
+      video_size: 'Video size cannot exceed 50MB',
+      file_type: 'Only image and video files are supported',
+      upload_failed: 'File upload failed'
+    },
+    validity: {
+      valid: '✓ Valuable',
+      invalid: '! Needs Improvement',
+      error: 'Detection Error'
+    },
+    messages: {
+      fetch_failed: 'Failed to fetch comments',
+      post_success: 'Comment posted successfully',
+      post_failed: 'Failed to post comment',
+      update_success: 'Comment updated successfully',
+      update_failed: 'Failed to update comment',
+      delete_confirm: 'Are you sure you want to delete this comment? This action cannot be undone.',
+      delete_title: 'Confirm Delete',
+      delete_success: 'Comment deleted successfully',
+      delete_failed: 'Failed to delete comment',
+      content_required: 'Comment content cannot be empty'
+    }
   },
 
   // Language switcher
@@ -939,5 +1162,29 @@ Brief description of this AI project's functionality and goals.
       processing: 'AI transformation in progress, please wait...',
       already_transformed: 'This idea has already been transformed into a project'
     }
+  },
+
+  // WeChat Group related
+  wechat_group: {
+    welcome_title: 'Welcome to AI Project Community!',
+    login_success: 'Login Successful!',
+    welcome_message: 'Congratulations on becoming a member of the AI project challenge, join our community!',
+    benefits_title: 'Community Benefits',
+    benefit_1: 'Get project updates and tech sharing in real-time',
+    benefit_2: 'Exchange experiences with like-minded developers',
+    benefit_3: 'Participate in technical discussions and project collaboration opportunities',
+    benefit_4: 'Get AI tool usage tips and best practices',
+    later: 'Maybe Later',
+    joined: 'I\'ve Joined',
+    joined_success: 'Welcome to AI Project Community! Looking forward to your participation and sharing',
+    later_message: 'You can find the WeChat group QR code at the bottom of any page anytime',
+    default_description: 'Exchange AI project experiences with other developers, share ideas and inspiration',
+    qr_code_alt: 'WeChat Group QR Code',
+    qr_loading: 'QR Code Loading...',
+    wechat_id_label: 'Or add WeChat ID:',
+    wechat_id: 'QQTommer',
+    copy_wechat_success: 'WeChat ID copied to clipboard! You can search and add friend in WeChat',
+    scan_tip: 'Scan the QR code above, or long press to save to album and scan with WeChat',
+    click_to_copy: 'Click to Copy'
   }
 }

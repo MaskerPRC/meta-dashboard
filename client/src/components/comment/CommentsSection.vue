@@ -3,7 +3,7 @@
     <div class="comments-header">
       <h3 class="comments-title">
         <el-icon><ChatLineSquare /></el-icon>
-        项目讨论 ({{ comments.length }})
+        {{ $t('project.discussion') }} ({{ comments.length }})
       </h3>
     </div>
 
@@ -18,7 +18,7 @@
     <!-- 登录提示 -->
     <div v-else class="login-hint">
       <el-icon><User /></el-icon>
-      <span>请先<router-link to="/login">登录</router-link>后参与讨论</span>
+      <span>{{ $t('comment.login_to_comment') }}</span>
     </div>
 
     <!-- 评论列表 -->
@@ -29,7 +29,7 @@
 
       <div v-else-if="comments.length === 0" class="empty-comments">
         <el-icon><ChatDotSquare /></el-icon>
-        <p>暂无评论，来发表第一条评论吧！</p>
+        <p>{{ $t('comment.empty_comments') }}</p>
       </div>
 
       <div v-else>
@@ -77,14 +77,14 @@
                       :command="`edit-${comment.id}`"
                     >
                       <el-icon><Edit /></el-icon>
-                      编辑
+                      {{ $t('form.edit') }}
                     </el-dropdown-item>
                     <el-dropdown-item 
                       :command="`delete-${comment.id}`"
                       class="danger-item"
                     >
                       <el-icon><Delete /></el-icon>
-                      删除
+                      {{ $t('form.delete') }}
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -137,7 +137,7 @@
                   maxlength="1000"
                   show-word-limit
                   resize="none"
-                  placeholder="支持Markdown语法..."
+                  :placeholder="$t('comment.placeholder')"
                 />
                 
                 <div 
@@ -148,14 +148,14 @@
               </div>
 
               <div class="edit-actions">
-                <el-button size="small" @click="cancelEdit">取消</el-button>
+                <el-button size="small" @click="cancelEdit">{{ $t('form.cancel') }}</el-button>
                 <el-button 
                   size="small" 
                   type="primary" 
                   @click="saveEdit(comment.id)"
                   :loading="saving"
                 >
-                  保存
+                  {{ $t('form.save') }}
                 </el-button>
               </div>
             </div>
@@ -233,7 +233,7 @@ const pagination = reactive({
 
 // 计算属性
 const editPreviewContent = computed(() => {
-  if (!editContent.value.trim()) return '<p class="preview-empty">暂无内容</p>'
+  if (!editContent.value.trim()) return `<p class="preview-empty">${t('comment.no_content')}</p>`
   return renderMarkdown(editContent.value)
 })
 
@@ -271,10 +271,11 @@ const getValidityTagType = (status) => {
 
 // 获取检测状态的文本
 const getValidityStatusText = (status) => {
+  const { t } = useI18n()
   switch (status) {
-    case 'valid': return '✓ 有价值'
-    case 'invalid': return '! 待改进'
-    case 'error': return '检测异常'
+    case 'valid': return t('comment.validity.valid')
+    case 'invalid': return t('comment.validity.invalid')
+    case 'error': return t('comment.validity.error')
     default: return ''
   }
 }
@@ -303,8 +304,8 @@ const fetchComments = async () => {
     pagination.total = response.data.pagination.total
     pagination.page = response.data.pagination.page
   } catch (error) {
-    console.error('获取评论失败:', error)
-    showNotification.error('获取评论失败')
+    console.error('Failed to fetch comments:', error)
+    showNotification.error(t('comment.messages.fetch_failed'))
   } finally {
     loading.value = false
   }
@@ -323,10 +324,10 @@ const submitComment = async (data) => {
     newComment.value = ''
     pagination.total++
     
-    showNotification.success('评论发表成功')
+    showNotification.success(t('comment.messages.post_success'))
   } catch (error) {
-    console.error('发表评论失败:', error)
-    showNotification.error(error.response?.data?.message || '发表评论失败')
+    console.error('Failed to post comment:', error)
+    showNotification.error(error.response?.data?.message || t('comment.messages.post_failed'))
   } finally {
     submitting.value = false
   }
@@ -357,7 +358,7 @@ const cancelEdit = () => {
 
 const saveEdit = async (commentId) => {
   if (!editContent.value.trim()) {
-    showNotification.warning('评论内容不能为空')
+    showNotification.warning(t('comment.messages.content_required'))
     return
   }
   
@@ -373,10 +374,10 @@ const saveEdit = async (commentId) => {
     }
     
     cancelEdit()
-    showNotification.success('评论修改成功')
+    showNotification.success(t('comment.messages.update_success'))
   } catch (error) {
-    console.error('修改评论失败:', error)
-    showNotification.error(error.response?.data?.message || '修改评论失败')
+    console.error('Failed to update comment:', error)
+    showNotification.error(error.response?.data?.message || t('comment.messages.update_failed'))
   } finally {
     saving.value = false
   }
@@ -385,11 +386,11 @@ const saveEdit = async (commentId) => {
 const deleteComment = async (comment) => {
   try {
     await ElMessageBox.confirm(
-      '确定要删除这条评论吗？此操作无法撤销。',
-      '确认删除',
+      t('comment.messages.delete_confirm'),
+      t('comment.messages.delete_title'),
       {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('form.delete'),
+        cancelButtonText: t('form.cancel'),
         type: 'warning',
         confirmButtonClass: 'el-button--danger'
       }
@@ -403,11 +404,11 @@ const deleteComment = async (comment) => {
       pagination.total--
     }
     
-    showNotification.success('评论删除成功')
+    showNotification.success(t('comment.messages.delete_success'))
   } catch (error) {
     if (error === 'cancel') return
-    console.error('删除评论失败:', error)
-    showNotification.error(error.response?.data?.message || '删除评论失败')
+    console.error('Failed to delete comment:', error)
+    showNotification.error(error.response?.data?.message || t('comment.messages.delete_failed'))
   }
 }
 

@@ -2,17 +2,17 @@
   <div class="wechat-group" :class="{ compact: isCompact }">
     <div class="wechat-group-card ai-card">
       <h3 v-if="!hideTitle" class="wechat-group-title">
-        {{ wechatGroupConfig.title || '加入微信交流群' }}
+        {{ wechatGroupConfig.title || $t('home.join_wechat_group') }}
       </h3>
       <p v-if="!hideDescription" class="wechat-group-description">
-        {{ wechatGroupConfig.description || '与其他开发者交流AI项目经验，分享创意与灵感' }}
+        {{ wechatGroupConfig.description || $t('wechat_group.default_description') }}
       </p>
 
       <div v-if="wechatGroupConfig.qr" class="qr-container">
         <div class="qr-image-wrapper">
           <img
             :src="wechatGroupConfig.qr"
-            alt="微信群二维码"
+            :alt="$t('wechat_group.qr_code_alt')"
             class="qr-image"
             @error="handleImageError"
           />
@@ -22,25 +22,25 @@
       <div v-else class="placeholder-container">
         <div class="placeholder-qr">
           <i class="fa-solid fa-qrcode placeholder-icon"></i>
-          <p class="placeholder-text">二维码加载中...</p>
+          <p class="placeholder-text">{{ $t('wechat_group.qr_loading') }}</p>
         </div>
       </div>
       
       <div v-if="showContactInfo && !hideDescription" class="text-center mt-2">
         <p class="text-xs font-bold">
-          也可添加微信号：<span class="wechat-id cursor-pointer hover:underline" @click="copyWechat">QQTommer</span>
+          {{ $t('wechat_group.wechat_id_label') }}<span class="wechat-id cursor-pointer hover:underline" @click="copyWechat">{{ $t('wechat_group.wechat_id') }}</span>
         </p>
       </div>
 
       <div v-if="!isCompact" class="wechat-group-tips">
         <p class="tip-text">
           <i class="fa-solid fa-info-circle mr-2"></i>
-          扫描上方二维码，或长按保存到相册后用微信扫一扫
+          {{ $t('wechat_group.scan_tip') }}
         </p>
         <div v-if="showContactInfo" class="contact-fallback">
           <p class="fallback-text">
-            也可添加微信号：<span class="wechat-id cursor-pointer hover:underline" @click="copyWechat">QQTommer</span>
-            <span class="text-xs bg-gray-200 px-2 py-1 rounded border border-black ml-2">点击复制</span>
+            {{ $t('wechat_group.wechat_id_label') }}<span class="wechat-id cursor-pointer hover:underline" @click="copyWechat">{{ $t('wechat_group.wechat_id') }}</span>
+            <span class="text-xs bg-gray-200 px-2 py-1 rounded border border-black ml-2">{{ $t('wechat_group.click_to_copy') }}</span>
           </p>
         </div>
       </div>
@@ -50,9 +50,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { showNotification } from '../../utils/notification'
 import { ChatDotSquare } from '@element-plus/icons-vue'
 import axios from '../../utils/axios'
+
+const { t } = useI18n()
 
 // 定义 props
 const props = defineProps({
@@ -81,15 +84,15 @@ const props = defineProps({
 // 微信群配置
 const wechatGroupConfig = ref({
   qr: '',
-  title: '加入微信交流群',
-  description: '与其他开发者交流AI项目经验，分享创意与灵感'
+  title: t('home.join_wechat_group'),
+  description: t('wechat_group.default_description')
 })
 
 // 复制微信号
 const copyWechat = async () => {
   try {
     await navigator.clipboard.writeText('QQTommer')
-    showNotification.success('微信号已复制到剪贴板！可以打开微信搜索添加好友')
+    showNotification.success(t('wechat_group.copy_wechat_success'))
   } catch (err) {
     // 降级处理：创建临时文本域来复制
     const textArea = document.createElement('textarea')
@@ -98,7 +101,7 @@ const copyWechat = async () => {
     textArea.select()
     document.execCommand('copy')
     document.body.removeChild(textArea)
-    showNotification.success('微信号已复制到剪贴板！可以打开微信搜索添加好友')
+    showNotification.success(t('wechat_group.copy_wechat_success'))
   }
 }
 

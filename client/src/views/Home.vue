@@ -9,8 +9,8 @@
         </div>
         
         <h1 class="font-display font-black text-6xl md:text-7xl leading-[1.1]">
-          一年挑战 <br>
-          <span class="highlight-marker">100个 AI产品</span>
+          {{ $t('home.challenge_title') }} <br>
+          <span class="highlight-marker">100 {{ $t('home.stats.ai_projects') }}</span>
         </h1>
         
         <p class="text-lg font-medium text-gray-800 max-w-lg border-l-4 border-neo-purple pl-4 bg-white/60 py-2">
@@ -19,22 +19,30 @@
 
         <div class="flex flex-wrap gap-4 pt-4">
           <router-link to="/projects" class="neo-btn bg-black text-white px-8 py-4 text-lg flex gap-2 items-center hover:bg-gray-800">
-            我做了啥？ <i class="fa-solid fa-arrow-right -rotate-45"></i>
+            {{ $t('home.view_projects') }} <i class="fa-solid fa-arrow-right -rotate-45"></i>
           </router-link>
           <router-link to="/about" class="neo-btn bg-neo-green px-8 py-4 text-lg font-bold flex gap-2 items-center hover:bg-green-400">
-            <i class="fa-solid fa-bolt"></i> 围观挑战
+            <i class="fa-solid fa-bolt"></i> {{ $t('home.learn_more') }}
           </router-link>
         </div>
 
         <!-- Social Tags -->
-        <div v-if="hasSocialLinks" class="flex gap-3 pt-4">
+        <div v-if="hasSocialLinks" class="flex flex-wrap gap-3 pt-4">
+          <a
+            v-if="socialLinks.social_x_url"
+            :href="socialLinks.social_x_url"
+            target="_blank"
+            class="px-3 py-1 border-2 border-black rounded-full bg-black text-white font-bold text-xs shadow-neo-sm cursor-pointer hover:translate-y-0.5 hover:shadow-none transition"
+          >
+            {{ $t('home.social_platforms.x') }}
+          </a>
           <a
             v-if="socialLinks.social_xiaohongshu_url"
             :href="socialLinks.social_xiaohongshu_url"
             target="_blank"
             class="px-3 py-1 border-2 border-black rounded-full bg-neo-red text-white font-bold text-xs shadow-neo-sm cursor-pointer hover:translate-y-0.5 hover:shadow-none transition"
           >
-            小红书
+            {{ $t('home.social_platforms.xiaohongshu') }}
           </a>
           <a
             v-if="socialLinks.social_bilibili_url"
@@ -42,7 +50,7 @@
             target="_blank"
             class="px-3 py-1 border-2 border-black rounded-full bg-neo-blue text-white font-bold text-xs shadow-neo-sm cursor-pointer hover:translate-y-0.5 hover:shadow-none transition"
           >
-            Bilibili
+            {{ $t('home.social_platforms.bilibili') }}
           </a>
           <a
             v-if="socialLinks.social_wechat_official_url"
@@ -50,7 +58,36 @@
             target="_blank"
             class="px-3 py-1 border-2 border-black rounded-full bg-[#07C160] text-white font-bold text-xs shadow-neo-sm cursor-pointer hover:translate-y-0.5 hover:shadow-none transition"
           >
-            公众号
+            {{ $t('home.social_platforms.wechat_official') }}
+          </a>
+          <a
+            v-if="socialLinks.social_zhihu_url"
+            :href="socialLinks.social_zhihu_url"
+            target="_blank"
+            class="px-3 py-1 border-2 border-black rounded-full bg-[#0084FF] text-white font-bold text-xs shadow-neo-sm cursor-pointer hover:translate-y-0.5 hover:shadow-none transition"
+          >
+            {{ $t('home.social_platforms.zhihu') }}
+          </a>
+          <a
+            v-if="socialLinks.social_csdn_url"
+            :href="socialLinks.social_csdn_url"
+            target="_blank"
+            class="px-3 py-1 border-2 border-black rounded-full bg-[#FC5531] text-white font-bold text-xs shadow-neo-sm cursor-pointer hover:translate-y-0.5 hover:shadow-none transition"
+          >
+            {{ $t('home.social_platforms.csdn') }}
+          </a>
+        </div>
+
+        <!-- Startup Article -->
+        <div v-if="startupArticle.url" class="pt-4">
+          <a
+            :href="startupArticle.url"
+            target="_blank"
+            class="neo-btn bg-neo-purple text-white px-6 py-3 text-base font-bold flex gap-2 items-center hover:bg-purple-500 inline-block"
+          >
+            <i class="fa-solid fa-newspaper"></i>
+            <span>{{ startupArticle.title || $t('home.startup_article.read_article') }}</span>
+            <i class="fa-solid fa-arrow-right -rotate-45"></i>
           </a>
         </div>
       </div>
@@ -64,7 +101,7 @@
           <!-- Total Progress -->
           <div class="neo-card col-span-2 p-6 rounded-xl flex items-center justify-between bg-neo-yellow">
             <div>
-              <div class="text-sm font-bold uppercase border-b-2 border-black inline-block mb-2">当前总进度</div>
+              <div class="text-sm font-bold uppercase border-b-2 border-black inline-block mb-2">{{ $t('home.stats.overall_progress') }}</div>
               <div class="text-6xl font-black font-display">{{ projectsStore.totalProgress || 0 }}%</div>
             </div>
             <i class="fa-solid fa-chart-line text-5xl opacity-20"></i>
@@ -74,14 +111,14 @@
           <div class="neo-card p-5 rounded-xl bg-white text-center group">
             <div class="w-full bg-neo-green border-2 border-black py-1 font-bold text-xs mb-3 group-hover:bg-black group-hover:text-neo-green transition">SUCCESS</div>
             <div class="text-4xl font-black mb-1">{{ projectsStore.statusCounts.completed || 0 }}</div>
-            <div class="text-xs font-bold text-gray-500">已完成</div>
+            <div class="text-xs font-bold text-gray-500">{{ $t('home.stats.completed') }}</div>
           </div>
 
           <!-- Stat 2 -->
           <div class="neo-card p-5 rounded-xl bg-white text-center group">
             <div class="w-full bg-neo-blue border-2 border-black py-1 font-bold text-xs mb-3 text-white group-hover:bg-black group-hover:text-neo-blue transition">BUILDING</div>
             <div class="text-4xl font-black mb-1">{{ projectsStore.statusCounts.development || 0 }}</div>
-            <div class="text-xs font-bold text-gray-500">开发中</div>
+            <div class="text-xs font-bold text-gray-500">{{ $t('home.stats.in_development') }}</div>
           </div>
 
           <!-- Countdown -->
@@ -91,13 +128,13 @@
                 <i class="fa-regular fa-clock text-xl"></i>
               </div>
               <div>
-                <div class="text-gray-400 text-xs">距离{{ currentYear }}年结束</div>
-                <div class="text-2xl font-black text-neo-yellow font-display">{{ daysRemaining }} <span class="text-base text-white">天</span></div>
+                <div class="text-gray-400 text-xs">{{ $t('home.stats.days_remaining').replace('{year}', currentYear) }}</div>
+                <div class="text-2xl font-black text-neo-yellow font-display">{{ daysRemaining }} <span class="text-base text-white">{{ $t('home.stats.days') }}</span></div>
               </div>
             </div>
             <div class="text-right pr-2">
               <div class="text-3xl font-bold">{{ projectsStore.statusCounts.idea || 0 }}</div>
-              <div class="text-xs text-gray-400">待开发</div>
+              <div class="text-xs text-gray-400">{{ $t('home.status_overview.brainstorming') }}</div>
             </div>
           </div>
         </div>
@@ -108,7 +145,7 @@
     <div class="mb-12">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-2xl font-black bg-white border-2 border-black px-4 py-1 shadow-neo-sm inline-block transform -rotate-1">
-          看板状态
+          {{ $t('home.status_overview.title') }}
         </h3>
       </div>
       
@@ -119,7 +156,7 @@
             <i class="fa-solid fa-lightbulb text-yellow-500"></i>
           </div>
           <div class="text-3xl font-black">{{ projectsStore.statusCounts.idea || 0 }}</div>
-          <div class="text-sm font-bold bg-gray-200 px-2 rounded border border-black">构思中</div>
+          <div class="text-sm font-bold bg-gray-200 px-2 rounded border border-black">{{ $t('home.status_overview.brainstorming') }}</div>
         </div>
 
         <div class="neo-card min-w-[160px] p-4 rounded-lg flex flex-col items-center justify-center text-center bg-white">
@@ -127,7 +164,7 @@
             <i class="fa-solid fa-pen-ruler text-blue-500"></i>
           </div>
           <div class="text-3xl font-black">{{ projectsStore.statusCounts.planning || 0 }}</div>
-          <div class="text-sm font-bold bg-blue-200 px-2 rounded border border-black">规划中</div>
+          <div class="text-sm font-bold bg-blue-200 px-2 rounded border border-black">{{ $t('home.status_overview.planning') }}</div>
         </div>
 
         <div class="neo-card min-w-[160px] p-4 rounded-lg flex flex-col items-center justify-center text-center bg-neo-purple/20">
@@ -135,7 +172,7 @@
             <i class="fa-solid fa-code text-purple-600"></i>
           </div>
           <div class="text-3xl font-black">{{ projectsStore.statusCounts.development || 0 }}</div>
-          <div class="text-sm font-bold bg-neo-purple text-white px-2 rounded border border-black">开发中</div>
+          <div class="text-sm font-bold bg-neo-purple text-white px-2 rounded border border-black">{{ $t('home.status_overview.development') }}</div>
         </div>
 
         <div class="neo-card min-w-[160px] p-4 rounded-lg flex flex-col items-center justify-center text-center bg-white">
@@ -143,7 +180,7 @@
             <i class="fa-solid fa-bug text-red-500"></i>
           </div>
           <div class="text-3xl font-black">{{ projectsStore.statusCounts.testing || 0 }}</div>
-          <div class="text-sm font-bold bg-red-200 px-2 rounded border border-black">测试中</div>
+          <div class="text-sm font-bold bg-red-200 px-2 rounded border border-black">{{ $t('home.status_overview.testing') }}</div>
         </div>
         
         <div class="neo-card min-w-[160px] p-4 rounded-lg flex flex-col items-center justify-center text-center bg-neo-green/20">
@@ -151,16 +188,16 @@
             <i class="fa-solid fa-check text-green-600"></i>
           </div>
           <div class="text-3xl font-black">{{ projectsStore.statusCounts.completed || 0 }}</div>
-          <div class="text-sm font-bold bg-neo-green border border-black px-2 rounded">已完成</div>
+          <div class="text-sm font-bold bg-neo-green border border-black px-2 rounded">{{ $t('home.status_overview.completed') }}</div>
         </div>
       </div>
     </div>
 
     <!-- Projects List -->
     <div class="mb-6 flex justify-between items-end border-b-4 border-black pb-2">
-      <h2 class="text-4xl font-black uppercase tracking-tight">Latest Drops</h2>
+      <h2 class="text-4xl font-black uppercase tracking-tight">{{ $t('home.latest_projects') }}</h2>
       <router-link to="/projects" class="font-bold hover:underline bg-black text-white px-2">
-        查看全部列表 &rarr;
+        {{ $t('home.view_all_projects') }} &rarr;
       </router-link>
     </div>
 
@@ -180,7 +217,7 @@
           to="/admin"
           class="neo-btn bg-black text-white px-6 py-3 mt-4 inline-block"
         >
-          创建新项目
+          {{ $t('admin.create_project') }}
         </router-link>
       </div>
     </div>
@@ -192,8 +229,8 @@
       </div>
       <div class="relative z-10 md:flex justify-between items-center">
         <div class="text-white mb-6 md:mb-0">
-          <h2 class="text-3xl font-black mb-2">加入微信交流群</h2>
-          <p class="font-bold text-lg opacity-90">扫码即刻与1000+开发者一起卷！</p>
+          <h2 class="text-3xl font-black mb-2">{{ $t('home.join_wechat_group') }}</h2>
+          <p class="font-bold text-lg opacity-90">{{ $t('home.join_wechat_description') }}</p>
         </div>
         <div class="bg-white p-3 border-2 border-black transform rotate-2 shadow-neo-sm">
           <WechatGroup :is-compact="true" :hide-title="true" :hide-description="true" />

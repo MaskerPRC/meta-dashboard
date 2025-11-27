@@ -50,7 +50,7 @@
 
       <div class="flex items-center gap-2 z-10">
         <div class="text-right">
-          <div class="text-xs font-bold text-gray-500 uppercase">Total Records</div>
+          <div class="text-xs font-bold text-gray-500 uppercase">{{ $t('global_history.total_records') }}</div>
           <div class="font-mono font-black text-xl tabular-nums">{{ pagination.total || 0 }}</div>
         </div>
         <div class="w-10 h-10 bg-neo-green border-2 border-black flex items-center justify-center text-xl">
@@ -118,7 +118,7 @@
             <!-- Progress Update Visual -->
             <div v-else-if="history.type === 'progress_update'" class="mb-4">
               <div class="flex items-center justify-between mb-2">
-                <span class="font-bold text-sm uppercase tracking-wider">Progress Leap</span>
+                <span class="font-bold text-sm uppercase tracking-wider">{{ $t('global_history.progress_leap') }}</span>
                 <span class="font-black text-neo-green text-xl bg-black px-2">
                   +{{ (history.progress_after || 0) - (history.progress_before || 0) }}%
                 </span>
@@ -151,8 +151,8 @@
               <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-black text-white p-4 border-2 border-black shadow-neo-sm mb-4 relative z-10">
                 <div class="text-4xl text-neo-yellow"><i class="fa-solid fa-check-double"></i></div>
                 <div>
-                  <div class="text-xs text-gray-400 font-mono mb-1">MILESTONE</div>
-                  <div class="font-bold text-lg">Project Completed</div>
+                  <div class="text-xs text-gray-400 font-mono mb-1">{{ $t('global_history.record_types.milestone').toUpperCase() }}</div>
+                  <div class="font-bold text-lg">{{ $t('global_history.project_completed') }}</div>
                 </div>
               </div>
             </div>
@@ -164,14 +164,14 @@
             <div class="mt-5 flex justify-between items-center pt-4 border-t-2 border-gray-100">
               <div class="flex items-center gap-2">
                 <div class="w-6 h-6 bg-black rounded-full border border-black"></div>
-                <span class="font-bold text-sm">{{ history.creator_name || 'System' }}</span>
+                <span class="font-bold text-sm">{{ history.creator_name || $t('global_history.system') }}</span>
               </div>
               <a 
                 href="#" 
                 @click.stop="navigateToProject(history.project_id)"
                 class="font-bold text-sm border-b-2 border-black hover:bg-neo-yellow transition-colors"
               >
-                查看详情 <i class="fa-solid fa-eye"></i>
+                {{ $t('global_history.view_details') }} <i class="fa-solid fa-eye"></i>
               </a>
             </div>
           </div>
@@ -190,7 +190,7 @@
           @click="loadMore"
           class="w-full bg-white border-2 border-black border-dashed py-4 text-gray-500 font-bold hover:bg-gray-50 hover:text-black hover:border-solid transition-all"
         >
-          <i class="fa-solid fa-arrow-down mr-2"></i> 加载更早的历史记录
+          <i class="fa-solid fa-arrow-down mr-2"></i> {{ $t('global_history.load_earlier') }}
         </button>
       </div>
     </div>
@@ -317,14 +317,7 @@ const getTypeIcon = (type) => {
 
 // 获取类型标签文本
 const getTypeLabel = (type) => {
-  const typeMap = {
-    'progress_update': '进度更新',
-    'status_change': '状态变更',
-    'progress_log': '进度日志',
-    'manual_note': '手动记录',
-    'milestone': '项目完结'
-  }
-  return typeMap[type] || '记录'
+  return t(`global_history.record_types.${type}`) || t('global_history.record_types.unknown')
 }
 
 // 格式化日期

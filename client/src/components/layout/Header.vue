@@ -19,21 +19,21 @@
             class="px-4 py-2 hover:bg-white border-2 border-transparent hover:border-black rounded-md transition"
             :class="{ 'bg-white/50 border-black/10': $route.path === '/' }"
           >
-            首页
+            {{ $t('nav.home') }}
           </router-link>
           <router-link 
             to="/projects" 
             class="px-4 py-2 hover:bg-white border-2 border-transparent hover:border-black rounded-md transition"
             :class="{ 'bg-white/50 border-black/10': $route.path === '/projects' }"
           >
-            项目列表
+            {{ $t('nav.projects') }}
           </router-link>
           <router-link 
             to="/ideas" 
             class="px-4 py-2 hover:bg-white border-2 border-transparent hover:border-black rounded-md transition"
             :class="{ 'bg-white/50 border-black/10': $route.path === '/ideas' }"
           >
-            想法征集
+            {{ $t('nav.ideas') }}
           </router-link>
           <router-link 
             v-if="isPublicResumeAvailable"
@@ -41,14 +41,14 @@
             class="px-4 py-2 hover:bg-white border-2 border-transparent hover:border-black rounded-md transition"
             :class="{ 'bg-white/50 border-black/10': $route.path === '/resume' }"
           >
-            简历
+            {{ $t('nav.resume') }}
           </router-link>
           <router-link 
             to="/about" 
             class="px-4 py-2 hover:bg-white border-2 border-transparent hover:border-black rounded-md transition"
             :class="{ 'bg-white/50 border-black/10': $route.path === '/about' }"
           >
-            关于
+            {{ $t('nav.about') }}
           </router-link>
         </div>
 
@@ -63,6 +63,8 @@
             <i class="fa-brands fa-github text-xl"></i>
           </a>
           
+          <LanguageSwitcher />
+
           <!-- 用户菜单 -->
           <div v-if="authStore.isAuthenticated" class="relative">
             <el-dropdown trigger="click" @command="handleUserCommand">
@@ -85,7 +87,7 @@
                   </el-dropdown-item>
                   <el-dropdown-item command="my-resume">
                     <i class="fa-solid fa-file-alt mr-2"></i>
-                    编辑简历
+                    {{ $t('resume.edit') }}
                   </el-dropdown-item>
                   <el-dropdown-item 
                     v-if="authStore.isAdmin" 
@@ -106,7 +108,7 @@
           <!-- 登录按钮 -->
           <router-link v-else to="/login">
             <button class="neo-btn bg-white px-5 py-2 text-black hover:bg-neo-purple hover:text-white">
-              登 录
+              {{ $t('nav.login') }}
             </button>
           </router-link>
           
@@ -135,7 +137,7 @@
         >
           <div class="p-4 border-b-4 border-black bg-neo-yellow">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-xl">菜单</h3>
+              <h3 class="font-bold text-xl">{{ $t('nav.menu') }}</h3>
               <button 
                 class="w-10 h-10 bg-white border-2 border-black rounded-md flex items-center justify-center hover:bg-gray-100 transition"
                 @click="toggleMobileMenu"
@@ -152,7 +154,7 @@
               :class="{ 'bg-white/50 border-black/10': $route.path === '/' }"
               @click="toggleMobileMenu"
             >
-              首页
+              {{ $t('nav.home') }}
             </router-link>
             <router-link 
               to="/projects" 
@@ -160,7 +162,7 @@
               :class="{ 'bg-white/50 border-black/10': $route.path === '/projects' }"
               @click="toggleMobileMenu"
             >
-              项目列表
+              {{ $t('nav.projects') }}
             </router-link>
             <router-link 
               to="/ideas" 
@@ -168,7 +170,7 @@
               :class="{ 'bg-white/50 border-black/10': $route.path === '/ideas' }"
               @click="toggleMobileMenu"
             >
-              想法征集
+              {{ $t('nav.ideas') }}
             </router-link>
             <router-link 
               v-if="isPublicResumeAvailable"
@@ -177,7 +179,7 @@
               :class="{ 'bg-white/50 border-black/10': $route.path === '/resume' }"
               @click="toggleMobileMenu"
             >
-              简历
+              {{ $t('nav.resume') }}
             </router-link>
             <router-link 
               to="/about" 
@@ -185,7 +187,7 @@
               :class="{ 'bg-white/50 border-black/10': $route.path === '/about' }"
               @click="toggleMobileMenu"
             >
-              关于
+              {{ $t('nav.about') }}
             </router-link>
             
             <!-- 移动端用户区域 -->
@@ -225,10 +227,16 @@
                 {{ $t('nav.logout') }}
               </button>
             </div>
-            <div v-else class="mt-4 pt-4 border-t-2 border-black">
+            <div class="mt-4 pt-4 border-t-2 border-black">
+              <div class="mb-3 flex justify-between items-center px-1">
+                <span class="font-bold text-sm text-gray-600">{{ $t('common.language') }}</span>
+                <LanguageSwitcher />
+              </div>
+            </div>
+            <div v-if="!authStore.isAuthenticated" class="pt-2">
               <router-link to="/login" class="block">
                 <button class="neo-btn bg-black text-white w-full px-4 py-3 hover:bg-gray-800">
-                  登 录
+                  {{ $t('nav.login') }}
                 </button>
               </router-link>
             </div>
@@ -248,6 +256,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
 import ProfileDialog from '../common/ProfileDialog.vue'
+import LanguageSwitcher from '../common/LanguageSwitcher.vue'
 import axios from '../../utils/axios'
 
 const router = useRouter()

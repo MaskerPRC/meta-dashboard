@@ -11,11 +11,9 @@
           <span class="text-9xl font-black text-black">4</span>
         </div>
         <div class="neo-card p-6 bg-white inline-block">
-          <h1 class="text-4xl font-black mb-2">页面找不到了</h1>
+          <h1 class="text-4xl font-black mb-2">{{ $t('not_found.title') }}</h1>
           <p class="text-gray-600 font-medium">
-            抱歉，您访问的页面可能已被删除、重命名或暂时不可用。
-            <br>
-            让我们帮您找到正确的路径吧！
+            {{ $t('not_found.description') }}
           </p>
         </div>
       </div>
@@ -27,7 +25,7 @@
             v-model="searchQuery"
             @keyup.enter="handleSearch"
             type="text"
-            placeholder="搜索AI项目、标签或关键词..."
+            :placeholder="$t('not_found.search_placeholder')"
             class="w-full bg-gray-100 border-2 border-black px-4 py-3 pr-12 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
           />
           <button 
@@ -42,7 +40,7 @@
       <!-- Navigation Suggestions -->
       <div class="mb-12">
         <h3 class="text-2xl font-black mb-6 bg-white border-2 border-black inline-block px-4 py-1 shadow-neo-sm transform -rotate-1">
-          您可能想要访问：
+          {{ $t('not_found.suggestions_title') }}
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <router-link 
@@ -52,8 +50,8 @@
             <div class="w-16 h-16 bg-neo-blue border-4 border-black rounded-lg flex items-center justify-center mx-auto mb-4">
               <i class="fa-solid fa-house text-3xl text-black"></i>
             </div>
-            <h4 class="text-lg font-black mb-2">首页</h4>
-            <p class="text-sm text-gray-600">查看AI挑战概览和最新项目</p>
+            <h4 class="text-lg font-black mb-2">{{ $t('not_found.home') }}</h4>
+            <p class="text-sm text-gray-600">{{ $t('not_found.home_desc') }}</p>
           </router-link>
 
           <router-link 
@@ -63,8 +61,8 @@
             <div class="w-16 h-16 bg-neo-green border-4 border-black rounded-lg flex items-center justify-center mx-auto mb-4">
               <i class="fa-solid fa-list text-3xl text-black"></i>
             </div>
-            <h4 class="text-lg font-black mb-2">项目列表</h4>
-            <p class="text-sm text-gray-600">浏览所有AI项目的完整列表</p>
+            <h4 class="text-lg font-black mb-2">{{ $t('not_found.projects') }}</h4>
+            <p class="text-sm text-gray-600">{{ $t('not_found.projects_desc') }}</p>
           </router-link>
 
           <router-link 
@@ -74,8 +72,8 @@
             <div class="w-16 h-16 bg-neo-purple border-4 border-black rounded-lg flex items-center justify-center mx-auto mb-4">
               <i class="fa-solid fa-info text-3xl text-black"></i>
             </div>
-            <h4 class="text-lg font-black mb-2">关于挑战</h4>
-            <p class="text-sm text-gray-600">了解100个AI产品挑战的详情</p>
+            <h4 class="text-lg font-black mb-2">{{ $t('not_found.about') }}</h4>
+            <p class="text-sm text-gray-600">{{ $t('not_found.about_desc') }}</p>
           </router-link>
 
           <div 
@@ -86,7 +84,7 @@
             <div class="w-16 h-16 bg-neo-yellow border-4 border-black rounded-lg flex items-center justify-center mx-auto mb-4">
               <i class="fa-solid fa-wand-magic-sparkles text-3xl text-black"></i>
             </div>
-            <h4 class="text-lg font-black mb-2">随机项目</h4>
+            <h4 class="text-lg font-black mb-2">{{ $t('not_found.random_project') }}</h4>
             <p class="text-sm text-gray-600">{{ randomProject.title }}</p>
           </div>
         </div>
@@ -95,7 +93,7 @@
       <!-- Recent Projects -->
       <div v-if="recentProjects.length > 0" class="mb-12">
         <h3 class="text-2xl font-black mb-6 bg-white border-2 border-black inline-block px-4 py-1 shadow-neo-sm transform rotate-1">
-          最新AI项目
+          {{ $t('not_found.recent_projects') }}
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div 

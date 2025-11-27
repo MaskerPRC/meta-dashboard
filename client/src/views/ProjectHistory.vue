@@ -8,13 +8,13 @@
           class="neo-btn bg-white px-4 py-2 hover:bg-gray-100"
         >
           <i class="fa-solid fa-arrow-left mr-2"></i>
-          返回项目详情
+          {{ $t('project_history.back_to_detail') }}
         </button>
         <div v-if="project">
           <h1 class="text-3xl font-black mb-2">{{ project.title }} - {{ t('project.progress_history') }}</h1>
           <div class="flex items-center gap-4 text-sm font-bold">
             <span>
-              状态: 
+              {{ $t('project_history.status') }}: 
               <span 
                 class="px-2 py-1 border-2 border-black rounded"
                 :class="getStatusBadgeClass(project.status)"
@@ -23,7 +23,7 @@
               </span>
             </span>
             <span>
-              进度: 
+              {{ $t('project_history.progress') }}: 
               <span class="font-mono text-neo-blue">{{ project.progress }}%</span>
             </span>
           </div>
@@ -36,7 +36,7 @@
         class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
       >
         <i class="fa-solid fa-plus mr-2"></i>
-        添加进展记录
+        {{ $t('project_history.add_record') }}
       </button>
     </div>
 
@@ -48,12 +48,12 @@
           @change="loadHistories"
           class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer"
         >
-          <option value="">所有类型</option>
-          <option value="progress_update">进度更新</option>
-          <option value="status_change">状态变更</option>
-          <option value="progress_log">进展日志</option>
-          <option value="manual_note">手动记录</option>
-          <option value="milestone">里程碑</option>
+          <option value="">{{ $t('project_history.all_types') }}</option>
+          <option value="progress_update">{{ $t('global_history.record_types.progress_update') }}</option>
+          <option value="status_change">{{ $t('global_history.record_types.status_change') }}</option>
+          <option value="progress_log">{{ $t('global_history.record_types.progress_log') }}</option>
+          <option value="manual_note">{{ $t('global_history.record_types.manual_record') }}</option>
+          <option value="milestone">{{ $t('global_history.record_types.milestone') }}</option>
         </select>
         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
           <i class="fa-solid fa-caret-down text-xs"></i>
@@ -61,7 +61,7 @@
       </div>
       
       <div class="font-bold text-gray-600">
-        共 {{ pagination.total }} 条记录
+        {{ $t('project_history.total_records').replace('{count}', pagination.total) }}
       </div>
     </div>
 
@@ -88,7 +88,7 @@
                 <span class="px-2 py-1 bg-gray-100 border border-black rounded">
                   {{ getTypeText(history.type) }}
                 </span>
-                <span>{{ history.creator_name || '系统' }}</span>
+                <span>{{ history.creator_name || $t('project_history.system') }}</span>
                 <span>{{ formatTime(history.created_at) }}</span>
               </div>
             </div>
@@ -97,7 +97,7 @@
               <div v-if="history.type === 'progress_update'" class="neo-card p-4 bg-gray-50 mb-4">
                 <div class="flex items-center gap-4">
                   <div class="flex-1">
-                    <div class="text-xs font-bold text-gray-500 mb-2">进度变化</div>
+                    <div class="text-xs font-bold text-gray-500 mb-2">{{ $t('project_history.progress_change') }}</div>
                     <div class="flex items-center gap-3">
                       <div class="flex-1">
                         <div class="text-sm font-bold mb-1">{{ history.progress_before }}%</div>
@@ -125,7 +125,7 @@
               
               <div v-if="history.type === 'status_change'" class="neo-card p-4 bg-gray-50 mb-4">
                 <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold text-gray-500">状态变化:</span>
+                  <span class="text-xs font-bold text-gray-500">{{ $t('project_history.status_change') }}</span>
                   <span 
                     class="px-3 py-1 text-xs font-bold border-2 border-black rounded"
                     :class="getStatusBadgeClass(history.status_before)"
@@ -145,7 +145,7 @@
               <div v-if="history.type === 'progress_log'" class="neo-card p-4 bg-blue-50 mb-4">
                 <div class="flex items-center gap-2 mb-2">
                   <i class="fa-solid fa-clipboard-list text-neo-blue"></i>
-                  <span class="font-bold text-sm">项目进展更新</span>
+                  <span class="font-bold text-sm">{{ $t('project_history.project_progress_update') }}</span>
                 </div>
                 <div class="text-sm" v-html="renderMarkdown(history.content)"></div>
               </div>
@@ -158,7 +158,7 @@
               
               <!-- Attachments -->
               <div v-if="history.attachments && history.attachments.length > 0" class="mb-4">
-                <div class="text-xs font-bold text-gray-500 mb-2">附件:</div>
+                <div class="text-xs font-bold text-gray-500 mb-2">{{ $t('project_history.attachments') }}</div>
                 <div class="flex flex-wrap gap-3">
                   <div 
                     v-for="attachment in history.attachments" 
@@ -189,14 +189,14 @@
                 class="neo-btn bg-white px-4 py-2 text-sm hover:bg-gray-100"
               >
                 <i class="fa-solid fa-edit mr-1"></i>
-                编辑
+                {{ $t('project_history.edit') }}
               </button>
               <button 
                 @click="deleteHistory(history)" 
                 class="neo-btn bg-neo-red text-white px-4 py-2 text-sm hover:bg-red-500"
               >
                 <i class="fa-solid fa-trash mr-1"></i>
-                删除
+                {{ $t('project_history.delete') }}
               </button>
             </div>
           </div>
@@ -208,14 +208,14 @@
     <!-- Empty State -->
     <div v-else class="text-center py-16">
       <i class="fa-solid fa-history text-6xl text-gray-400 mb-4"></i>
-      <h3 class="text-xl font-black mb-2">暂无进展记录</h3>
-      <p class="text-gray-600 mb-6">开始记录项目的每一步进展吧</p>
+      <h3 class="text-xl font-black mb-2">{{ $t('project_history.no_records') }}</h3>
+      <p class="text-gray-600 mb-6">{{ $t('project_history.start_recording') }}</p>
       <button 
         v-if="canWrite" 
         @click="showAddDialog" 
         class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
       >
-        添加第一条记录
+        {{ $t('project_history.add_first_record') }}
       </button>
     </div>
 
@@ -245,22 +245,22 @@
     <!-- Add/Edit Dialog -->
     <el-dialog
       v-model="showDialog"
-      :title="editingHistory ? '编辑进展记录' : '添加进展记录'"
+      :title="editingHistory ? $t('project_history.edit_record') : $t('project_history.add_record_title')"
       width="700px"
       :before-close="closeDialog"
       class="history-dialog"
     >
       <form @submit.prevent="saveHistory">
         <div class="form-group mb-4">
-          <label class="block text-sm font-bold mb-2">记录类型</label>
+          <label class="block text-sm font-bold mb-2">{{ $t('project_history.record_type') }}</label>
           <div class="relative">
             <select 
               v-model="historyForm.type" 
               required
               class="appearance-none bg-gray-100 border-2 border-black px-4 py-3 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer w-full"
             >
-              <option value="manual_note">手动记录</option>
-              <option value="milestone">里程碑</option>
+              <option value="manual_note">{{ $t('global_history.record_types.manual_record') }}</option>
+              <option value="milestone">{{ $t('global_history.record_types.milestone') }}</option>
             </select>
             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
               <i class="fa-solid fa-caret-down text-xs"></i>
@@ -269,22 +269,22 @@
         </div>
         
         <div class="form-group mb-4">
-          <label class="block text-sm font-bold mb-2">标题</label>
+          <label class="block text-sm font-bold mb-2">{{ $t('project_history.title') }}</label>
           <input 
             v-model="historyForm.title" 
             type="text" 
-            placeholder="请输入记录标题"
+            :placeholder="$t('project_history.title_placeholder')"
             required
             class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
           />
         </div>
         
         <div class="form-group mb-4">
-          <label class="block text-sm font-bold mb-2">内容（支持Markdown）</label>
+          <label class="block text-sm font-bold mb-2">{{ $t('project_history.content') }}</label>
           <MarkdownEditor 
             v-model="historyForm.content"
             :height="'300px'"
-            placeholder="记录项目进展、遇到的问题、解决方案、心得体会等..."
+            :placeholder="$t('project_history.content_placeholder')"
             @upload-success="handleUploadSuccess"
           />
         </div>
@@ -295,7 +295,7 @@
             @click="closeDialog" 
             class="neo-btn bg-white px-6 py-3 hover:bg-gray-100"
           >
-            取消
+            {{ $t('project_history.cancel') }}
           </button>
           <button 
             type="submit" 
@@ -303,7 +303,7 @@
             class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400 disabled:opacity-50"
           >
             <i v-if="saving" class="fa-solid fa-spinner fa-spin mr-2"></i>
-            {{ saving ? '保存中...' : '保存' }}
+            {{ saving ? $t('project_history.saving') : $t('project_history.save') }}
           </button>
         </div>
       </form>
@@ -315,7 +315,7 @@
       class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center cursor-pointer"
       @click="closeImagePreview"
     >
-      <img :src="previewImage" alt="预览" class="max-w-[90%] max-h-[90%] border-4 border-white" />
+      <img :src="previewImage" :alt="$t('project_history.preview')" class="max-w-[90%] max-h-[90%] border-4 border-white" />
     </div>
   </main>
 </template>
@@ -527,13 +527,13 @@ export default {
     
     getTypeText(type) {
       const texts = {
-        progress_update: '进度更新',
-        status_change: '状态变更',
-        manual_note: '手动记录',
-        milestone: '里程碑',
-        progress_log: '进展日志'
+        progress_update: this.t('global_history.record_types.progress_update'),
+        status_change: this.t('global_history.record_types.status_change'),
+        manual_note: this.t('global_history.record_types.manual_record'),
+        milestone: this.t('global_history.record_types.milestone'),
+        progress_log: this.t('global_history.record_types.progress_log')
       };
-      return texts[type] || '记录';
+      return texts[type] || this.t('global_history.record_types.manual_record');
     },
     
     getStatusText(status) {

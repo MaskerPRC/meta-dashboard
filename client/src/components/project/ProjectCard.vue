@@ -42,7 +42,7 @@
       <div class="mt-auto">
         <!-- Progress Bar -->
         <div class="flex justify-between text-xs font-bold mb-1">
-          <span>进度</span>
+          <span>{{ $t('home.progress') }}</span>
           <span>{{ project.progress || 0 }}%</span>
         </div>
         <div class="h-5 w-full border-2 border-black rounded-full bg-white overflow-hidden p-[2px]">

@@ -6,7 +6,7 @@
         to="/projects" 
         class="flex items-center gap-2 font-bold hover:underline bg-white border-2 border-black px-3 py-1 shadow-neo-hover"
       >
-        <i class="fa-solid fa-arrow-left"></i> 返回列表
+        <i class="fa-solid fa-arrow-left"></i> {{ $t('project.back_to_list') }}
       </router-link>
       <span class="font-mono text-gray-500">/ Projects / {{ project?.id || 'loading' }}</span>
     </div>
@@ -68,8 +68,8 @@
                   <i class="fa-solid fa-history"></i>
                 </div>
                 <div class="text-left">
-                  <div class="font-bold text-lg group-hover:text-neo-purple transition-colors">进展历史</div>
-                  <div class="text-xs text-gray-500 font-mono">查看项目发展轨迹</div>
+                  <div class="font-bold text-lg group-hover:text-neo-purple transition-colors">{{ $t('project.progress_history') }}</div>
+                  <div class="text-xs text-gray-500 font-mono">{{ $t('project.view_development_timeline') }}</div>
                 </div>
               </div>
               <i class="fa-solid fa-chevron-right"></i>
@@ -87,16 +87,16 @@
                   <i class="fa-solid fa-play"></i>
                 </div>
                 <div class="text-left">
-                  <div class="font-black text-lg">在线演示</div>
-                  <div class="text-xs text-black font-mono font-bold">体验项目效果</div>
+                  <div class="font-black text-lg">{{ $t('project.online_demo') }}</div>
+                  <div class="text-xs text-black font-mono font-bold">{{ $t('project.experience_project') }}</div>
                 </div>
               </div>
               <i class="fa-solid fa-arrow-up-right-from-square font-bold text-xl"></i>
             </a>
             <div v-else class="neo-btn-secondary p-4 flex items-center justify-center opacity-50">
               <div class="text-center">
-                <div class="font-bold text-lg text-gray-400">暂无演示</div>
-                <div class="text-xs text-gray-500 font-mono">Demo链接未配置</div>
+                <div class="font-bold text-lg text-gray-400">{{ $t('project.no_demo') }}</div>
+                <div class="text-xs text-gray-500 font-mono">{{ $t('project.demo_not_configured') }}</div>
               </div>
             </div>
           </div>
@@ -122,14 +122,14 @@
         <div class="px-6 py-4 border-b-3 border-black bg-gray-100">
           <h2 class="font-display font-black text-xl flex items-center gap-2">
             <i class="fa-solid fa-images"></i>
-            项目附件
+            {{ $t('project.attachments') }}
           </h2>
         </div>
 
         <div class="p-6">
           <!-- Images -->
           <div v-if="projectAttachments.images.length > 0" class="mb-8">
-            <h3 class="text-sm font-black uppercase text-gray-500 mb-4 tracking-widest">图片 ({{ projectAttachments.images.length }})</h3>
+            <h3 class="text-sm font-black uppercase text-gray-500 mb-4 tracking-widest">{{ $t('project.images') }} ({{ projectAttachments.images.length }})</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div
                 v-for="(image, index) in projectAttachments.images"
@@ -155,7 +155,7 @@
 
           <!-- Videos -->
           <div v-if="projectAttachments.videos.length > 0">
-            <h3 class="text-sm font-black uppercase text-gray-500 mb-4 tracking-widest">视频 ({{ projectAttachments.videos.length }})</h3>
+            <h3 class="text-sm font-black uppercase text-gray-500 mb-4 tracking-widest">{{ $t('project.videos') }} ({{ projectAttachments.videos.length }})</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div
                 v-for="(video, index) in projectAttachments.videos"
@@ -169,7 +169,7 @@
                   :poster="video.poster"
                   class="w-full border-b-2 border-black"
                 >
-                  您的浏览器不支持视频播放。
+                  {{ $t('project.browser_not_support_video') }}
                 </video>
                 <div class="p-4 bg-gray-50">
                   <p class="text-sm font-bold text-gray-700">
@@ -198,7 +198,7 @@
           <div v-if="renderedContent" v-html="renderedContent"></div>
           <div v-else class="text-center py-12 text-gray-400">
             <i class="fa-solid fa-file-lines text-4xl mb-4"></i>
-            <p class="font-bold">暂无详细内容</p>
+            <p class="font-bold">{{ $t('project.no_content') }}</p>
           </div>
         </div>
       </div>
@@ -207,14 +207,14 @@
       <div class="neo-card p-0 bg-white relative">
         <div class="px-6 py-4 border-b-3 border-black bg-neo-purple/20 flex justify-between items-center">
           <h2 class="font-display font-bold text-xl flex items-center">
-            <i class="fa-regular fa-comments mr-2"></i> 项目讨论 ({{ commentsCount || 0 }})
+            <i class="fa-regular fa-comments mr-2"></i> {{ $t('project.discussion') }} ({{ commentsCount || 0 }})
           </h2>
           <button 
             v-if="!authStore.isAuthenticated"
             class="bg-black text-white px-3 py-1 text-xs font-bold hover:bg-gray-800 transition"
             @click="$router.push('/login')"
           >
-            LOGIN TO POST
+            {{ $t('project.login_to_post') }}
           </button>
         </div>
 
@@ -231,10 +231,10 @@
     <!-- Project Not Found -->
     <div v-else class="neo-card p-12 text-center">
       <i class="fa-solid fa-exclamation-triangle text-6xl text-gray-400 mb-4"></i>
-      <h2 class="text-2xl font-black mb-2">项目不存在</h2>
-      <p class="text-gray-600 mb-6">请检查链接是否正确</p>
+      <h2 class="text-2xl font-black mb-2">{{ $t('project.not_found') }}</h2>
+      <p class="text-gray-600 mb-6">{{ $t('project.check_link') }}</p>
       <router-link to="/projects" class="neo-btn bg-black text-white px-6 py-3 inline-block">
-        返回项目列表
+        {{ $t('project.back_to_list') }}
       </router-link>
     </div>
 
@@ -323,15 +323,15 @@ const projectAttachments = computed(() => {
 // 获取状态名称
 const getStatusName = (status) => {
   const statusMap = {
-    idea: '构思中',
-    planning: '规划中',
-    development: '开发中',
-    testing: '测试中',
-    completed: '已完成',
-    deployed: '已部署',
-    paused: '已暂停'
+    idea: t('home.status_overview.brainstorming'),
+    planning: t('home.status_overview.planning'),
+    development: t('home.status_overview.development'),
+    testing: t('home.status_overview.testing'),
+    completed: t('home.status_overview.completed'),
+    deployed: t('home.status_overview.deployed'),
+    paused: t('home.status_overview.on_hold')
   }
-  return statusMap[status] || '未知'
+  return statusMap[status] || t('common.unknown')
 }
 
 // 获取状态图标
@@ -365,12 +365,12 @@ const getStatusBadgeClass = (status) => {
 // 获取优先级名称
 const getPriorityName = (priority) => {
   const priorityMap = {
-    low: '低',
-    medium: '中等',
-    high: '高',
-    urgent: '紧急'
+    low: t('admin.priority_options.low'),
+    medium: t('admin.priority_options.medium'),
+    high: t('admin.priority_options.high'),
+    urgent: t('admin.priority_options.urgent')
   }
-  return priorityMap[priority] || '中等'
+  return priorityMap[priority] || t('admin.priority_options.medium')
 }
 
 // 格式化日期

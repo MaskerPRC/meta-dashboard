@@ -2,6 +2,7 @@ export default {
   // 导航和布局
   nav: {
     title: '导航菜单',
+    menu: '菜单',
     home: '首页',
     projects: '项目列表',
     ideas: '想法征集',
@@ -42,7 +43,8 @@ export default {
       overall_progress: '整体进度',
       completed: '已完成',
       in_development: '开发中',
-      days_remaining: '天倒计时'
+      days_remaining: '距离{year}年结束',
+      days: '天'
     },
 
     // 项目状态概览
@@ -59,7 +61,28 @@ export default {
 
     // 最新项目
     latest_projects: '最新项目',
+    view_all_projects: '查看全部列表',
     progress: '进度',
+
+    // 微信群
+    join_wechat_group: '加入微信交流群',
+    join_wechat_description: '扫码即刻与1000+开发者一起卷！',
+
+    // 社交平台
+    social_platforms: {
+      x: 'X (Twitter)',
+      xiaohongshu: '小红书',
+      bilibili: 'Bilibili',
+      wechat_official: '公众号',
+      zhihu: '知乎',
+      csdn: 'CSDN'
+    },
+
+    // 创业启动文章
+    startup_article: {
+      title: '创业启动文章',
+      read_article: '阅读文章'
+    },
 
     // 挑战宣言
     challenge_manifesto: {
@@ -101,17 +124,54 @@ export default {
     project_inception: '项目立项完成',
     technical_research: '技术调研完成',
     records_count: '条记录',
+    total_records: '总记录数',
+    progress_leap: '进度飞跃',
     previous: '之前',
     current: '现在',
-
-    // 记录内容
+    view_details: '查看详情',
+    load_earlier: '加载更早的历史记录',
+    system: '系统',
+    project_completed: '项目已完成',
+    // 记录类型
     record_types: {
-      milestone: '里程碑',
+      milestone: '项目完结',
       progress_update: '进度更新',
       status_change: '状态变更',
-      progress_log: '进展日志',
-      manual_record: '手动记录'
+      progress_log: '进度日志',
+      manual_note: '手动记录',
+      unknown: '记录'
     }
+  },
+
+  // 项目历史页面
+  project_history: {
+    back_to_detail: '返回项目详情',
+    status: '状态',
+    progress: '进度',
+    add_record: '添加进展记录',
+    all_types: '所有类型',
+    total_records: '共 {count} 条记录',
+    progress_change: '进度变化',
+    status_change: '状态变化:',
+    project_progress_update: '项目进展更新',
+    attachments: '附件:',
+    edit: '编辑',
+    delete: '删除',
+    no_records: '暂无进展记录',
+    start_recording: '开始记录项目的每一步进展吧',
+    add_first_record: '添加第一条记录',
+    edit_record: '编辑进展记录',
+    add_record_title: '添加进展记录',
+    record_type: '记录类型',
+    title: '标题',
+    title_placeholder: '请输入记录标题',
+    content: '内容（支持Markdown）',
+    content_placeholder: '记录项目进展、遇到的问题、解决方案、心得体会等...',
+    cancel: '取消',
+    saving: '保存中...',
+    save: '保存',
+    system: '系统',
+    preview: '预览'
   },
 
   // 关于挑战页面
@@ -469,11 +529,21 @@ export default {
      back_to_list: '返回项目列表',
      edit_project: '编辑项目',
      delete_project: '删除项目',
-     progress_history: '进展历史',
-     view_development_timeline: '查看项目发展轨迹',
-         project_details: '项目详情',
+    progress_history: '进展历史',
+    view_development_timeline: '查看项目发展轨迹',
+    project_details: '项目详情',
     not_found: '项目不存在',
     check_link: '请检查链接是否正确',
+    online_demo: '在线演示',
+    experience_project: '体验项目效果',
+    no_demo: '暂无演示',
+    demo_not_configured: 'Demo链接未配置',
+    images: '图片',
+    videos: '视频',
+    no_content: '暂无详细内容',
+    discussion: '项目讨论',
+    login_to_post: 'LOGIN TO POST',
+    browser_not_support_video: '您的浏览器不支持视频播放。',
     select_status: '选择项目状态',
     select_priority: '选择优先级',
     status_filter: '状态筛选',
@@ -484,6 +554,7 @@ export default {
       project_description: '项目描述',
       progress_percentage: '进度百分比',
       github_repo: 'GitHub仓库',
+    view_source_code: '查看源代码',
       demo_link: '演示链接',
       start_time: '开始时间',
       expected_completion: '预期完成时间',
@@ -554,7 +625,25 @@ export default {
     // 进展日志
     progress_log: {
       title: '进展日志输入',
-      tip: '填写进展日志有助于团队了解项目推进情况，此内容将在项目进展历史中显示'
+      tip: '填写进展日志有助于团队了解项目推进情况，此内容将在项目进展历史中显示',
+      dialog_title: '本次修改进展说明',
+      description_label: '进展描述：',
+      skip: '跳过',
+      save_with_log: '保存并记录进展',
+      save_directly: '直接保存'
+    },
+
+    // 图片标注
+    image_caption: {
+      click_to_add: '点击添加标注',
+      edit: '编辑标注',
+      delete_image: '删除图片',
+      dialog_title: '编辑图片标注',
+      preview_image: '预览图片',
+      label: '图片标注：',
+      placeholder: '为这张图片添加描述或标注...',
+      tip: '留空将显示原始文件名。标注将在项目详情页面和图片预览中显示。',
+      save: '保存标注'
     },
 
     // 项目模板
@@ -669,6 +758,17 @@ export default {
   },
 
   // 消息
+  common: {
+    unknown: '未知',
+    page_info: '第 {current} / {total} 页',
+    submitting: '提交中...',
+    saving: '保存中...',
+    language: '语言 Language',
+    close: '关闭',
+    close_hint: 'ESC 或点击空白处关闭',
+    unnamed_image: '未命名图片'
+  },
+
   message: {
     success: '操作成功',
     error: '操作失败',
@@ -681,16 +781,27 @@ export default {
   auth: {
     welcome_back: '欢迎回来',
     login_description: '选择您喜欢的方式登录，参与AI产品挑战之旅',
+    account_login: '账号登录',
+    register_account: '注册账号',
+    oauth_login: '第三方登录',
     username: '用户名',
+    username_or_email: '用户名或邮箱',
     email: '邮箱',
     password: '密码',
+    password_placeholder: '密码（至少6位）',
+    confirm_password: '确认密码',
+    phone_optional: '手机号（可选）',
     login_button: '登录',
+    logging_in: '登录中...',
     register_button: '注册',
+    registering: '注册中...',
     github_login: '使用GitHub登录',
     google_login: '使用Google登录',
     forgot_password: '忘记密码？',
     no_account: '还没有账号？',
+    register_now: '立即注册',
     has_account: '已有账号？',
+    login_now: '立即登录',
     profile: '个人资料',
 
     // 个人资料相关
@@ -706,7 +817,43 @@ export default {
     current_password_placeholder: '请输入当前密码',
     new_password_placeholder: '请输入新密码（至少6位）',
     profile_updated_success: '个人资料更新成功',
-    password_updated_success: '密码修改成功'
+    password_updated_success: '密码修改成功',
+
+    // 表单验证消息
+    validation: {
+      username_required: '请输入用户名或邮箱',
+      password_required: '请输入密码',
+      username_required_register: '请输入用户名',
+      username_length: '用户名长度在3到20个字符',
+      username_pattern: '用户名只能包含字母、数字和下划线',
+      email_required: '请输入邮箱地址',
+      email_invalid: '请输入正确的邮箱地址',
+      phone_invalid: '请输入正确的手机号',
+      password_min: '密码长度至少6位',
+      confirm_password_required: '请确认密码',
+      confirm_password_again: '请再次输入密码',
+      confirm_password_mismatch: '两次输入密码不一致',
+      display_name_length: '显示名称长度在 1 到 50 个字符'
+    },
+
+    // 登录/注册消息
+    messages: {
+      login_success: '登录成功',
+      login_failed: '登录失败',
+      welcome_back: '欢迎回来！',
+      register_success: '注册成功',
+      register_success_auto_login: '账户创建成功，已自动登录',
+      register_failed: '注册失败',
+      network_error: '网络错误',
+      check_network: '请检查网络连接后重试',
+      github_login_failed: 'GitHub登录失败，请重试',
+      google_login_failed: 'Google登录失败，请重试',
+      wechat_login_failed: '微信登录失败，请重试',
+      wechat_scan_login_failed: '微信扫码登录失败，请重试',
+      auth_failed: '认证失败',
+      session_error: '会话错误',
+      session_save_failed: '登录状态保存失败'
+    }
   },
 
   // 评论系统
@@ -718,14 +865,60 @@ export default {
     reply: '回复',
     write: '编写',
     preview: '预览',
-    submit: '提交评论',
     placeholder: '请输入评论内容，支持Markdown格式...',
     no_comments: '暂无评论，来发表第一条评论吧！',
     load_more: '加载更多',
     upload_image: '上传图片',
     upload_video: '上传视频',
+    attachments: '附件',
+    images: '图片',
+    videos: '视频',
     paste_support: '支持直接粘贴图片和视频文件',
-    paste_hint: '支持Markdown语法，可直接粘贴图片文件（Ctrl+V）...'
+    paste_hint: '支持Markdown语法，可直接粘贴图片文件（Ctrl+V）...',
+    login_to_comment: '请先登录后参与讨论',
+    empty_comments: '暂无评论，来发表第一条评论吧！',
+    no_content: '暂无内容',
+    submit: '发表评论',
+    markdown_syntax: 'Markdown语法',
+    uploading: '文件正在上传中，请稍候...',
+    markdown: {
+      bold: '粗体',
+      italic: '斜体',
+      code: '代码',
+      code_block: '代码块',
+      link: '链接',
+      list_item: '列表项',
+      quote: '引用'
+    },
+    upload_success: {
+      images: '成功上传 {count} 张图片',
+      videos: '成功上传 {count} 个视频'
+    },
+    errors: {
+      image_format: '只支持 JPG、PNG、GIF、WebP 格式的图片',
+      image_size: '图片大小不能超过 5MB',
+      video_format: '只支持 MP4、WebM 格式的视频',
+      video_size: '视频大小不能超过 50MB',
+      file_type: '只支持图片和视频文件',
+      upload_failed: '文件上传失败'
+    },
+    validity: {
+      valid: '✓ 有价值',
+      invalid: '! 待改进',
+      error: '检测异常'
+    },
+    messages: {
+      fetch_failed: '获取评论失败',
+      post_success: '评论发表成功',
+      post_failed: '发表评论失败',
+      update_success: '评论修改成功',
+      update_failed: '修改评论失败',
+      delete_confirm: '确定要删除这条评论吗？此操作无法撤销。',
+      delete_title: '确认删除',
+      delete_success: '评论删除成功',
+      delete_failed: '删除评论失败',
+      content_required: '评论内容不能为空'
+    }
   },
 
   // 语言切换
@@ -925,6 +1118,7 @@ export default {
     // 空状态
     empty: {
       no_ideas: '暂无想法数据',
+    submit_first_idea: '提交第一个想法',
       submit_first: '提交第一个想法'
     },
 
@@ -945,5 +1139,29 @@ export default {
       processing: '正在进行AI转化，请稍等...',
       already_transformed: '该想法已转化为项目'
     }
+  },
+
+  // 微信群相关
+  wechat_group: {
+    welcome_title: '欢迎加入AI项目交流群！',
+    login_success: '登录成功！',
+    welcome_message: '恭喜您成为AI项目挑战的一员，快来加入我们的交流群吧！',
+    benefits_title: '交流群福利',
+    benefit_1: '第一时间获取项目更新和技术分享',
+    benefit_2: '与志同道合的开发者交流经验',
+    benefit_3: '参与技术讨论和项目合作机会',
+    benefit_4: '获得AI工具使用技巧和最佳实践',
+    later: '稍后再说',
+    joined: '我已加入群聊',
+    joined_success: '欢迎加入AI项目交流群！期待您的参与和分享',
+    later_message: '您可以随时在任意页面底部找到微信群二维码',
+    default_description: '与其他开发者交流AI项目经验，分享创意与灵感',
+    qr_code_alt: '微信群二维码',
+    qr_loading: '二维码加载中...',
+    wechat_id_label: '也可添加微信号：',
+    wechat_id: 'QQTommer',
+    copy_wechat_success: '微信号已复制到剪贴板！可以打开微信搜索添加好友',
+    scan_tip: '扫描上方二维码，或长按保存到相册后用微信扫一扫',
+    click_to_copy: '点击复制'
   }
 }

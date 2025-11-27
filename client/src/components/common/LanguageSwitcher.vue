@@ -4,14 +4,14 @@
     @command="handleLanguageChange"
     class="language-switcher"
   >
-    <el-button text class="language-btn">
-      <el-icon><Setting /></el-icon>
+    <button class="neo-language-btn">
+      <i class="fa-solid fa-globe text-lg"></i>
       <span class="language-text">{{ currentLanguageName }}</span>
-      <el-icon class="arrow-icon"><ArrowDown /></el-icon>
-    </el-button>
+      <i class="fa-solid fa-chevron-down text-xs"></i>
+    </button>
     
     <template #dropdown>
-      <el-dropdown-menu>
+      <el-dropdown-menu class="neo-dropdown-menu">
         <el-dropdown-item 
           v-for="lang in supportedLanguages" 
           :key="lang.code"
@@ -21,9 +21,7 @@
           <span class="language-option">
             {{ lang.nativeName }}
           </span>
-          <el-icon v-if="currentLanguage === lang.code" class="check-icon">
-            <Check />
-          </el-icon>
+          <i v-if="currentLanguage === lang.code" class="fa-solid fa-check check-icon"></i>
         </el-dropdown-item>
       </el-dropdown-menu>
     </template>
@@ -33,7 +31,6 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Setting, ArrowDown, Check } from '@element-plus/icons-vue'
 import { switchLanguage, getCurrentLanguage, getSupportedLanguages } from '../../locales/index.js'
 
 const { t } = useI18n()
@@ -47,7 +44,7 @@ const supportedLanguages = getSupportedLanguages()
 // 当前语言显示名称
 const currentLanguageName = computed(() => {
   const current = supportedLanguages.find(lang => lang.code === currentLanguage.value)
-  return current ? current.nativeName : '中文'
+  return current ? current.nativeName : t('language.chinese')
 })
 
 // 处理语言切换
@@ -58,33 +55,65 @@ const handleLanguageChange = (langCode) => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .language-switcher {
-  margin-left: 8px;
+  margin-left: 0;
 }
 
-.language-btn {
+.neo-language-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   padding: 8px 12px;
-  color: var(--el-text-color-primary);
-  transition: all 0.3s ease;
-}
+  background: white;
+  border: 2px solid black;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  color: black;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 2px 2px 0 0 black;
 
-.language-btn:hover {
-  color: var(--el-color-primary);
-  background-color: var(--el-color-primary-light-9);
+  &:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 0 black;
+    background: #f3f4f6;
+  }
+
+  &:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 0 black;
+  }
 }
 
 .language-text {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
-.arrow-icon {
-  font-size: 12px;
-  transition: transform 0.3s ease;
+:deep(.neo-dropdown-menu) {
+  border: 3px solid black;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 0 black;
+  padding: 4px;
+  background: white;
+
+  .el-dropdown-menu__item {
+    padding: 10px 16px;
+    font-weight: 700;
+    border-radius: 0;
+    margin-bottom: 2px;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+
+    &.is-active {
+      background: #fef3c7;
+      color: black;
+    }
+  }
 }
 
 .language-option {
@@ -96,23 +125,8 @@ const handleLanguageChange = (langCode) => {
 }
 
 .check-icon {
-  color: var(--el-color-primary);
+  color: black;
   font-size: 14px;
-}
-
-.is-active {
-  background-color: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-  .language-btn {
-    color: var(--el-text-color-primary);
-  }
-  
-  .language-btn:hover {
-    background-color: var(--el-color-primary-dark-2);
-  }
+  font-weight: 700;
 }
 </style> 

@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="mb-12 flex justify-between items-end border-b-4 border-black pb-4">
       <div>
-        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">想法征集</h1>
-        <p class="text-gray-600 font-medium">分享你的创意想法，参与投票，一起推动AI项目发展</p>
+        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">{{ $t('ideas.title') }}</h1>
+        <p class="text-gray-600 font-medium">{{ $t('ideas.subtitle') }}</p>
       </div>
       <button 
         v-if="authStore.isAuthenticated" 
@@ -12,7 +12,7 @@
         class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
       >
         <i class="fa-solid fa-plus mr-2"></i>
-        提交想法
+        {{ $t('ideas.submit_idea') }}
       </button>
       <router-link 
         v-else
@@ -20,7 +20,7 @@
         class="neo-btn bg-white px-6 py-3 hover:bg-neo-purple hover:text-white"
       >
         <i class="fa-solid fa-user mr-2"></i>
-        登录提交想法
+        {{ $t('ideas.login_to_submit') }}
       </router-link>
     </div>
 
@@ -48,10 +48,10 @@
             @change="handleFilterChange"
             class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer hover:shadow-neo-sm transition text-sm"
           >
-            <option value="">状态筛选</option>
-            <option value="pending">待审核</option>
-            <option value="adopted">已采纳</option>
-            <option value="rejected">已拒绝</option>
+            <option value="">{{ $t('ideas.filter_by_status') }}</option>
+            <option value="pending">{{ $t('ideas.status.pending') }}</option>
+            <option value="adopted">{{ $t('ideas.status.adopted') }}</option>
+            <option value="rejected">{{ $t('ideas.status.rejected') }}</option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
             <i class="fa-solid fa-caret-down text-xs"></i>
@@ -65,9 +65,9 @@
             @change="handleSortChange"
             class="appearance-none bg-gray-100 border-2 border-black px-4 py-2 pr-8 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white cursor-pointer hover:shadow-neo-sm transition text-sm"
           >
-            <option value="vote_count">投票数</option>
-            <option value="created_at">最新创建</option>
-            <option value="title">标题</option>
+            <option value="vote_count">{{ $t('ideas.sort_by_votes') }}</option>
+            <option value="created_at">{{ $t('ideas.sort_by_date') }}</option>
+            <option value="title">{{ $t('ideas.sort_by_title') }}</option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black border-l-2 border-black bg-neo-yellow">
             <i class="fa-solid fa-caret-down text-xs"></i>
@@ -80,7 +80,7 @@
             v-model="searchText"
             @keyup.enter="handleSearch"
             type="text"
-            placeholder="搜索想法标题或描述..."
+            :placeholder="$t('ideas.search_placeholder')"
             class="w-full bg-gray-100 border-2 border-black px-4 py-2 pr-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white hover:shadow-neo-sm transition text-sm"
           />
           <button 
@@ -107,7 +107,7 @@
           class="neo-btn bg-white px-4 py-2 text-black hover:bg-gray-100 text-sm"
         >
           <i class="fa-solid fa-rotate mr-1"></i>
-          重置
+          {{ $t('ideas.reset_filters') }}
         </button>
       </div>
     </div>
@@ -116,19 +116,19 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <div class="neo-card p-5 bg-white text-center">
         <div class="text-4xl font-black mb-1">{{ totalIdeas }}</div>
-        <div class="text-xs font-bold text-gray-500">总想法数</div>
+        <div class="text-xs font-bold text-gray-500">{{ $t('ideas.stats.total_ideas') }}</div>
       </div>
       <div class="neo-card p-5 bg-yellow-50 text-center">
         <div class="text-4xl font-black mb-1">{{ pendingIdeas }}</div>
-        <div class="text-xs font-bold text-gray-500">待审核</div>
+        <div class="text-xs font-bold text-gray-500">{{ $t('ideas.stats.pending_ideas') }}</div>
       </div>
       <div class="neo-card p-5 bg-green-50 text-center">
         <div class="text-4xl font-black mb-1">{{ adoptedIdeas }}</div>
-        <div class="text-xs font-bold text-gray-500">已采纳</div>
+        <div class="text-xs font-bold text-gray-500">{{ $t('ideas.stats.adopted_ideas') }}</div>
       </div>
       <div class="neo-card p-5 bg-blue-50 text-center">
         <div class="text-4xl font-black mb-1">{{ userVotesToday }}</div>
-        <div class="text-xs font-bold text-gray-500">我今日投票</div>
+        <div class="text-xs font-bold text-gray-500">{{ $t('ideas.stats.my_votes_today') }}</div>
       </div>
     </div>
 
@@ -136,13 +136,13 @@
     <div v-loading="loading" class="mb-8">
       <div v-if="ideas.length === 0 && !loading" class="text-center py-16">
         <i class="fa-solid fa-lightbulb text-6xl text-gray-400 mb-4"></i>
-        <p class="text-lg font-bold text-gray-600 mb-4">暂无想法数据</p>
+        <p class="text-lg font-bold text-gray-600 mb-4">{{ $t('ideas.no_ideas') }}</p>
         <button 
           v-if="authStore.isAuthenticated" 
           @click="showSubmitDialog = true"
           class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
         >
-          提交第一个想法
+          {{ $t('ideas.submit_first_idea') }}
         </button>
       </div>
 
@@ -189,7 +189,7 @@
               class="flex-1 neo-btn bg-neo-green text-black px-3 py-2 text-sm hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i class="fa-solid fa-check mr-1"></i>
-              投1票
+              {{ $t('ideas.card.vote_1') }}
             </button>
             <button 
               v-if="idea.status === 'pending' && authStore.isAuthenticated"
@@ -198,7 +198,7 @@
               class="flex-1 neo-btn bg-neo-blue text-white px-3 py-2 text-sm hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i class="fa-solid fa-star mr-1"></i>
-              投2票
+              {{ $t('ideas.card.vote_2') }}
             </button>
             <router-link 
               v-if="idea.project_id"
@@ -207,7 +207,7 @@
               class="neo-btn bg-neo-purple text-white px-3 py-2 text-sm hover:bg-purple-400"
             >
               <i class="fa-solid fa-link mr-1"></i>
-              查看项目
+              {{ $t('ideas.card.view_project') }}
             </router-link>
           </div>
         </div>
@@ -225,7 +225,7 @@
           <i class="fa-solid fa-chevron-left"></i>
         </button>
         <span class="font-mono font-bold">
-          第 {{ currentPage }} / {{ Math.ceil(totalCount / pageSize) }} 页
+          {{ $t('common.page_info').replace('{current}', currentPage).replace('{total}', Math.ceil(totalCount / pageSize)) }}
         </span>
         <button 
           @click="handleCurrentChange(currentPage + 1)"
@@ -240,7 +240,7 @@
     <!-- Submit Dialog -->
     <el-dialog
       v-model="showSubmitDialog"
-      title="提交想法"
+      :title="$t('ideas.submit.dialog_title')"
       width="600px"
       :before-close="closeSubmitDialog"
       class="submit-idea-dialog"
@@ -253,13 +253,13 @@
       >
         <div class="form-group mb-4">
           <label class="block text-sm font-bold mb-2">
-            <span class="text-red-500">*</span>想法标题
+            <span class="text-red-500">*</span>{{ $t('ideas.submit.title_label') }}
           </label>
           <div class="relative">
             <input
               v-model="submitForm.title"
               type="text"
-              placeholder="简明扼要地描述你的想法（最多200字符）"
+              :placeholder="$t('ideas.submit.title_placeholder')"
               maxlength="200"
               class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
             />
@@ -271,12 +271,12 @@
 
         <div class="form-group mb-4">
           <label class="block text-sm font-bold mb-2">
-            <span class="text-red-500">*</span>想法描述
+            <span class="text-red-500">*</span>{{ $t('ideas.submit.description_label') }}
           </label>
           <textarea
             v-model="submitForm.description"
             :rows="4"
-            placeholder="详细描述你的想法（最多1000字符）"
+            :placeholder="$t('ideas.submit.description_placeholder')"
             maxlength="1000"
             class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white resize-none"
           ></textarea>
@@ -286,11 +286,11 @@
         </div>
 
         <div class="form-group mb-4">
-          <label class="block text-sm font-bold mb-2">详细内容</label>
+          <label class="block text-sm font-bold mb-2">{{ $t('ideas.submit.content_label') }}</label>
           <textarea
             v-model="submitForm.content"
             :rows="6"
-            placeholder="可选：提供更详细的实现思路、技术方案等（支持Markdown格式，最多10000字符）"
+            :placeholder="$t('ideas.submit.content_placeholder')"
             maxlength="10000"
             class="w-full bg-gray-100 border-2 border-black px-4 py-3 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white resize-none"
           ></textarea>
@@ -306,15 +306,15 @@
             @click="closeSubmitDialog"
             class="neo-btn bg-white px-6 py-3 hover:bg-gray-100"
           >
-            取消
+            {{ $t('ideas.submit.cancel_button') }}
           </button>
           <button 
             @click="submitIdea" 
             :disabled="submitting"
             class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400 disabled:opacity-50"
           >
-            <span v-if="!submitting">提交想法</span>
-            <span v-else>提交中...</span>
+            <span v-if="!submitting">{{ $t('ideas.submit.submit_button') }}</span>
+            <span v-else>{{ $t('common.submitting') }}</span>
           </button>
         </div>
       </template>
@@ -540,9 +540,9 @@ const closeSubmitDialog = () => {
 
 const getStatusName = (status) => {
   const statusMap = {
-    pending: '待审核',
-    adopted: '已采纳',
-    rejected: '已拒绝'
+    pending: t('ideas.status.pending'),
+    adopted: t('ideas.status.adopted'),
+    rejected: t('ideas.status.rejected')
   }
   return statusMap[status] || status
 }

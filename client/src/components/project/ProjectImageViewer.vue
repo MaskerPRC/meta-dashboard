@@ -25,7 +25,7 @@
       </button>
 
       <!-- 右上角关闭按钮 -->
-      <button class="close-btn-top" @click="$emit('close')" title="关闭 (ESC)">
+      <button class="close-btn-top" @click="$emit('close')" :title="$t('common.close') + ' (ESC)'">
         <i class="fa-solid fa-times text-xl"></i>
       </button>
 
@@ -38,8 +38,8 @@
           </span>
         </div>
         <div class="toolbar-actions">
-          <span class="help-text">ESC 或点击空白处关闭</span>
-          <button class="close-btn" @click="$emit('close')" title="关闭">
+          <span class="help-text">{{ $t('common.close_hint') }}</span>
+          <button class="close-btn" @click="$emit('close')" :title="$t('common.close')">
             <i class="fa-solid fa-times"></i>
           </button>
         </div>
@@ -50,6 +50,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   show: {
@@ -91,10 +92,12 @@ const nextImage = () => {
   }
 }
 
+const { t } = useI18n()
+
 // 获取显示名称：优先显示caption，否则显示filename
 const getDisplayName = (image) => {
-  if (!image) return '未命名图片'
-  return image.caption || image.filename || '未命名图片'
+  if (!image) return t('common.unnamed_image')
+  return image.caption || image.filename || t('common.unnamed_image')
 }
 
 // 键盘事件处理

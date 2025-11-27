@@ -1,14 +1,14 @@
 <template>
   <div class="attachments-section">
     <div class="attachments-header">
-      <span class="attachments-title">附件</span>
+      <span class="attachments-title">{{ $t('comment.attachments') }}</span>
     </div>
     
     <!-- 图片附件 -->
     <div v-if="attachments.images.length > 0" class="attachment-group">
       <div class="attachment-label">
         <el-icon><Picture /></el-icon>
-        图片 ({{ attachments.images.length }})
+        {{ $t('comment.images') }} ({{ attachments.images.length }})
       </div>
       <div class="images-grid">
         <div 
@@ -44,7 +44,7 @@
     <div v-if="attachments.videos.length > 0" class="attachment-group">
       <div class="attachment-label">
         <el-icon><VideoPlay /></el-icon>
-        视频 ({{ attachments.videos.length }})
+        {{ $t('comment.videos') }} ({{ attachments.videos.length }})
       </div>
       <div class="videos-list">
         <div 

@@ -275,13 +275,13 @@
                         <div class="attachment-overlay">
                           <div class="image-caption-display">
                             <span class="caption-text" :class="{ 'empty-caption': !image.caption }">
-                              {{ image.caption || '点击添加标注' }}
+                              {{ image.caption || t('project.image_caption.click_to_add') }}
                             </span>
-                            <el-button size="small" type="primary" @click="editImageCaption(index)" title="编辑标注">
+                            <el-button size="small" type="primary" @click="editImageCaption(index)" :title="t('project.image_caption.edit')">
                               <el-icon><Edit /></el-icon>
                             </el-button>
                           </div>
-                          <el-button type="danger" size="small" @click="removeAttachment('images', index)" title="删除图片">
+                          <el-button type="danger" size="small" @click="removeAttachment('images', index)" :title="t('project.image_caption.delete_image')">
                             <el-icon><Delete /></el-icon>
                           </el-button>
                         </div>
@@ -327,7 +327,7 @@
   <!-- 进展说明弹窗 -->
   <el-dialog
     v-model="showProgressDialog"
-    title="本次修改进展说明"
+    :title="t('project.progress_log.dialog_title')"
     width="500px"
     :close-on-click-modal="false"
   >
@@ -337,7 +337,7 @@
         <span>{{ $t('project.progress_log.tip') }}</span>
       </div>
       
-      <el-form-item label="进展描述：" style="margin-top: 16px;">
+      <el-form-item :label="t('project.progress_log.description_label')" style="margin-top: 16px;">
         <el-input
           v-model="progressLog"
           type="textarea"
@@ -351,9 +351,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleProgressCancel">跳过</el-button>
+        <el-button @click="handleProgressCancel">{{ t('project.progress_log.skip') }}</el-button>
         <el-button type="primary" @click="handleProgressSubmit" :loading="saving">
-          {{ progressLog.trim() ? '保存并记录进展' : '直接保存' }}
+          {{ progressLog.trim() ? t('project.progress_log.save_with_log') : t('project.progress_log.save_directly') }}
         </el-button>
       </div>
     </template>
@@ -362,21 +362,21 @@
   <!-- 编辑图片标注弹窗 -->
   <el-dialog
     v-model="showImageCaptionDialog"
-    title="编辑图片标注"
+    :title="t('project.image_caption.dialog_title')"
     width="500px"
     :close-on-click-modal="false"
   >
     <div class="image-caption-edit">
       <div class="image-preview">
-        <img v-if="editingImageIndex >= 0" :src="formData.attachments.images[editingImageIndex]?.url" alt="预览图片" />
+        <img v-if="editingImageIndex >= 0" :src="formData.attachments.images[editingImageIndex]?.url" :alt="t('project.image_caption.preview_image')" />
       </div>
       
-      <el-form-item label="图片标注：" style="margin-top: 16px;">
+      <el-form-item :label="t('project.image_caption.label')" style="margin-top: 16px;">
         <el-input
           v-model="editingImageCaption"
           type="textarea"
           :rows="3"
-          placeholder="为这张图片添加描述或标注..."
+          :placeholder="t('project.image_caption.placeholder')"
           maxlength="200"
           show-word-limit
         />
@@ -384,14 +384,14 @@
       
       <div class="caption-tip">
         <el-icon><InfoFilled /></el-icon>
-        <span>留空将显示原始文件名。标注将在项目详情页面和图片预览中显示。</span>
+        <span>{{ t('project.image_caption.tip') }}</span>
       </div>
     </div>
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="cancelImageCaptionEdit">取消</el-button>
-        <el-button type="primary" @click="saveImageCaptionEdit">保存标注</el-button>
+        <el-button @click="cancelImageCaptionEdit">{{ t('form.cancel') }}</el-button>
+        <el-button type="primary" @click="saveImageCaptionEdit">{{ t('project.image_caption.save') }}</el-button>
       </div>
     </template>
   </el-dialog>

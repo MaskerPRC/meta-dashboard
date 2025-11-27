@@ -41,31 +41,31 @@
           <el-dropdown trigger="click" placement="bottom-end">
             <el-button size="small" text>
               <el-icon><QuestionFilled /></el-icon>
-              Markdown语法
+              {{ t('comment.markdown_syntax') }}
             </el-button>
             <template #dropdown>
               <el-dropdown-menu class="markdown-help">
                 <div class="help-content">
                   <div class="help-item">
-                    <code>**粗体**</code> → <strong>粗体</strong>
+                    <code>**{{ t('comment.markdown.bold') }}**</code> → <strong>{{ t('comment.markdown.bold') }}</strong>
                   </div>
                   <div class="help-item">
-                    <code>*斜体*</code> → <em>斜体</em>
+                    <code>*{{ t('comment.markdown.italic') }}*</code> → <em>{{ t('comment.markdown.italic') }}</em>
                   </div>
                   <div class="help-item">
-                    <code>`代码`</code> → <code>代码</code>
+                    <code>`{{ t('comment.markdown.code') }}`</code> → <code>{{ t('comment.markdown.code') }}</code>
                   </div>
                   <div class="help-item">
-                    <code>```代码块```</code>
+                    <code>```{{ t('comment.markdown.code_block') }}```</code>
                   </div>
                   <div class="help-item">
-                    <code>[链接](URL)</code>
+                    <code>[{{ t('comment.markdown.link') }}](URL)</code>
                   </div>
                   <div class="help-item">
-                    <code>- 列表项</code>
+                    <code>- {{ t('comment.markdown.list_item') }}</code>
                   </div>
                   <div class="help-item">
-                    <code>&gt; 引用</code>
+                    <code>&gt; {{ t('comment.markdown.quote') }}</code>
                   </div>
                 </div>
               </el-dropdown-menu>
@@ -113,7 +113,7 @@
           :loading="submitting"
           :disabled="!modelValue.trim() && !hasAttachmentsToSubmit()"
         >
-          发表评论
+          {{ t('comment.submit') }}
         </el-button>
       </div>
     </div>
@@ -157,7 +157,7 @@ const attachments = ref({ images: [], videos: [] })
 
 // 计算属性
 const previewContent = computed(() => {
-  if (!props.modelValue.trim()) return '<p class="preview-empty">暂无内容</p>'
+  if (!props.modelValue.trim()) return `<p class="preview-empty">${t('comment.no_content')}</p>`
   return renderMarkdown(props.modelValue)
 })
 
@@ -195,7 +195,7 @@ const handlePaste = async (event) => {
 
 const uploadFile = async (file) => {
   if (uploading.value) {
-    showNotification.warning('文件正在上传中，请稍候...')
+    showNotification.warning(t('comment.uploading'))
     return
   }
   
@@ -224,17 +224,17 @@ const uploadFile = async (file) => {
     
     if (images.length > 0) {
       attachments.value.images.push(...images)
-      showNotification.success(`成功上传 ${images.length} 张图片`)
+      showNotification.success(t('comment.upload_success.images', { count: images.length }))
     }
     
     if (videos.length > 0) {
       attachments.value.videos.push(...videos)
-      showNotification.success(`成功上传 ${videos.length} 个视频`)
+      showNotification.success(t('comment.upload_success.videos', { count: videos.length }))
     }
     
   } catch (error) {
     console.error('文件上传失败:', error)
-    showNotification.error(error.response?.data?.message || '文件上传失败')
+    showNotification.error(error.response?.data?.message || t('comment.errors.upload_failed'))
   } finally {
     uploading.value = false
   }
@@ -246,26 +246,26 @@ const validateFile = (file) => {
   
   if (file.type.startsWith('image/')) {
     if (!allowedImageTypes.includes(file.type)) {
-      showNotification.error('只支持 JPG、PNG、GIF、WebP 格式的图片')
+      showNotification.error(t('comment.errors.image_format'))
       return false
     }
     const isLt5M = file.size / 1024 / 1024 < 5
     if (!isLt5M) {
-      showNotification.error('图片大小不能超过 5MB')
+      showNotification.error(t('comment.errors.image_size'))
       return false
     }
   } else if (file.type.startsWith('video/')) {
     if (!allowedVideoTypes.includes(file.type)) {
-      showNotification.error('只支持 MP4、WebM 格式的视频')
+      showNotification.error(t('comment.errors.video_format'))
       return false
     }
     const isLt50M = file.size / 1024 / 1024 < 50
     if (!isLt50M) {
-      showNotification.error('视频大小不能超过 50MB')
+      showNotification.error(t('comment.errors.video_size'))
       return false
     }
   } else {
-    showNotification.error('只支持图片和视频文件')
+    showNotification.error(t('comment.errors.file_type'))
     return false
   }
   

@@ -57,8 +57,8 @@
           <el-icon><Link /></el-icon>
         </div>
         <div class="link-content">
-          <div class="link-title">GitHub 仓库</div>
-          <div class="link-desc">查看源代码</div>
+          <div class="link-title">{{ $t('project.github_repo') }}</div>
+          <div class="link-desc">{{ $t('project.view_source_code') }}</div>
         </div>
         <div class="link-arrow">
           <el-icon><ArrowRight /></el-icon>
@@ -87,7 +87,7 @@
 
     <!-- 技术栈 -->
     <div v-if="project.tech_stack && project.tech_stack.length" class="tech-stack">
-      <h3>技术栈</h3>
+      <h3>{{ $t('project.tech_stack_label') }}</h3>
       <div class="tech-tags">
         <el-tag 
           v-for="tech in project.tech_stack" 

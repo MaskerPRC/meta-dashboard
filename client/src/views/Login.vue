@@ -6,19 +6,19 @@
         <div class="w-16 h-16 bg-black text-white flex items-center justify-center font-black text-2xl border-2 border-white shadow-sm mx-auto mb-4">
           AI
         </div>
-        <h1 class="font-display font-black text-3xl mb-2">AI项目看板</h1>
-        <p class="text-gray-600 font-medium">一年100个AI产品挑战</p>
+        <h1 class="font-display font-black text-3xl mb-2">{{ $t('home.title') }}</h1>
+        <p class="text-gray-600 font-medium">{{ $t('home.subtitle') }}</p>
       </div>
 
       <!-- 登录表单 -->
       <div>
-        <h2 class="text-2xl font-black mb-2 text-center">欢迎回来</h2>
-        <p class="text-sm text-gray-600 mb-6 text-center">选择您喜欢的方式登录，参与AI产品挑战之旅</p>
+        <h2 class="text-2xl font-black mb-2 text-center">{{ $t('auth.welcome_back') }}</h2>
+        <p class="text-sm text-gray-600 mb-6 text-center">{{ $t('auth.login_description') }}</p>
 
         <!-- 登录方式切换 -->
         <el-tabs v-model="activeTab" class="login-tabs">
           <!-- 账号密码登录 -->
-          <el-tab-pane label="账号登录" name="local">
+          <el-tab-pane :label="$t('auth.account_login')" name="local">
             <div class="tab-content-wrapper">
               <el-form
                 ref="loginFormRef"
@@ -32,7 +32,7 @@
                     <input
                       v-model="loginForm.username"
                       type="text"
-                      placeholder="用户名或邮箱"
+                      :placeholder="$t('auth.username_or_email')"
                       class="w-full bg-gray-100 border-2 border-black px-4 py-3 pl-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
                     />
                     <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -44,7 +44,7 @@
                     <input
                       v-model="loginForm.password"
                       type="password"
-                      placeholder="密码"
+                      :placeholder="$t('auth.password')"
                       class="w-full bg-gray-100 border-2 border-black px-4 py-3 pl-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
                     />
                     <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -58,8 +58,8 @@
                     :disabled="loading"
                     class="neo-btn bg-black text-white w-full py-3 hover:bg-gray-800 font-bold disabled:opacity-50"
                   >
-                    <span v-if="!loading">登录</span>
-                    <span v-else>登录中...</span>
+                    <span v-if="!loading">{{ $t('auth.login_button') }}</span>
+                    <span v-else>{{ $t('auth.logging_in') }}</span>
                   </button>
                 </el-form-item>
 
@@ -68,7 +68,7 @@
                     @click="activeTab = 'register'"
                     class="text-sm font-bold text-gray-600 hover:text-black underline"
                   >
-                    还没有账号？立即注册
+                    {{ $t('auth.no_account') }} {{ $t('auth.register_now') }}
                   </button>
                 </div>
               </el-form>
@@ -76,7 +76,7 @@
           </el-tab-pane>
 
           <!-- 注册 -->
-          <el-tab-pane label="注册账号" name="register">
+          <el-tab-pane :label="$t('auth.register_account')" name="register">
             <div class="tab-content-wrapper">
               <el-form
                 ref="registerFormRef"
@@ -90,7 +90,7 @@
                     <input
                       v-model="registerForm.username"
                       type="text"
-                      placeholder="用户名"
+                      :placeholder="$t('auth.username')"
                       class="w-full bg-gray-100 border-2 border-black px-4 py-3 pl-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
                     />
                     <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -102,7 +102,7 @@
                     <input
                       v-model="registerForm.email"
                       type="email"
-                      placeholder="邮箱"
+                      :placeholder="$t('auth.email')"
                       class="w-full bg-gray-100 border-2 border-black px-4 py-3 pl-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
                     />
                     <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -114,7 +114,7 @@
                     <input
                       v-model="registerForm.phone"
                       type="tel"
-                      placeholder="手机号（可选）"
+                      :placeholder="$t('auth.phone_optional')"
                       class="w-full bg-gray-100 border-2 border-black px-4 py-3 pl-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
                     />
                     <i class="fa-solid fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -126,7 +126,7 @@
                     <input
                       v-model="registerForm.password"
                       type="password"
-                      placeholder="密码（至少6位）"
+                      :placeholder="$t('auth.password_placeholder')"
                       class="w-full bg-gray-100 border-2 border-black px-4 py-3 pl-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
                     />
                     <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -138,7 +138,7 @@
                     <input
                       v-model="registerForm.confirmPassword"
                       type="password"
-                      placeholder="确认密码"
+                      :placeholder="$t('auth.confirm_password')"
                       class="w-full bg-gray-100 border-2 border-black px-4 py-3 pl-10 rounded font-bold focus:outline-none focus:ring-0 focus:bg-white"
                     />
                     <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -152,8 +152,8 @@
                     :disabled="loading"
                     class="neo-btn bg-neo-green text-black w-full py-3 hover:bg-green-400 font-bold disabled:opacity-50"
                   >
-                    <span v-if="!loading">注册</span>
-                    <span v-else>注册中...</span>
+                    <span v-if="!loading">{{ $t('auth.register_button') }}</span>
+                    <span v-else>{{ $t('auth.registering') }}</span>
                   </button>
                 </el-form-item>
 
@@ -162,7 +162,7 @@
                     @click="activeTab = 'local'"
                     class="text-sm font-bold text-gray-600 hover:text-black underline"
                   >
-                    已有账号？立即登录
+                    {{ $t('auth.has_account') }} {{ $t('auth.login_now') }}
                   </button>
                 </div>
               </el-form>
@@ -170,7 +170,7 @@
           </el-tab-pane>
 
           <!-- 第三方登录 -->
-          <el-tab-pane label="第三方登录" name="oauth">
+          <el-tab-pane :label="$t('auth.oauth_login')" name="oauth">
             <div class="tab-content-wrapper">
               <div class="space-y-4">
                 <!-- GitHub登录 -->
@@ -180,7 +180,7 @@
                   class="neo-btn bg-[#24292e] text-white w-full py-3 hover:bg-[#1a1e22] font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <i class="fa-brands fa-github text-xl"></i>
-                  <span>使用 GitHub 登录</span>
+                  <span>{{ $t('auth.github_login') }}</span>
                 </button>
 
                 <!-- Google登录 -->
@@ -190,7 +190,7 @@
                   class="neo-btn bg-white border-2 border-black w-full py-3 hover:bg-gray-100 font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <i class="fa-brands fa-google text-xl"></i>
-                  <span>使用 Google 登录</span>
+                  <span>{{ $t('auth.google_login') }}</span>
                 </button>
 
                 <!-- 微信登录 -->
@@ -206,12 +206,12 @@
 
               <!-- 登录提示 -->
               <div class="mt-6 p-4 bg-gray-100 border-2 border-black border-dashed rounded">
-                <p class="text-xs font-bold mb-2">第三方登录说明：</p>
+                <p class="text-xs font-bold mb-2">{{ $t('auth.oauth_login_note') }}</p>
                 <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
-                  <li>首次登录将自动创建账户</li>
-                  <li v-if="isInWechat">支持微信网页授权登录，安全便捷</li>
-                  <li v-else>支持GitHub、Google和微信扫码登录</li>
-                  <li>安全快捷，无需记住密码</li>
+                  <li>{{ $t('auth.oauth_note_1') }}</li>
+                  <li v-if="isInWechat">{{ $t('auth.oauth_note_wechat') }}</li>
+                  <li v-else>{{ $t('auth.oauth_note_scan') }}</li>
+                  <li>{{ $t('auth.oauth_note_2') }}</li>
                 </ul>
               </div>
             </div>
@@ -222,11 +222,11 @@
       <!-- 页面底部 -->
       <div class="mt-8 text-center">
         <p class="text-xs text-gray-500 mb-4">
-          继续即表示您同意我们的服务条款和隐私政策
+          {{ $t('auth.terms_notice') }}
         </p>
         <router-link to="/" class="neo-btn bg-white px-4 py-2 text-sm hover:bg-gray-100 inline-flex items-center gap-2">
           <i class="fa-solid fa-arrow-left"></i>
-          返回首页
+          {{ $t('auth.back_to_home') }}
         </router-link>
       </div>
     </div>
@@ -236,6 +236,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { showNotification } from '../utils/notification'
 import axios from '../utils/axios'
@@ -243,6 +244,7 @@ import { isWechatBrowser } from '../utils/wechatDetector'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const authStore = useAuthStore()
 
 const loading = ref(false)
@@ -251,7 +253,7 @@ const activeTab = ref('local')
 // 微信登录相关
 const isInWechat = ref(false)
 const wechatLoginText = computed(() => {
-  return isInWechat.value ? '使用微信登录' : '使用微信扫码登录'
+  return isInWechat.value ? t('auth.wechat_login') : t('auth.wechat_scan_login')
 })
 
 // 登录表单数据
@@ -276,9 +278,9 @@ const registerFormRef = ref()
 // 自定义验证函数
 const validateConfirmPassword = (rule, value, callback) => {
   if (value === '') {
-    callback(new Error('请再次输入密码'))
+    callback(new Error(t('auth.validation.confirm_password_again')))
   } else if (value !== registerForm.value.password) {
-    callback(new Error('两次输入密码不一致'))
+    callback(new Error(t('auth.validation.confirm_password_mismatch')))
   } else {
     callback()
   }
@@ -287,33 +289,33 @@ const validateConfirmPassword = (rule, value, callback) => {
 // 登录表单验证规则
 const loginRules = {
   username: [
-    { required: true, message: '请输入用户名或邮箱', trigger: 'blur' }
+    { required: true, message: t('auth.validation.username_required'), trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
+    { required: true, message: t('auth.validation.password_required'), trigger: 'blur' }
   ]
 }
 
 // 注册表单验证规则
 const registerRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度在3到20个字符', trigger: 'blur' },
-    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
+    { required: true, message: t('auth.validation.username_required_register'), trigger: 'blur' },
+    { min: 3, max: 20, message: t('auth.validation.username_length'), trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_]+$/, message: t('auth.validation.username_pattern'), trigger: 'blur' }
   ],
   email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { required: true, message: t('auth.validation.email_required'), trigger: 'blur' },
+    { type: 'email', message: t('auth.validation.email_invalid'), trigger: 'blur' }
   ],
   phone: [
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    { pattern: /^1[3-9]\d{9}$/, message: t('auth.validation.phone_invalid'), trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少6位', trigger: 'blur' }
+    { required: true, message: t('auth.validation.password_required'), trigger: 'blur' },
+    { min: 6, message: t('auth.validation.password_min'), trigger: 'blur' }
   ],
   confirmPassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
+    { required: true, message: t('auth.validation.confirm_password_required'), trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' }
   ]
 }
@@ -334,7 +336,7 @@ const handleLocalLogin = async () => {
     })
 
     if (response.data.success) {
-      showNotification.success('欢迎回来！', '登录成功')
+      showNotification.success(t('auth.messages.welcome_back'), t('auth.messages.login_success'))
 
       // 更新认证状态
       authStore.user = response.data.user
@@ -350,12 +352,12 @@ const handleLocalLogin = async () => {
       const redirect = route.query.redirect || '/'
       router.push(redirect)
     } else {
-      showNotification.error(response.data.message || '登录失败', '登录失败')
+      showNotification.error(response.data.message || t('auth.messages.login_failed'), t('auth.messages.login_failed'))
     }
   } catch (error) {
     console.error('登录错误:', error)
     if (error.response?.data?.message) {
-      showNotification.error(error.response.data.message, '登录失败')
+      showNotification.error(error.response.data.message, t('auth.messages.login_failed'))
     } else {
       showNotification.error('请检查网络连接后重试', '网络错误')
     }
@@ -383,7 +385,7 @@ const handleRegister = async () => {
     })
 
     if (response.data.success) {
-      showNotification.success('账户创建成功，已自动登录', '注册成功')
+      showNotification.success(t('auth.messages.register_success_auto_login'), t('auth.messages.register_success'))
 
       // 更新认证状态
       authStore.user = response.data.user
@@ -399,12 +401,12 @@ const handleRegister = async () => {
       const redirect = route.query.redirect || '/'
       router.push(redirect)
     } else {
-      showNotification.error(response.data.message || '注册失败', '注册失败')
+      showNotification.error(response.data.message || t('auth.messages.register_failed'), t('auth.messages.register_failed'))
     }
   } catch (error) {
     console.error('注册错误:', error)
     if (error.response?.data?.message) {
-      showNotification.error(error.response.data.message, '注册失败')
+      showNotification.error(error.response.data.message, t('auth.messages.register_failed'))
     } else {
       showNotification.error('请检查网络连接后重试', '网络错误')
     }
@@ -441,7 +443,7 @@ const loginWithWechat = async () => {
   try {
     authStore.loginWithWechat()
   } catch (error) {
-    showNotification.error('微信登录失败，请重试', '登录失败')
+    showNotification.error(t('auth.messages.wechat_login_failed'), t('auth.messages.login_failed'))
     loading.value = false
   }
 }
@@ -456,17 +458,17 @@ onMounted(async () => {
     const errorMessage = route.query.message
 
     if (errorType === 'github') {
-      showNotification.error('GitHub登录失败，请重试', '登录失败')
+      showNotification.error(t('auth.messages.github_login_failed'), t('auth.messages.login_failed'))
     } else if (errorType === 'google') {
-      showNotification.error('Google登录失败，请重试', '登录失败')
+      showNotification.error(t('auth.messages.google_login_failed'), t('auth.messages.login_failed'))
     } else if (errorType === 'wechat') {
-      showNotification.error('微信扫码登录失败，请重试', '登录失败')
+      showNotification.error(t('auth.messages.wechat_scan_login_failed'), t('auth.messages.login_failed'))
     } else if (errorType === 'wechat_mp') {
-      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : '微信登录失败，请重试', '登录失败')
+      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : t('auth.messages.wechat_login_failed'), t('auth.messages.login_failed'))
     } else if (errorType === 'auth_failed') {
-      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : '登录失败', '认证失败')
+      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : t('auth.messages.login_failed'), t('auth.messages.auth_failed'))
     } else if (errorType === 'session_error') {
-      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : '登录状态保存失败', '会话错误')
+      showNotification.error(errorMessage ? decodeURIComponent(errorMessage) : t('auth.messages.session_save_failed'), t('auth.messages.session_error'))
     }
   }
 

@@ -35,7 +35,7 @@
             preload="metadata"
             :poster="video.poster"
           >
-            您的浏览器不支持视频播放。
+            {{ $t('project.browser_not_support_video') }}
           </video>
           <div class="video-info">
             <span class="filename">{{ video.filename }}</span>

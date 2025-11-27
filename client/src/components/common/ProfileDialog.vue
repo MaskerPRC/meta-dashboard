@@ -60,7 +60,7 @@
                   disabled
                   class="w-full bg-gray-200 border-2 border-gray-400 px-4 py-3 rounded font-bold cursor-not-allowed"
                 />
-                <div class="text-xs text-gray-500 mt-1 font-bold">用户名不可修改</div>
+                <div class="text-xs text-gray-500 mt-1 font-bold">{{ $t('auth.username_immutable') }}</div>
               </div>
             </el-form>
           </div>
@@ -166,22 +166,22 @@ const passwordForm = reactive({
 // 个人资料验证规则
 const profileRules = {
   display_name: [
-    { required: true, message: '请输入显示名称', trigger: 'blur' },
-    { min: 1, max: 50, message: '显示名称长度在 1 到 50 个字符', trigger: 'blur' }
+    { required: true, message: t('auth.display_name_placeholder'), trigger: 'blur' },
+    { min: 1, max: 50, message: t('auth.validation.display_name_length'), trigger: 'blur' }
   ],
   email: [
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email', message: t('auth.validation.email_invalid'), trigger: 'blur' }
   ]
 }
 
 // 密码验证规则
 const passwordRules = {
   current_password: [
-    { required: true, message: '请输入当前密码', trigger: 'blur' }
+    { required: true, message: t('auth.current_password_placeholder'), trigger: 'blur' }
   ],
   new_password: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少6位', trigger: 'blur' }
+    { required: true, message: t('auth.new_password_placeholder'), trigger: 'blur' },
+    { min: 6, message: t('auth.validation.password_min'), trigger: 'blur' }
   ]
 }
 

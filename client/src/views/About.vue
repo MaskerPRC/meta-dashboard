@@ -13,15 +13,15 @@
       <div class="grid grid-cols-3 gap-4 mt-8 max-w-2xl mx-auto">
         <div class="neo-card p-4 bg-neo-yellow text-center">
           <div class="text-4xl font-black mb-1">{{ projectsStore.projects.length || 0 }}</div>
-          <div class="text-xs font-bold">已启动项目</div>
+          <div class="text-xs font-bold">{{ $t('about.stats.launched_projects') }}</div>
         </div>
         <div class="neo-card p-4 bg-neo-green text-center">
           <div class="text-4xl font-black mb-1">{{ projectsStore.totalProgress || 0 }}%</div>
-          <div class="text-xs font-bold">平均进度</div>
+          <div class="text-xs font-bold">{{ $t('about.stats.average_progress') }}</div>
         </div>
         <div class="neo-card p-4 bg-neo-blue text-center">
           <div class="text-4xl font-black mb-1">{{ projectsStore.statusCounts.completed || 0 }}</div>
-          <div class="text-xs font-bold">已完成</div>
+          <div class="text-xs font-bold">{{ $t('about.stats.completed_projects') }}</div>
         </div>
       </div>
     </div>

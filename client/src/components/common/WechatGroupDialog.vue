@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="dialogVisible"
-    title="欢迎加入AI项目交流群！"
+    :title="$t('wechat_group.welcome_title')"
     width="500px"
     :before-close="handleClose"
     center
@@ -12,33 +12,33 @@
         <div class="w-20 h-20 bg-neo-green border-4 border-black rounded-lg flex items-center justify-center mx-auto mb-4 shadow-neo">
           <i class="fa-solid fa-check text-4xl text-black"></i>
         </div>
-        <h3 class="text-2xl font-black mb-2">登录成功！</h3>
+        <h3 class="text-2xl font-black mb-2">{{ $t('wechat_group.login_success') }}</h3>
         <p class="text-gray-600 font-medium">
-          恭喜您成为AI项目挑战的一员，快来加入我们的交流群吧！
+          {{ $t('wechat_group.welcome_message') }}
         </p>
       </div>
 
       <div class="neo-card p-6 bg-white mb-6">
         <h4 class="text-lg font-black mb-4 flex items-center gap-2">
           <i class="fa-solid fa-comments text-neo-green"></i>
-          交流群福利
+          {{ $t('wechat_group.benefits_title') }}
         </h4>
         <ul class="space-y-3">
           <li class="flex items-start gap-3">
             <i class="fa-solid fa-star text-neo-yellow mt-1"></i>
-            <span class="text-sm text-gray-700">第一时间获取项目更新和技术分享</span>
+            <span class="text-sm text-gray-700">{{ $t('wechat_group.benefit_1') }}</span>
           </li>
           <li class="flex items-start gap-3">
             <i class="fa-solid fa-users text-neo-blue mt-1"></i>
-            <span class="text-sm text-gray-700">与志同道合的开发者交流经验</span>
+            <span class="text-sm text-gray-700">{{ $t('wechat_group.benefit_2') }}</span>
           </li>
           <li class="flex items-start gap-3">
             <i class="fa-solid fa-trophy text-neo-purple mt-1"></i>
-            <span class="text-sm text-gray-700">参与技术讨论和项目合作机会</span>
+            <span class="text-sm text-gray-700">{{ $t('wechat_group.benefit_3') }}</span>
           </li>
           <li class="flex items-start gap-3">
             <i class="fa-solid fa-network-wired text-neo-green mt-1"></i>
-            <span class="text-sm text-gray-700">获得AI工具使用技巧和最佳实践</span>
+            <span class="text-sm text-gray-700">{{ $t('wechat_group.benefit_4') }}</span>
           </li>
         </ul>
       </div>
@@ -57,14 +57,14 @@
           @click="handleLater"
           class="neo-btn bg-white px-6 py-3 hover:bg-gray-100"
         >
-          稍后再说
+          {{ $t('wechat_group.later') }}
         </button>
         <button 
           @click="handleJoined"
           class="neo-btn bg-neo-green text-black px-6 py-3 hover:bg-green-400"
         >
           <i class="fa-solid fa-comments mr-2"></i>
-          我已加入群聊
+          {{ $t('wechat_group.joined') }}
         </button>
       </div>
     </template>
@@ -73,8 +73,11 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { showNotification } from '../../utils/notification'
 import WechatGroup from './WechatGroup.vue'
+
+const { t } = useI18n()
 
 // 定义 props
 const props = defineProps({
@@ -110,14 +113,14 @@ const handleClose = () => {
 const handleLater = () => {
   dialogVisible.value = false
   emit('later')
-  showNotification.info('您可以随时在任意页面底部找到微信群二维码')
+  showNotification.info(t('wechat_group.later_message'))
 }
 
 // 处理已加入群聊
 const handleJoined = () => {
   dialogVisible.value = false
   emit('joined')
-  showNotification.success('欢迎加入AI项目交流群！期待您的参与和分享')
+  showNotification.success(t('wechat_group.joined_success'))
 }
 </script>
 
