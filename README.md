@@ -9,7 +9,8 @@ https://100.agitao.net/
 
 <img width="1994" height="1418" alt="image" src="https://github.com/user-attachments/assets/a70a75d9-44f3-4a6f-8978-61a9aa8b026d" />
 
-<img width="2280" height="1581" alt="image" src="https://github.com/user-attachments/assets/32e3c3ba-fc68-4f36-851f-f6d97d09cfe4" />
+<img width="1920" height="1500" alt="image" src="https://github.com/user-attachments/assets/8cf4a6c3-33a8-40c9-8483-c45b4d86a234" />
+
 
 ## 👀欢迎加入微信交流群
 ![100个AI项目交流群](https://proxy.agitao.me/img)
